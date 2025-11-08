@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 013e985d42fa2fe4aac420e07ad073dd, type: 3}
+  m_Name: PoiExportPackageObjectPro
+  m_EditorClassIdentifier: 
+  title: Pro_7.3.50_UpTo
+  filesToRemove:
+  - {fileID: 11500000, guid: cd834bc6927a686428a7d2e898e9102b, type: 3}
+  - {fileID: 11500000, guid: 013e985d42fa2fe4aac420e07ad073dd, type: 3}
+  - {fileID: 11400000, guid: 7b0de107479224743a84bdf7e6202815, type: 2}
+  - {fileID: 11400000}
+  - {fileID: 11400000, guid: 5771311c7021b9540a371715cf9885a8, type: 2}
+  - {fileID: 102900000, guid: 2890881ff43963543aeec93698887a19, type: 3}
+  - {fileID: 102900000, guid: deb80b12d480b9f478f9539032e3d0a2, type: 3}
+  filesToAdd:
+  - {fileID: 102900000, guid: 087998055908a594bb4fcb980a01904f, type: 3}

@@ -1,0 +1,21 @@
+{
+  "name": "com.poiyomi.pro",
+  "displayName": "Poiyomi Pro Shader",
+  "version": "9.3.37",
+  "description": "Feature-rich shaders for Unity and VRChat.",
+  "author": {
+    "name": "Poiyomi",
+    "url": "https://www.poiyomi.com"
+  },
+  "changelogUrl": "https://www.poiyomi.com/changelog",
+  "gitDependencies": {},
+  "vpmDependencies": {},
+  "legacyFolders": {
+    "Assets\\_PoiyomiShaders": ""
+  },
+  "legacyFiles": {},
+  "hideInEditor": false,
+  "license": "MIT",
+  "unity": "2019.4",
+  "type": "Shader"
+}

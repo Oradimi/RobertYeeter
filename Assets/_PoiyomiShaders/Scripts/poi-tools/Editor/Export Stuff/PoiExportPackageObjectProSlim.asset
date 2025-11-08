@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 013e985d42fa2fe4aac420e07ad073dd, type: 3}
+  m_Name: PoiExportPackageObjectProSlim
+  m_EditorClassIdentifier: 
+  title: Pro
+  filesToRemove:
+  - {fileID: 11500000, guid: cd834bc6927a686428a7d2e898e9102b, type: 3}
+  - {fileID: 11500000, guid: 013e985d42fa2fe4aac420e07ad073dd, type: 3}
+  - {fileID: 11400000, guid: 7b0de107479224743a84bdf7e6202815, type: 2}
+  - {fileID: 11400000, guid: 98b8329fcee9eb3438336c6a5679a354, type: 2}
+  - {fileID: 11400000}
+  - {fileID: 102900000, guid: 2890881ff43963543aeec93698887a19, type: 3}
+  - {fileID: 102900000, guid: deb80b12d480b9f478f9539032e3d0a2, type: 3}
+  filesToAdd:
+  - {fileID: 102900000, guid: 724a9cd6d562cf645b84be676a878cf7, type: 3}
+  - {fileID: 102900000, guid: ff8d3b136c831ac42a0c97ca28673d59, type: 3}
+  - {fileID: 102900000, guid: cfc4de536d16ce04fb4f58bf9a796b91, type: 3}
+  - {fileID: 102900000, guid: 0ce128eb17894554a9d52cb41423eb66, type: 3}
+  - {fileID: 102900000, guid: 65df4a1e57fee17498559c1730fd6e70, type: 3}
+  - {fileID: 102900000, guid: 670b097baf11e4b438ec4eca42ae323d, type: 3}
+  - {fileID: 4900000, guid: c1886b825430ada47a42d52f33c03cac, type: 3}
+  - {fileID: 102900000, guid: cb514bdc28c681942916ac4a6f8aa683, type: 3}
+  - {fileID: 102900000, guid: 89d756369a556c241b43d0957c6dc0d6, type: 3}
+  - {fileID: 4900000, guid: 0a61a58ee74a4074e96d62e63f4e3354, type: 3}
+  - {fileID: 11400000, guid: 0db0b86376c3dca4b9a6828ef8615fe0, type: 2}
+  - {fileID: 102900000, guid: 7f2ccf89be522fb469599b9487b97356, type: 3}
+  - {fileID: 102900000, guid: de00c69f732489943bf5b0c91b57ab20, type: 3}
+  - {fileID: 102900000, guid: a09f738db9518d141b5e635d40456d4a, type: 3}
+  - {fileID: 102900000, guid: 4ff2cc567a760f244bfe790065c38719, type: 3}
+  - {fileID: 4900000, guid: 1bba950fc6e8948488a04a778c84aff8, type: 3}
