@@ -5,6 +5,7 @@ public class FloorManager : MonoBehaviour
 {
     [SerializeField] private Transform floorPrefab;
     [SerializeField] private Transform waterPrefab;
+    [SerializeField] private Transform robertPrefab;
     [SerializeField] private float speed = 5f;
     
     private List<Transform> _floor;
@@ -31,6 +32,8 @@ public class FloorManager : MonoBehaviour
         _floorPreviousPosition.Add(transform.localPosition);
         _water.Add(Instantiate(waterPrefab, transform));
         _waterPreviousPosition.Add(transform.localPosition);
+        _floor[0].localPosition += Vector3.forward * 30f;
+        _water[0].localPosition += Vector3.forward * 30f;
     }
 
     private void FixedUpdate()
@@ -38,11 +41,22 @@ public class FloorManager : MonoBehaviour
         if (!floorPrefab || !waterPrefab)
             return;
 
-        UpdateScrollingEnvironment(floorPrefab, speed * 1.0f, _floor, _floorPreviousPosition);
+        if (UpdateScrollingEnvironment(floorPrefab, speed * 1.0f, _floor, _floorPreviousPosition))
+        {
+            for (var i = 0; i < 9; i++)
+            {
+                var randomX = Random.Range(-2, 2);
+                if (randomX >= 0)
+                    randomX++;
+                var randomPosition = new Vector3(randomX, 0f, _floor[^1].localPosition.z - (Random.Range(0, 7) + 9 * i));
+                Instantiate(robertPrefab, randomPosition, Quaternion.identity, _floor[^1]);
+            }
+        }
+        
         UpdateScrollingEnvironment(waterPrefab, speed * 1.5f, _water, _waterPreviousPosition);
     }
 
-    private void UpdateScrollingEnvironment(Transform prefab, float elementSpeed, List<Transform> element, List<Vector3> elementPreviousPosition)
+    private bool UpdateScrollingEnvironment(Transform prefab, float elementSpeed, List<Transform> element, List<Vector3> elementPreviousPosition)
     {
         var elementToAdd = false;
         var elementToRemove = false;
@@ -71,5 +85,7 @@ public class FloorManager : MonoBehaviour
             element.RemoveAt(0);
             elementPreviousPosition.RemoveAt(0);
         }
+
+        return elementToAdd;
     }
 }

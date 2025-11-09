@@ -1,4 +1,3 @@
-#if UNITY_EDITOR
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -81,4 +80,3 @@ public class SceneLabelAttribute : PropertyAttribute
         }
     }
 }
-#endif

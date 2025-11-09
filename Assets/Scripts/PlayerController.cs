@@ -34,7 +34,6 @@ public class PlayerController : MonoBehaviour
     private void OnMove(InputAction.CallbackContext ctx)
     {
         var input = ctx.ReadValue<Vector2>();
-        Debug.Log(input);
         _targetPosition = new Vector3(Mathf.Clamp(_targetPosition.x - input.x, -2.0f, 2.0f), 0, 0);
     }
 }

@@ -1,4 +1,3 @@
-#if UNITY_EDITOR
 /// EDITOR TOOL
 /// IDs for SceneLabels.
 /// Can freely add to if needed.
@@ -7,4 +6,3 @@ public enum SceneLabelID
     Default,
     Switch,
 }
-#endif
