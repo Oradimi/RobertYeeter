@@ -16,7 +16,6 @@ public class FloorManager : MonoBehaviour
 
     private float _introTimer = 3f;
     private Camera _camera;
-    private AudioSource _audioSource;
     [SerializeField] private Texture2D button;
     [SerializeField] private Texture2D buttonHover;
     private bool _started;
@@ -44,8 +43,6 @@ public class FloorManager : MonoBehaviour
         if (!floorPrefab || !waterPrefab || !robertPrefab
             || !_camera || !cameraStartPosition || !cameraEndPosition)
             return;
-        
-        _audioSource = _camera.GetComponent<AudioSource>();
         
         cameraEndPosition.position = _camera.transform.position;
         cameraEndPosition.rotation = _camera.transform.rotation;
@@ -197,9 +194,15 @@ public class FloorManager : MonoBehaviour
         if (GUI.Button(rect, text, style))
         {
             if (!_gameOver)
-                _audioSource.Play();
+            {
+                if (!UnlocksManager.audioSource.isPlaying)
+                    UnlocksManager.audioSource.Play();
+            }
             else
+            {
                 SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+            }
+            
             _started = true;
             _gameOver = false;
             GameManager.ResetScore();

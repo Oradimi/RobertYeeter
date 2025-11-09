@@ -13,6 +13,8 @@ public class UnlocksManager : MonoBehaviour
     private bool _clothes;
     private bool _hair;
     
+    public static AudioSource audioSource;
+    
     private void Awake()
     {
         if (_instance)
@@ -23,6 +25,8 @@ public class UnlocksManager : MonoBehaviour
 
         _instance = this;
         DontDestroyOnLoad(_instance);
+        
+        audioSource = GetComponent<AudioSource>();
     }
 
     public static void ChangeClothes()
