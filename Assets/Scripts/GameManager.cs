@@ -37,7 +37,6 @@ public class GameManager : MonoBehaviour
         }
 
         _instance = this;
-        DontDestroyOnLoad(_instance);
         
         _floorManager = FindAnyObjectByType<FloorManager>();
 
@@ -60,9 +59,17 @@ public class GameManager : MonoBehaviour
         _instance._score += score;
         _instance._effectTime = 2f;
     }
+    
+    public static void ResetScore()
+    {
+        _instance._score = 0;
+    }
 
     public static void GameOver(GameOverCase gameOverCase, Transform deathCause = null)
     {
+        if (_instance._score > 30)
+            UnlocksManager.Unlocked = true;
+        
         if (_instance._isGameOver)
             return;
         _instance._isGameOver = true;
@@ -83,8 +90,10 @@ public class GameManager : MonoBehaviour
     {
         if (attr.ID != SceneLabelID.Score)
             return;
+
+        var prefix = FloorManager.GetStarted() ? "" : "Score: ";
         
-        attr.Value = _instance._score;
+        attr.Value = $"{prefix}{_instance._score}";
         
         if (_instance._effectTime <= 0f)
         {

@@ -1558,7 +1558,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 8300000, guid: 4883492488cd7a94aa317b497ecf1a76, type: 3}
-  m_PlayOnAwake: 1
+  m_PlayOnAwake: 0
   m_Volume: 0.8
   m_Pitch: 1
   Loop: 1
@@ -3987,6 +3987,50 @@ MonoBehaviour:
   localInertiaProperty: 0
   windInfluenceProperty: 0
   blendWeightProperty: 0
+--- !u!1 &477966125
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 477966126}
+  - component: {fileID: 477966127}
+  m_Layer: 0
+  m_Name: UnlocksManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &477966126
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 477966125}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &477966127
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 477966125}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 991cf2b05fd5c9d4f84f3d6c46e02bda, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
 --- !u!4 &522372126 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -1970910866554435671, guid: 885f4d1c37a2c534ab604e77bbc253be, type: 3}
@@ -8258,6 +8302,9 @@ MonoBehaviour:
   speed: 5
   cameraStartPosition: {fileID: 1826279054}
   cameraEndPosition: {fileID: 1893753257}
+  button: {fileID: 2800000, guid: b10308105d82b8a4a9ac94d2f400461e, type: 3}
+  buttonHover: {fileID: 2800000, guid: 3fa9b3b1ac24d604e9b1cf90a3da05bd, type: 3}
+  interFont: {fileID: 12800000, guid: 4c83786b872c078498f294511280bfe2, type: 3}
 --- !u!1 &1628515402 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: -4892708723325309783, guid: 885f4d1c37a2c534ab604e77bbc253be, type: 3}
@@ -9565,3 +9612,4 @@ SceneRoots:
   - {fileID: 220812509}
   - {fileID: 339779115}
   - {fileID: 1622918628}
+  - {fileID: 477966126}

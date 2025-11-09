@@ -48,6 +48,7 @@ public class Robert : MonoBehaviour
         }
 
         _playerCaught = true;
+        GameManager.GetPlayer().PlayPunchSound();
         GameManager.GetPlayer().SetCaught();
         GameManager.GameOver(GameManager.GameOverCase.Caught);
     }

@@ -72,7 +72,7 @@ public class PlayerController : MonoBehaviour
         CheckForJumpPrompt();
         
         _chargePosition *= chargeBreak;
-        _isCharging = _chargePosition.z < -0.2f && !_isJumping;
+        _isCharging = _chargePosition.z < -0.2f;
         
         _jumpTime -= Time.fixedDeltaTime;
         _isJumping = _jumpTime > 0.4f;
