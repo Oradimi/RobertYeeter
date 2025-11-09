@@ -41,7 +41,7 @@ public class SceneLabelOverlay : MonoBehaviour
         _data = new SceneLabelOverlayData
         {
             IsGameView = false,
-            SceneViewScale = 1f,
+            SceneViewScale = 1.6875f,
             GameViewScale = 1f
         };
         _labelMap = new Dictionary<int, Label>();
@@ -49,7 +49,8 @@ public class SceneLabelOverlay : MonoBehaviour
         _objectMap = new Dictionary<int, GameObject>();
         _reverseObjectMap = new Dictionary<GameObject, List<int>>();
         _attributeMap = new Dictionary<int, SceneLabelAttribute>();
-        _checkTimer = 5f;
+        _checkTimer = 1f;
+        OnChangeTimerRefresh();
     }
     
     /// Called every frame when GameView is displaying
@@ -121,8 +122,8 @@ public class SceneLabelOverlay : MonoBehaviour
             
             var scale = 1f / Mathf.Sqrt(screenPos.z * 0.1f);
             var textAlpha = (scale - 0.75f) * 4f;
-            var labelWidth = 240f * _data.GameViewScale;
-            var labelHeight = style.fontSize * _data.GameViewScale;
+            var labelWidth = 240f * _data.SceneViewScale;
+            var labelHeight = style.fontSize * _data.SceneViewScale + 20f;
             
             // Label shadow
             style.normal.textColor = new Color(0f, 0f, 0f, 0.8f * textAlpha);
@@ -216,17 +217,26 @@ public class SceneLabelOverlay : MonoBehaviour
 
                 var value = field.GetValue(mono);
                 attr.Value = value;
+                attr.Mono = mono;
+                attr.FieldInfo = field;
                 attr.GameObject = mono.gameObject;
                 OnSetSpecialAttribute?.Invoke(attr, _data);
                 var text = TextBuilder(attr.RichValue ?? attr.Value, attr, mono.name);
                 var uncoloredText = TextBuilder(attr.FormatValue ?? attr.Value, attr, mono.name);
                 var id = attr.GetUniqueID(mono, field);
 
-                if (_labelMap.TryGetValue(id, out _))
-                    continue;
-                
-                if (attr.SameLine && _reverseObjectMap.TryGetValue(mono.gameObject, out _))
+                if (_labelMap.TryGetValue(id, out var label))
                 {
+                    label.text = text;
+                    _labelTextShadowMap[id] = uncoloredText;
+                    _attributeMap[id] = attr;
+                    continue;
+                }
+                
+                if (attr.SameLine && _reverseObjectMap.TryGetValue(mono.gameObject, out var key))
+                {
+                    _labelMap[key[^1]].text += text;
+                    _labelTextShadowMap[key[^1]] += uncoloredText;
                     _attributeMap.TryAdd(id, attr);
                     continue;
                 }
@@ -240,7 +250,7 @@ public class SceneLabelOverlay : MonoBehaviour
                         color = attr.Color,
                         fontSize = attr.FontSize,
                         unityFontStyleAndWeight = attr.FontStyle,
-                        unityTextAlign = TextAnchor.UpperLeft,
+                        unityTextAlign = TextAnchor.LowerLeft,
                         textShadow = new TextShadow
                         {
                             color = new Color(0, 0, 0, 0.8f),
@@ -272,7 +282,8 @@ public class SceneLabelOverlay : MonoBehaviour
         {
             if (!kv.Value.GameObject)
                 continue;
-            
+
+            kv.Value.Value = kv.Value.FieldInfo.GetValue(kv.Value.Mono);
             OnSetSpecialAttribute?.Invoke(kv.Value, _data);
             
             var text = TextBuilder(kv.Value.RichValue ?? kv.Value.Value, kv.Value, kv.Value.GameObject.name);
@@ -310,7 +321,7 @@ public class SceneLabelOverlay : MonoBehaviour
             default:
                 return $"{separator}{attr.Prefix}{value}{attr.Suffix}";
             case null:
-                return $"{separator}{attr.Prefix}null{attr.Suffix}";
+                return $"{separator}{attr.Prefix}<null>{attr.Suffix}";
             case IList { Count: 0 }:
                 return $"{separator}{attr.Prefix}[]{attr.Suffix}";
             case IList list:

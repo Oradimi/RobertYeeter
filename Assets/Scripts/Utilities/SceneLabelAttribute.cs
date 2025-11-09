@@ -1,6 +1,6 @@
+using System;
 using System.Reflection;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 /// EDITOR TOOL
 /// Member attribute. May be added to any variable to have it displayed by text in the scene.
@@ -19,6 +19,12 @@ public class SceneLabelAttribute : PropertyAttribute
     
     /// Associated Game Object
     public GameObject GameObject;
+    
+    /// Mono
+    public MonoBehaviour Mono;
+    
+    /// Field Info
+    public FieldInfo FieldInfo;
     
     /// Constant ID for the attribute
     /// Can be used to set special behaviours on a category of attributes

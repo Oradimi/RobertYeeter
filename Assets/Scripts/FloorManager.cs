@@ -3,6 +3,8 @@ using UnityEngine;
 
 public class FloorManager : MonoBehaviour
 {
+    private static FloorManager _instance;
+    
     [SerializeField] private Transform floorPrefab;
     [SerializeField] private Transform waterPrefab;
     [SerializeField] private Transform robertPrefab;
@@ -21,6 +23,15 @@ public class FloorManager : MonoBehaviour
     
     private void Awake()
     {
+        if (_instance)
+        {
+            Destroy(this);
+            return;
+        }
+
+        _instance = this;
+        DontDestroyOnLoad(_instance);
+        
         _camera = Camera.main;
         
         if (!floorPrefab || !waterPrefab || !robertPrefab
@@ -60,7 +71,8 @@ public class FloorManager : MonoBehaviour
         if (_introTimer < 0)
             UpdateCamera();
 
-        if (UpdateScrollingEnvironment(floorPrefab, speed * 1.0f, _floor, _floorPreviousPosition))
+        var floorScrollSpeed = GameManager.GlobalSpeed * speed;
+        if (UpdateScrollingEnvironment(floorPrefab, floorScrollSpeed, _floor, _floorPreviousPosition))
         {
             for (var i = 0; i < 9; i++)
             {
@@ -71,8 +83,24 @@ public class FloorManager : MonoBehaviour
                 Instantiate(robertPrefab, randomPosition, Quaternion.identity, _floor[^1]);
             }
         }
-        
-        UpdateScrollingEnvironment(waterPrefab, speed * 1.5f, _water, _waterPreviousPosition);
+
+        var waterScrollSpeed = floorScrollSpeed == 0f ? speed * 0.5f : GameManager.GlobalSpeed * speed * 1.5f;
+        UpdateScrollingEnvironment(waterPrefab, waterScrollSpeed, _water, _waterPreviousPosition);
+    }
+
+    public void GameOver(GameManager.GameOverCase gameOverCase, Transform deathCause = null)
+    {
+        switch (gameOverCase)
+        {
+            case GameManager.GameOverCase.Caught:
+                if (deathCause)
+                    cameraEndPosition.position = deathCause.transform.position + Vector3.forward;
+                break;
+            case GameManager.GameOverCase.Drowned:
+                cameraEndPosition.position = new Vector3(0, 0f, -0.7f);
+                cameraEndPosition.eulerAngles = new Vector3(0f, 0.2f, 0);
+                break;
+        }
     }
 
     private bool UpdateScrollingEnvironment(Transform prefab, float elementSpeed, List<Transform> element, List<Vector3> elementPreviousPosition)
