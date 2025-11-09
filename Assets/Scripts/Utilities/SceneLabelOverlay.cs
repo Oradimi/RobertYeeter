@@ -82,6 +82,7 @@ public class SceneLabelOverlay : MonoBehaviour
                 font = interFont ? interFont : null,
                 fontSize = Mathf.FloorToInt(_attributeMap[kv.Key].FontSize * _data.GameViewScale),
                 normal = { textColor = _attributeMap[kv.Key].Color },
+                hover = { textColor = _attributeMap[kv.Key].Color },
                 alignment = kv.Value.style.unityTextAlign.value,
                 fontStyle = _attributeMap[kv.Key].FontStyle
             };
@@ -125,12 +126,15 @@ public class SceneLabelOverlay : MonoBehaviour
             
             // Label shadow
             style.normal.textColor = new Color(0f, 0f, 0f, 0.8f * textAlpha);
+            style.hover.textColor = new Color(0f, 0f, 0f, 0.8f * textAlpha);
             var shadowOffset = 2f * _data.GameViewScale;
             DrawScaledLabel(new Rect(position.x + shadowOffset, position.y + shadowOffset, labelWidth, labelHeight),
                 _labelTextShadowMap[kv.Key], style, scale);
 
             // Label
             style.normal.textColor = new Color(_attributeMap[kv.Key].Color.r,
+                _attributeMap[kv.Key].Color.g, _attributeMap[kv.Key].Color.b, textAlpha);
+            style.hover.textColor = new Color(_attributeMap[kv.Key].Color.r,
                 _attributeMap[kv.Key].Color.g, _attributeMap[kv.Key].Color.b, textAlpha);
             DrawScaledLabel(new Rect(position.x, position.y, labelWidth, labelHeight),
                 kv.Value.text, style, scale);

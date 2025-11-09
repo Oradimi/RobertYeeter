@@ -8,6 +8,12 @@ public class FloorManager : MonoBehaviour
     [SerializeField] private Transform robertPrefab;
     [SerializeField] private float speed = 5f;
     
+    [SerializeField] private Transform cameraStartPosition;
+    [SerializeField] private Transform cameraEndPosition;
+
+    private float _introTimer = 3f;
+    private Camera _camera;
+    
     private List<Transform> _floor;
     private List<Vector3> _floorPreviousPosition;
     private List<Transform> _water;
@@ -15,8 +21,16 @@ public class FloorManager : MonoBehaviour
     
     private void Awake()
     {
-        if (!floorPrefab || !waterPrefab)
+        _camera = Camera.main;
+        
+        if (!floorPrefab || !waterPrefab || !robertPrefab
+            || !_camera || !cameraStartPosition || !cameraEndPosition)
             return;
+        
+        cameraEndPosition.position = _camera.transform.position;
+        cameraEndPosition.rotation = _camera.transform.rotation;
+        _camera.transform.position = cameraStartPosition.position;
+        _camera.transform.rotation = cameraStartPosition.rotation;
         
         _floor = new List<Transform>();
         _floorPreviousPosition = new List<Vector3>();
@@ -38,8 +52,13 @@ public class FloorManager : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (!floorPrefab || !waterPrefab)
+        if (!floorPrefab || !waterPrefab || !robertPrefab
+            || !_camera || !cameraStartPosition || !cameraEndPosition)
             return;
+
+        _introTimer -= Time.deltaTime;
+        if (_introTimer < 0)
+            UpdateCamera();
 
         if (UpdateScrollingEnvironment(floorPrefab, speed * 1.0f, _floor, _floorPreviousPosition))
         {
@@ -87,5 +106,11 @@ public class FloorManager : MonoBehaviour
         }
 
         return elementToAdd;
+    }
+
+    private void UpdateCamera()
+    {
+        _camera.transform.position = Vector3.MoveTowards(_camera.transform.position, cameraEndPosition.position, speed * Time.fixedDeltaTime);
+        _camera.transform.forward = Vector3.Slerp(_camera.transform.forward, cameraEndPosition.forward, speed * Time.deltaTime);
     }
 }
