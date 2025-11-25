@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: c74dacc02611bf94baf0144d24c5d9ae
+guid: faf35f6cb42f3b24e95a8f5e28fc9099
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
@@ -7,28 +7,13 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: FloorBake1
-    second: {fileID: 2100000, guid: cf942af38bbf40145a8d7c8957fd07e5, type: 2}
+      name: Floor
+    second: {fileID: 2100000, guid: 5e54801bc0795594192545a3cec0f504, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: FloorBake2
-    second: {fileID: 2100000, guid: 541d244e55ba4c049a19d8fae9c870c4, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: FloorBake3
-    second: {fileID: 2100000, guid: abf6fdf9d7635e147971effbc2e01773, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: FloorBake4
-    second: {fileID: 2100000, guid: aa61f59f8e3c1b144beb356f8f385308, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: WaterBake
-    second: {fileID: 2100000, guid: 0459d69ba035214468b58182235feec0, type: 2}
+      name: Water
+    second: {fileID: 2100000, guid: 24d49a21dac99044392fdadb85b29929, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
@@ -64,10 +49,10 @@ ModelImporter:
     useSRGBMaterialColor: 1
     sortHierarchyByName: 1
     importPhysicalCameras: 1
-    importVisibility: 0
-    importBlendShapes: 0
-    importCameras: 0
-    importLights: 0
+    importVisibility: 1
+    importBlendShapes: 1
+    importCameras: 1
+    importLights: 1
     nodeNameCollisionStrategy: 1
     fileIdsGeneration: 2
     swapUVChannels: 0
@@ -104,7 +89,7 @@ ModelImporter:
     blendShapeNormalImportMode: 1
     normalSmoothingSource: 0
   referencedClips: []
-  importAnimation: 0
+  importAnimation: 1
   humanDescription:
     serializedVersion: 3
     human: []
@@ -123,11 +108,11 @@ ModelImporter:
     skeletonHasParents: 1
   lastHumanDescriptionAvatarSource: {instanceID: 0}
   autoGenerateAvatarMappingIfUnspecified: 1
-  animationType: 0
+  animationType: 2
   humanoidOversampling: 1
   avatarSetup: 0
   addHumanoidExtraRootOnlyWhenUsingAvatar: 1
-  importBlendShapeDeformPercent: 0
+  importBlendShapeDeformPercent: 1
   remapMaterialsIfMaterialImportModeIsNone: 0
   additionalBone: 0
   userData: 

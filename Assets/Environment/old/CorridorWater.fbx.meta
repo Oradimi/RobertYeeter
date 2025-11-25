@@ -8,7 +8,7 @@ ModelImporter:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: WaterBake
-    second: {fileID: 2100000, guid: 0459d69ba035214468b58182235feec0, type: 2}
+    second: {fileID: 2100000, guid: 24d49a21dac99044392fdadb85b29929, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

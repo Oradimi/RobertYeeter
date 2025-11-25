@@ -5,9 +5,9 @@ using UnityEngine.SceneManagement;
 public class FloorManager : MonoBehaviour
 {
     private static FloorManager _instance;
-    
+    private static readonly int ZShift = Shader.PropertyToID("_ZShift");
+
     [SerializeField] private Transform floorPrefab;
-    [SerializeField] private Transform waterPrefab;
     [SerializeField] private Transform robertPrefab;
     [SerializeField] private float speed = 5f;
     
@@ -23,8 +23,7 @@ public class FloorManager : MonoBehaviour
     
     private List<Transform> _floor;
     private List<Vector3> _floorPreviousPosition;
-    private List<Transform> _water;
-    private List<Vector3> _waterPreviousPosition;
+    private float _totalInstantiatedFloors;
     
     [SerializeField] private Font interFont;
     
@@ -40,19 +39,15 @@ public class FloorManager : MonoBehaviour
         
         _camera = Camera.main;
         
-        if (!floorPrefab || !waterPrefab || !robertPrefab
+        if (!floorPrefab || !robertPrefab
             || !_camera || !cameraStartPosition || !cameraEndPosition)
             return;
         
-        cameraEndPosition.position = _camera.transform.position;
-        cameraEndPosition.rotation = _camera.transform.rotation;
         _camera.transform.position = cameraStartPosition.position;
         _camera.transform.rotation = cameraStartPosition.rotation;
         
         _floor = new List<Transform>();
         _floorPreviousPosition = new List<Vector3>();
-        _water = new List<Transform>();
-        _waterPreviousPosition = new List<Vector3>();
 
         var children = GetComponentsInChildren<Transform>();
         foreach (var child in children)
@@ -61,10 +56,8 @@ public class FloorManager : MonoBehaviour
         
         _floor.Add(Instantiate(floorPrefab, transform));
         _floorPreviousPosition.Add(transform.localPosition);
-        _water.Add(Instantiate(waterPrefab, transform));
-        _waterPreviousPosition.Add(transform.localPosition);
         _floor[0].localPosition += Vector3.forward * 30f;
-        _water[0].localPosition += Vector3.forward * 30f;
+        UpdateFloorMaterialShift(_floor[0]);
     }
 
     private void OnGUI()
@@ -234,7 +227,7 @@ public class FloorManager : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (!_started || !floorPrefab || !waterPrefab || !robertPrefab
+        if (!_started || !floorPrefab || !robertPrefab
             || !_camera || !cameraStartPosition || !cameraEndPosition)
             return;
 
@@ -248,6 +241,7 @@ public class FloorManager : MonoBehaviour
         var floorScrollSpeed = GameManager.GlobalSpeed * speed;
         if (UpdateScrollingEnvironment(floorPrefab, floorScrollSpeed, _floor, _floorPreviousPosition))
         {
+            UpdateFloorMaterialShift(_floor[^1]);
             for (var i = 0; i < 9; i++)
             {
                 var randomX = Random.Range(-2, 2);
@@ -257,9 +251,6 @@ public class FloorManager : MonoBehaviour
                 Instantiate(robertPrefab, randomPosition, Quaternion.identity, _floor[^1]);
             }
         }
-
-        var waterScrollSpeed = floorScrollSpeed == 0f ? speed * 0.5f : GameManager.GlobalSpeed * speed * 1.5f;
-        UpdateScrollingEnvironment(waterPrefab, waterScrollSpeed, _water, _waterPreviousPosition);
     }
 
     public void GameOver(GameManager.GameOverCase gameOverCase, Transform deathCause = null)
@@ -298,7 +289,8 @@ public class FloorManager : MonoBehaviour
         
         if (elementToAdd)
         {
-            element.Add(Instantiate(prefab, elementPreviousPosition[0] + Vector3.back * 84f, Quaternion.identity, transform));
+            element.Add(Instantiate(prefab, elementPreviousPosition[0] + Vector3.back * 84f, Quaternion.identity,
+                transform));
             elementPreviousPosition.Add(elementPreviousPosition[0] + Vector3.back * 84f);
         }
 
@@ -310,6 +302,14 @@ public class FloorManager : MonoBehaviour
         }
 
         return elementToAdd;
+    }
+    
+    private void UpdateFloorMaterialShift(Transform floor)
+    {
+        var floorMaterials = floor.GetComponent<Renderer>().materials;
+        foreach (var floorMaterial in floorMaterials)
+            floorMaterial.SetFloat(ZShift, _totalInstantiatedFloors);
+        _totalInstantiatedFloors++;
     }
 
     public static bool GetStarted()
