@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -7,7 +8,7 @@ public class FloorManager : MonoBehaviour
     private static FloorManager _instance;
     private static readonly int ZShift = Shader.PropertyToID("_ZShift");
 
-    [SerializeField] private Transform floorPrefab;
+    [SerializeField] private Transform[] floorPrefab;
     [SerializeField] private Transform robertPrefab;
     [SerializeField] private float speed = 5f;
     
@@ -16,6 +17,7 @@ public class FloorManager : MonoBehaviour
 
     private float _introTimer = 3f;
     private Camera _camera;
+    private Vector3 _cameraTarget;
     [SerializeField] private Texture2D button;
     [SerializeField] private Texture2D buttonHover;
     private bool _started;
@@ -39,12 +41,13 @@ public class FloorManager : MonoBehaviour
         
         _camera = Camera.main;
         
-        if (!floorPrefab || !robertPrefab
+        if (floorPrefab.Length < 1 || !robertPrefab
             || !_camera || !cameraStartPosition || !cameraEndPosition)
             return;
         
         _camera.transform.position = cameraStartPosition.position;
         _camera.transform.rotation = cameraStartPosition.rotation;
+        _cameraTarget = cameraEndPosition.position;
         
         _floor = new List<Transform>();
         _floorPreviousPosition = new List<Vector3>();
@@ -53,11 +56,120 @@ public class FloorManager : MonoBehaviour
         foreach (var child in children)
             if (child != transform)
                 Destroy(child.gameObject);
+
+        InstantiateFloor(0, Vector3.forward * 30f);
+    }
+    
+    private void FixedUpdate()
+    {
+        if (!_started || floorPrefab.Length < 1 || !robertPrefab
+            || !_camera || !cameraStartPosition || !cameraEndPosition)
+            return;
+
+        _introTimer -= Time.deltaTime;
+        if (_introTimer < 0)
+            UpdateCameraIntro();
+        UpdateCamera();
+
+        if (_gameOver)
+            return;
+
+        var floorScrollSpeed = GameManager.GlobalSpeed * speed;
+        if (UpdateScrollingEnvironment(floorPrefab, floorScrollSpeed, _floor, _floorPreviousPosition))
+        {
+            UpdateFloorMaterialShift(_floor[^1]);
+            for (var i = 0; i < 9; i++)
+            {
+                var randomX = Random.Range(-2, 2);
+                if (randomX >= 0)
+                    randomX++;
+                var randomPosition = new Vector3(randomX, 0f, _floor[^1].localPosition.z - (Random.Range(0, 7) + 9 * i));
+                Instantiate(robertPrefab, randomPosition, Quaternion.identity, _floor[^1]);
+            }
+        }
+    }
+
+    private Transform InstantiateFloor(int index, Vector3 position)
+    {
+        var floor = Instantiate(floorPrefab[index], position, Quaternion.identity, transform);
+        _floor.Add(floor);
+        _floorPreviousPosition.Add(position);
+        _floor[^1].AddComponent<MeshCollider>();
+        UpdateFloorMaterialShift(_floor[^1]);
+        return floor;
+    }
+
+    private void DestroyFirstFloor()
+    {
+        Destroy(_floor[0].gameObject);
+        _floor.RemoveAt(0);
+        _floorPreviousPosition.RemoveAt(0);
+    }
+
+    public void GameOver(GameManager.GameOverCase gameOverCase, Transform deathCause = null)
+    {
+        switch (gameOverCase)
+        {
+            case GameManager.GameOverCase.Caught:
+                _gameOver = true;
+                cameraEndPosition.position = GameManager.GetPlayer().transform.position + new Vector3(0.3f, 1.5f, -2f);
+                cameraEndPosition.eulerAngles = new Vector3(20f, -10f, 0f);
+                break;
+            case GameManager.GameOverCase.Drowned:
+                _gameOver = true;
+                cameraEndPosition.position = new Vector3(0.1f, 0f, -0.7f);
+                cameraEndPosition.eulerAngles = new Vector3(0f, -5f, 0f);
+                break;
+        }
+    }
+
+    private bool UpdateScrollingEnvironment(Transform[] prefab, float elementSpeed, List<Transform> element, List<Vector3> elementPreviousPosition)
+    {
+        var elementToAdd = false;
+        var elementToRemove = false;
+        for (var i = 0; i < element.Count; i++)
+        {
+            element[i].localPosition += Vector3.forward * (elementSpeed * Time.deltaTime);
+            
+            if (elementPreviousPosition[i].z <= 42f && element[i].localPosition.z > 42f)
+                elementToAdd = true;
+
+            if (elementPreviousPosition[i].z <= 84f && element[i].localPosition.z > 84f)
+                elementToRemove = true;
+            
+            elementPreviousPosition[i] = element[i].localPosition;
+        }
         
-        _floor.Add(Instantiate(floorPrefab, transform));
-        _floorPreviousPosition.Add(transform.localPosition);
-        _floor[0].localPosition += Vector3.forward * 30f;
-        UpdateFloorMaterialShift(_floor[0]);
+        if (elementToAdd)
+            InstantiateFloor(Random.Range(0, floorPrefab.Length), elementPreviousPosition[0] + Vector3.back * 84f);
+
+        if (elementToRemove)
+            DestroyFirstFloor();
+
+        return elementToAdd;
+    }
+    
+    private void UpdateFloorMaterialShift(Transform floor)
+    {
+        var floorMaterial = floor.GetComponent<Renderer>().material;
+        floorMaterial.SetFloat(ZShift, _totalInstantiatedFloors);
+        _totalInstantiatedFloors++;
+    }
+
+    public static bool GetStarted()
+    {
+        return _instance._started;
+    }
+
+    private void UpdateCameraIntro()
+    {
+        _camera.transform.position = Vector3.MoveTowards(_camera.transform.position, cameraEndPosition.position, speed * Time.fixedDeltaTime);
+        _camera.transform.forward = Vector3.Slerp(_camera.transform.forward, cameraEndPosition.forward, speed * Time.deltaTime);
+    }
+    
+    private void UpdateCamera()
+    {
+        _camera.transform.position = Vector3.MoveTowards(_camera.transform.position, _cameraTarget, speed * Time.fixedDeltaTime);
     }
 
     private void OnGUI()
@@ -223,103 +335,5 @@ public class FloorManager : MonoBehaviour
         GUIUtility.ScaleAroundPivot(Vector2.one * scale, rect.position);
         GUI.Label(rect, text, style);
         GUI.matrix = matrixBackup;
-    }
-
-    private void FixedUpdate()
-    {
-        if (!_started || !floorPrefab || !robertPrefab
-            || !_camera || !cameraStartPosition || !cameraEndPosition)
-            return;
-
-        _introTimer -= Time.deltaTime;
-        if (_introTimer < 0)
-            UpdateCamera();
-
-        if (_gameOver)
-            return;
-
-        var floorScrollSpeed = GameManager.GlobalSpeed * speed;
-        if (UpdateScrollingEnvironment(floorPrefab, floorScrollSpeed, _floor, _floorPreviousPosition))
-        {
-            UpdateFloorMaterialShift(_floor[^1]);
-            for (var i = 0; i < 9; i++)
-            {
-                var randomX = Random.Range(-2, 2);
-                if (randomX >= 0)
-                    randomX++;
-                var randomPosition = new Vector3(randomX, 0f, _floor[^1].localPosition.z - (Random.Range(0, 7) + 9 * i));
-                Instantiate(robertPrefab, randomPosition, Quaternion.identity, _floor[^1]);
-            }
-        }
-    }
-
-    public void GameOver(GameManager.GameOverCase gameOverCase, Transform deathCause = null)
-    {
-        switch (gameOverCase)
-        {
-            case GameManager.GameOverCase.Caught:
-                _gameOver = true;
-                cameraEndPosition.position = GameManager.GetPlayer().transform.position + new Vector3(0.3f, 1.5f, -2f);
-                cameraEndPosition.eulerAngles = new Vector3(20f, -10f, 0f);
-                break;
-            case GameManager.GameOverCase.Drowned:
-                _gameOver = true;
-                cameraEndPosition.position = new Vector3(0.1f, 0f, -0.7f);
-                cameraEndPosition.eulerAngles = new Vector3(0f, -5f, 0f);
-                break;
-        }
-    }
-
-    private bool UpdateScrollingEnvironment(Transform prefab, float elementSpeed, List<Transform> element, List<Vector3> elementPreviousPosition)
-    {
-        var elementToAdd = false;
-        var elementToRemove = false;
-        for (var i = 0; i < element.Count; i++)
-        {
-            element[i].localPosition += Vector3.forward * (elementSpeed * Time.deltaTime);
-            
-            if (elementPreviousPosition[i].z <= 42f && element[i].localPosition.z > 42f)
-                elementToAdd = true;
-
-            if (elementPreviousPosition[i].z <= 84f && element[i].localPosition.z > 84f)
-                elementToRemove = true;
-            
-            elementPreviousPosition[i] = element[i].localPosition;
-        }
-        
-        if (elementToAdd)
-        {
-            element.Add(Instantiate(prefab, elementPreviousPosition[0] + Vector3.back * 84f, Quaternion.identity,
-                transform));
-            elementPreviousPosition.Add(elementPreviousPosition[0] + Vector3.back * 84f);
-        }
-
-        if (elementToRemove)
-        {
-            Destroy(element[0].gameObject);
-            element.RemoveAt(0);
-            elementPreviousPosition.RemoveAt(0);
-        }
-
-        return elementToAdd;
-    }
-    
-    private void UpdateFloorMaterialShift(Transform floor)
-    {
-        var floorMaterials = floor.GetComponent<Renderer>().materials;
-        foreach (var floorMaterial in floorMaterials)
-            floorMaterial.SetFloat(ZShift, _totalInstantiatedFloors);
-        _totalInstantiatedFloors++;
-    }
-
-    public static bool GetStarted()
-    {
-        return _instance._started;
-    }
-
-    private void UpdateCamera()
-    {
-        _camera.transform.position = Vector3.MoveTowards(_camera.transform.position, cameraEndPosition.position, speed * Time.fixedDeltaTime);
-        _camera.transform.forward = Vector3.Slerp(_camera.transform.forward, cameraEndPosition.forward, speed * Time.deltaTime);
     }
 }

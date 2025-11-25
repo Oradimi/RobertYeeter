@@ -9,6 +9,7 @@ public class PlayerController : MonoBehaviour
     
     [SerializeField] private AudioClip punchSound;
     [SerializeField] private AudioClip splashSound;
+    [SerializeField] private AudioClip cantMoveSound;
 
     [SceneLabel(fontSize: 32)]
 #pragma warning disable CS0414 // Field is assigned but its value is never used
@@ -70,6 +71,7 @@ public class PlayerController : MonoBehaviour
             Speed() * Time.fixedDeltaTime);
         
         CheckForJumpPrompt();
+        CheckCollision();
         
         _chargePosition *= chargeBreak;
         _isCharging = _chargePosition.z < -0.2f;
@@ -77,6 +79,14 @@ public class PlayerController : MonoBehaviour
         _jumpTime -= Time.fixedDeltaTime;
         _isJumping = _jumpTime > 0.4f;
         _isFalling = _jumpTime > 0f && !_isJumping;
+    }
+
+    private void CheckCollision()
+    {
+        if (Physics.CheckSphere(transform.position, 0.1f, LayerMask.GetMask("Default")))
+        {
+            
+        }
     }
 
     public void DisableActionMap()
@@ -135,7 +145,7 @@ public class PlayerController : MonoBehaviour
             GameManager.AffectsAnimations = true;
             _promptTime = 100f;
             _prompt = "";
-            _targetPosition = new Vector3(Mathf.Clamp(_targetPosition.x - _direction, -2.0f, 2.0f), 0, 0);
+            _targetPosition = new Vector3(Mathf.Clamp(_targetPosition.x + _direction, -2.0f, 2.0f), 0, 0);
         }
     }
     
@@ -145,9 +155,15 @@ public class PlayerController : MonoBehaviour
             return;
         
         var input = ctx.ReadValue<Vector2>();
-        _direction = Mathf.Round(input.x);
-        _targetPosition = new Vector3(Mathf.Clamp(_targetPosition.x - _direction, -2.0f, 2.0f), 0, 0);
-        if (_targetPosition.x == 0f)
+        _direction = Mathf.Round(-input.x);
+        if (Physics.CheckSphere(transform.position + new Vector3(0.3f * _direction, 0.5f, 0f), 0.3f, LayerMask.GetMask("Default")))
+        {
+            _audioSource.PlayOneShot(cantMoveSound);
+            return;
+        }
+        
+        _targetPosition = new Vector3(Mathf.Clamp(_targetPosition.x + _direction, -3.0f, 3.0f), 0, 0);
+        if (_targetPosition.x == 0f && _targetPosition.y < 1f)
             _promptTime = 1f;
     }
 
