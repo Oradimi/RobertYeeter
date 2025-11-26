@@ -57,7 +57,7 @@ public class FloorManager : MonoBehaviour
             if (child != transform)
                 Destroy(child.gameObject);
 
-        InstantiateFloor(0, Vector3.forward * 30f);
+        InstantiateFloor(0, Vector3.forward * 10f);
     }
     
     private void FixedUpdate()
@@ -68,8 +68,7 @@ public class FloorManager : MonoBehaviour
 
         _introTimer -= Time.deltaTime;
         if (_introTimer < 0)
-            UpdateCameraIntro();
-        UpdateCamera();
+            UpdateCamera();
 
         if (_gameOver)
             return;
@@ -112,12 +111,12 @@ public class FloorManager : MonoBehaviour
         {
             case GameManager.GameOverCase.Caught:
                 _gameOver = true;
-                cameraEndPosition.position = GameManager.GetPlayer().transform.position + new Vector3(0.3f, 1.5f, -2f);
+                _cameraTarget = GameManager.GetPlayer().transform.position + new Vector3(0.3f, 1.5f, -2f);
                 cameraEndPosition.eulerAngles = new Vector3(20f, -10f, 0f);
                 break;
             case GameManager.GameOverCase.Drowned:
                 _gameOver = true;
-                cameraEndPosition.position = new Vector3(0.1f, 0f, -0.7f);
+                _cameraTarget = new Vector3(0.1f, 0f, -0.7f);
                 cameraEndPosition.eulerAngles = new Vector3(0f, -5f, 0f);
                 break;
         }
@@ -161,15 +160,10 @@ public class FloorManager : MonoBehaviour
         return _instance._started;
     }
 
-    private void UpdateCameraIntro()
-    {
-        _camera.transform.position = Vector3.MoveTowards(_camera.transform.position, cameraEndPosition.position, speed * Time.fixedDeltaTime);
-        _camera.transform.forward = Vector3.Slerp(_camera.transform.forward, cameraEndPosition.forward, speed * Time.deltaTime);
-    }
-    
     private void UpdateCamera()
     {
         _camera.transform.position = Vector3.MoveTowards(_camera.transform.position, _cameraTarget, speed * Time.fixedDeltaTime);
+        _camera.transform.forward = Vector3.Slerp(_camera.transform.forward, cameraEndPosition.forward, speed * Time.deltaTime);
     }
 
     private void OnGUI()
