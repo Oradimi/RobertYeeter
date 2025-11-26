@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -44,38 +45,36 @@ public static class FloorGeneration
         {
             var selectedType = previousType;
             var randomChance = 0;
-            switch (previousType)
+            if (previousType.HasFlag(FloorManager.FloorData.Type.Standard))
             {
-                case FloorManager.FloorData.Type.Standard:
-                    randomChance = Random.Range(0, 3);
-                    if (randomChance == 0)
-                        selectedType = FloorManager.FloorData.Type.Standard;
-                    else
-                        selectedType = FloorManager.FloorData.Type.Bridge;
-                    break;
-                case FloorManager.FloorData.Type.Narrow:
-                    randomChance = Random.Range(0, 3);
-                    if (randomChance == 0)
-                        selectedType = FloorManager.FloorData.Type.Narrow;
-                    else
-                        selectedType = FloorManager.FloorData.Type.Standard;
-                    break;
-                case FloorManager.FloorData.Type.Bridge:
-                    randomChance = Random.Range(0, 3);
-                    if (randomChance == 0)
-                        selectedType = FloorManager.FloorData.Type.Standard;
-                    else
-                        selectedType = FloorManager.FloorData.Type.Narrow;
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
+                randomChance = Random.Range(0, 3);
+                if (randomChance == 0)
+                    selectedType = FloorManager.FloorData.Type.Standard;
+                else
+                    selectedType = FloorManager.FloorData.Type.Bridge;
+            }
+            else if (previousType.HasFlag(FloorManager.FloorData.Type.Narrow))
+            {
+                randomChance = Random.Range(0, 3);
+                if (randomChance == 0)
+                    selectedType = FloorManager.FloorData.Type.Narrow;
+                else
+                    selectedType = FloorManager.FloorData.Type.Standard;
+            }
+            else if (previousType.HasFlag(FloorManager.FloorData.Type.Bridge))
+            {
+                randomChance = Random.Range(0, 3);
+                if (randomChance == 0)
+                    selectedType = FloorManager.FloorData.Type.Standard;
+                else
+                    selectedType = FloorManager.FloorData.Type.Narrow;
             }
             
             if (GameManager.GetDistanceTraveled() > 1000f && Random.Range(0, 3) == 0)
                 selectedType |= FloorManager.FloorData.Type.Exit;
             
             previousType = selectedType;
-            tempSettings[(int)selectedType].count++;
+            // tempSettings[(int)selectedType].count++;
 
             var floorData = FloorManager.GetFloorData();
             var currentZone = FloorManager.GetCurrentZone();
@@ -88,7 +87,7 @@ public static class FloorGeneration
 
             if (typeIndices.Count <= 0 && selectedType.HasFlag(FloorManager.FloorData.Type.Exit))
             {
-                selectedType |= FloorManager.FloorData.Type.Exit;
+                selectedType ^= FloorManager.FloorData.Type.Exit;
                 for (var j = 0; j < floorData.Length; j++)
                 {
                     if (floorData[j].type == selectedType && floorData[j].zone == currentZone)
