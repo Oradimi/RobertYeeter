@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60d1c64b579c4aac827754af14c593de, type: 3}
+  m_Name: Lush
+  m_EditorClassIdentifier: Assembly-CSharp::ZoneTextureData
+  floorMain: {fileID: 2800000, guid: cf6d3ba1401e54d48b28f7f8961910b3, type: 3}
+  floorDetail: {fileID: 2800000, guid: 7678c3966bdba944c8231739d482ace0, type: 3}
+  wallMain: {fileID: 2800000, guid: 33d2cd53fc52d59419839a6300d947c3, type: 3}
+  wallDetail: {fileID: 2800000, guid: f759b4cb649fc2343be5096e54259056, type: 3}

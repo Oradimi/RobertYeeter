@@ -28,18 +28,33 @@ public class FloorManager : MonoBehaviour
         public enum Zone
         {
             Lush,
+            Dry,
         }
+    }
+
+    [Serializable]
+    public class ZoneTextures
+    {
+        public FloorData.Zone zone;
+        public ZoneTextureData textureData;
     }
     
     private static FloorManager _instance;
     private static readonly int ZShift = Shader.PropertyToID("_ZShift");
+    private static readonly int FloorMain = Shader.PropertyToID("_FloorMain");
+    private static readonly int FloorDetail = Shader.PropertyToID("_FloorDetail");
+    private static readonly int WallMain = Shader.PropertyToID("_WallMain");
+    private static readonly int WallDetail = Shader.PropertyToID("_WallDetail");
     
     [TableList(Draggable = true,
         HideAddButton = false,
         HideRemoveButton = false,
         AlwaysExpanded = true)]
     [SerializeField] private FloorData[] floorData;
-    [SerializeField] private FloorGeneration.Settings[] settings;
+    [SerializeField] private ZoneTextures[] zoneTextures;
+    [SerializeField] private FloorData.Zone startingZone;
+    [ShowInInspector]
+    private FloorData.Zone _currentZone;
     [SerializeField] private Transform robertPrefab;
     [SerializeField] private float speed = 5f;
     
@@ -62,6 +77,9 @@ public class FloorManager : MonoBehaviour
     private float _totalInstantiatedFloors;
     
     [SerializeField] private Font interFont;
+    
+    [ShowInInspector]
+    private FloorGeneration.Settings[] _settings;
     
     private void Awake()
     {
@@ -90,8 +108,20 @@ public class FloorManager : MonoBehaviour
         foreach (var child in children)
             if (child != transform)
                 Destroy(child.gameObject);
-        
-        _prefabPreselection = FloorGeneration.Init(settings);
+
+        var typeEnumValues = Enum.GetValues(typeof(FloorData.Type));
+        _settings = new FloorGeneration.Settings[typeEnumValues.Length];
+        for (var i = 0; i < typeEnumValues.Length; i++)
+        {
+            var type = (FloorData.Type)typeEnumValues.GetValue(i);
+            _settings[i] = new FloorGeneration.Settings
+            {
+                type = type
+            };
+        }
+
+        _currentZone = startingZone;
+        _prefabPreselection = FloorGeneration.Init(_settings);
         InstantiateFloor(Vector3.forward * 30f);
     }
     
@@ -137,13 +167,16 @@ public class FloorManager : MonoBehaviour
     private Transform InstantiateFloor(Vector3 position)
     {
         if (_prefabPreselection.Count < 1)
-            _prefabPreselection = FloorGeneration.Init(settings);
+            _prefabPreselection = FloorGeneration.Init(_settings);
         var floor = Instantiate(floorData[_prefabPreselection[0]].prefab, position, Quaternion.identity, transform);
+        floor.AddComponent<MeshCollider>();
+        var floorRenderer = floor.GetComponent<Renderer>();
+        UpdateFloorMaterialShift(floorRenderer);
+        UpdateFloorTextures(floorRenderer);
         _prefabPreselection.RemoveAt(0);
         _floor.Add(floor.transform);
         _floorPreviousPosition.Add(position);
-        _floor[^1].gameObject.AddComponent<MeshCollider>();
-        UpdateFloorMaterialShift(_floor[^1]);
+        _totalInstantiatedFloors++;
         return floor.transform;
     }
 
@@ -157,6 +190,11 @@ public class FloorManager : MonoBehaviour
     public static bool IsGameOver()
     {
         return _instance._gameOver;
+    }
+
+    public static FloorData.Zone GetCurrentZone()
+    {
+        return _instance._currentZone;
     }
 
     public void GameOver(GameManager.GameOverCase gameOverCase, Transform deathCause = null)
@@ -202,11 +240,27 @@ public class FloorManager : MonoBehaviour
         return elementToAdd;
     }
     
-    private void UpdateFloorMaterialShift(Transform floor)
+    private void UpdateFloorMaterialShift(Renderer r)
     {
-        var floorMaterial = floor.GetComponent<Renderer>().material;
+        var floorMaterial = r.material;
         floorMaterial.SetFloat(ZShift, _totalInstantiatedFloors);
-        _totalInstantiatedFloors++;
+    }
+
+    private void UpdateFloorTextures(Renderer r)
+    {
+        var floorMaterial = r.material;
+        var currentZoneTextures = zoneTextures[0].textureData;
+        foreach (var zoneTexturesSet in zoneTextures)
+        {
+            if (zoneTexturesSet.zone != _currentZone || currentZoneTextures == zoneTexturesSet.textureData)
+                continue;
+            
+            floorMaterial.SetTexture(FloorMain, zoneTexturesSet.textureData.floorMain);
+            floorMaterial.SetTexture(FloorDetail, zoneTexturesSet.textureData.floorDetail);
+            floorMaterial.SetTexture(WallMain, zoneTexturesSet.textureData.wallMain);
+            floorMaterial.SetTexture(WallDetail, zoneTexturesSet.textureData.wallDetail);
+            break;
+        }
     }
 
     public static bool GetStarted()

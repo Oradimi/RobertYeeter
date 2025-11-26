@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60d1c64b579c4aac827754af14c593de, type: 3}
+  m_Name: Dry
+  m_EditorClassIdentifier: Assembly-CSharp::ZoneTextureData
+  floorMain: {fileID: 2800000, guid: 3544e4298b1e8e14d8072da8c01b930b, type: 3}
+  floorDetail: {fileID: 2800000, guid: c6ba4252ab2ca9245981852a2a44750a, type: 3}
+  wallMain: {fileID: 2800000, guid: 9e284a7b52929f5468003f0e1e78360e, type: 3}
+  wallDetail: {fileID: 2800000, guid: 3736476e25db4eb4d93afe7eab730167, type: 3}

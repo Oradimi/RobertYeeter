@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 using Random = UnityEngine.Random;
 
 public static class FloorGeneration
@@ -33,14 +34,13 @@ public static class FloorGeneration
             generationCount += setting.count;
         
         var tempSettings = new List<Settings>();
-        foreach (var setting in settings)
-            tempSettings.Add(setting.Clone());
+        tempSettings = settings.ToList();
         tempSettings.Sort(Settings.CompareByType);
         
         var indexList = new List<int>();
         var previousType = FloorManager.FloorData.Type.Standard;
 
-        for (var i = 0; i < generationCount; i++)
+        for (var i = 0; i < 5; i++)
         {
             var selectedType = previousType;
             var randomChance = 0;
@@ -72,20 +72,21 @@ public static class FloorGeneration
             }
             
             previousType = selectedType;
-            tempSettings[(int)selectedType].count--;
+            tempSettings[(int)selectedType].count++;
 
             var floorData = FloorManager.GetFloorData();
+            var currentZone = FloorManager.GetCurrentZone();
             var typeIndices = new List<int>();
             for (var j = 0; j < floorData.Length; j++)
             {
-                if (floorData[j].type == selectedType)
+                if (floorData[j].type == selectedType && floorData[j].zone == currentZone)
                     typeIndices.Add(j);
             }
             
-            var selectedIndex = typeIndices[Random.Range(0, typeIndices.Count)];
+            if (typeIndices.Count <= 0)
+                Debug.LogWarning($"The zone {currentZone} has no prefab of type {selectedType}!");
+            var selectedIndex = typeIndices[typeIndices.Count <= 0 ? 0 : Random.Range(0, typeIndices.Count)];
             indexList.Add(selectedIndex);
-            if (tempSettings[(int)selectedType].count <= 0)
-                return indexList;
         }
         
         return indexList;

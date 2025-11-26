@@ -8742,13 +8742,21 @@ MonoBehaviour:
   - prefab: {fileID: 919132149155446097, guid: faf35f6cb42f3b24e95a8f5e28fc9099, type: 3}
     type: 2
     zone: 0
-  settings:
-  - type: 0
-    count: 20
-  - type: 1
-    count: 20
-  - type: 2
-    count: 20
+  - prefab: {fileID: 919132149155446097, guid: 376d6b8190d937845a144b6c4506b67c, type: 3}
+    type: 0
+    zone: 1
+  - prefab: {fileID: 919132149155446097, guid: 1b556453005945b4ba669f9685485f8e, type: 3}
+    type: 1
+    zone: 1
+  - prefab: {fileID: 919132149155446097, guid: faf35f6cb42f3b24e95a8f5e28fc9099, type: 3}
+    type: 2
+    zone: 1
+  zoneTextures:
+  - zone: 0
+    textureData: {fileID: 11400000, guid: 408f4ceaf980cb04daf59a636cc5b469, type: 2}
+  - zone: 1
+    textureData: {fileID: 11400000, guid: 678a071139561e545aa90a6832a9b058, type: 2}
+  startingZone: 0
   robertPrefab: {fileID: 1989445490068115165, guid: 94e4789806b94cb45bea7c21c6b66e55, type: 3}
   speed: 5
   cameraStartPosition: {fileID: 1826279054}
