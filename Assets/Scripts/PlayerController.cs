@@ -101,12 +101,7 @@ public class PlayerController : MonoBehaviour
         Physics.Raycast(ray, out var hit, 1.2f, LayerMask.GetMask("Default"));
         if (hit.collider)
         {
-            var slope = Vector3.ProjectOnPlane(Vector3.back, hit.normal).normalized.y;
-            if (slope > 0.1f)
-            {
-                transform.position += Vector3.up * (slope * Time.fixedDeltaTime * speed);
-                _targetPosition = new Vector3(_targetPosition.x, transform.position.y, _targetPosition.z);
-            }
+            _targetPosition = new Vector3(_targetPosition.x, hit.point.y, _targetPosition.z);
         }
         else
         {
@@ -133,9 +128,9 @@ public class PlayerController : MonoBehaviour
     private void OnDrawGizmos()
     {
         Gizmos.color = _collision1 ? Color.red : Color.green;
-        Gizmos.DrawSphere(transform.position + new Vector3(0.4f * _direction, 0.9f, -0.5f), 0.2f);
+        Gizmos.DrawSphere(transform.position + new Vector3(0.4f * _direction, 0.5f, -0.5f), 0.3f);
         Gizmos.color = _collision2 ? Color.red : Color.green;
-        Gizmos.DrawSphere(transform.position, 0.2f);
+        Gizmos.DrawSphere(transform.position + Vector3.up * 0.1f, 0.2f);
         Gizmos.color = _collision3 ? Color.red : Color.green;
         Gizmos.DrawSphere(transform.position + new Vector3(0f, 0.9f, -0.5f), 0.2f);
     }
@@ -207,9 +202,9 @@ public class PlayerController : MonoBehaviour
         
         var input = ctx.ReadValue<Vector2>();
         _direction = Mathf.Round(-input.x);
-        _collision1 = Physics.CheckSphere(transform.position + new Vector3(0.4f * _direction, 0.9f, -0.5f), 0.2f,
+        _collision1 = Physics.CheckSphere(transform.position + new Vector3(0.4f * _direction, 0.5f, -0.5f), 0.3f,
             LayerMask.GetMask("Default"));
-        if (Physics.CheckSphere(transform.position + new Vector3(0.4f * _direction, 0.9f, -0.5f), 0.2f, LayerMask.GetMask("Default")))
+        if (Physics.CheckSphere(transform.position + new Vector3(0.4f * _direction, 0.5f, -0.5f), 0.3f, LayerMask.GetMask("Default")))
         {
             _audioSource.PlayOneShot(cantMoveSound);
             return;

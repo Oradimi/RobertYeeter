@@ -14,6 +14,7 @@ public class FloorManager : MonoBehaviour
     
     [SerializeField] private Transform cameraStartPosition;
     [SerializeField] private Transform cameraEndPosition;
+    [SerializeField] private Transform cameraHighPosition;
 
     private float _introTimer = 3f;
     private Camera _camera;
@@ -72,6 +73,8 @@ public class FloorManager : MonoBehaviour
 
         if (_gameOver)
             return;
+        
+        _cameraTarget = GameManager.GetPlayer().transform.position.y > 1f ? cameraHighPosition.position : cameraEndPosition.position;
 
         var floorScrollSpeed = GameManager.GlobalSpeed * speed;
         if (UpdateScrollingEnvironment(floorPrefab, floorScrollSpeed, _floor, _floorPreviousPosition))
