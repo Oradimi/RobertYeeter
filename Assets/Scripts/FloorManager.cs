@@ -1,14 +1,45 @@
+using System;
 using System.Collections.Generic;
-using Unity.VisualScripting;
+using TriInspector;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Random = UnityEngine.Random;
 
 public class FloorManager : MonoBehaviour
 {
+    [Serializable]
+    [DeclareVerticalGroup("Data")]
+    public class FloorData
+    {
+        [Required]
+        public GameObject prefab;
+        [Group("Data")]
+        public Type type;
+        [Group("Data")]
+        public Zone zone;
+        
+        public enum Type
+        {
+            Standard,
+            Narrow,
+            Bridge,
+        }
+
+        public enum Zone
+        {
+            Lush,
+        }
+    }
+    
     private static FloorManager _instance;
     private static readonly int ZShift = Shader.PropertyToID("_ZShift");
-
-    [SerializeField] private Transform[] floorPrefab;
+    
+    [TableList(Draggable = true,
+        HideAddButton = false,
+        HideRemoveButton = false,
+        AlwaysExpanded = true)]
+    [SerializeField] private FloorData[] floorData;
+    [SerializeField] private FloorGeneration.Settings[] settings;
     [SerializeField] private Transform robertPrefab;
     [SerializeField] private float speed = 5f;
     
@@ -24,6 +55,8 @@ public class FloorManager : MonoBehaviour
     private bool _started;
     private bool _gameOver;
     
+    [ShowInInspector]
+    private List<int> _prefabPreselection;
     private List<Transform> _floor;
     private List<Vector3> _floorPreviousPosition;
     private float _totalInstantiatedFloors;
@@ -42,7 +75,7 @@ public class FloorManager : MonoBehaviour
         
         _camera = Camera.main;
         
-        if (floorPrefab.Length < 1 || !robertPrefab
+        if (floorData.Length < 1 || !robertPrefab
             || !_camera || !cameraStartPosition || !cameraEndPosition)
             return;
         
@@ -57,13 +90,14 @@ public class FloorManager : MonoBehaviour
         foreach (var child in children)
             if (child != transform)
                 Destroy(child.gameObject);
-
-        InstantiateFloor(0, Vector3.forward * 10f);
+        
+        _prefabPreselection = FloorGeneration.Init(settings);
+        InstantiateFloor(Vector3.forward * 30f);
     }
     
     private void FixedUpdate()
     {
-        if (!_started || floorPrefab.Length < 1 || !robertPrefab
+        if (!_started || floorData.Length < 1 || !robertPrefab
             || !_camera || !cameraStartPosition || !cameraEndPosition)
             return;
 
@@ -73,13 +107,22 @@ public class FloorManager : MonoBehaviour
 
         if (_gameOver)
             return;
-        
-        _cameraTarget = GameManager.GetPlayer().transform.position.y > 1f ? cameraHighPosition.position : cameraEndPosition.position;
+
+        var isPlayerHigh = GameManager.GetPlayer().transform.position.y > 1f;
+        if (isPlayerHigh)
+        {
+            _cameraTarget = cameraHighPosition.position;
+            GameManager.SetTargetPosition(Vector3.up);
+        }
+        else
+        {
+            _cameraTarget = cameraEndPosition.position;
+            GameManager.SetTargetPosition(Vector3.zero);
+        }
 
         var floorScrollSpeed = GameManager.GlobalSpeed * speed;
-        if (UpdateScrollingEnvironment(floorPrefab, floorScrollSpeed, _floor, _floorPreviousPosition))
+        if (UpdateScrollingEnvironment(floorScrollSpeed, _floor, _floorPreviousPosition))
         {
-            UpdateFloorMaterialShift(_floor[^1]);
             for (var i = 0; i < 9; i++)
             {
                 var randomX = Random.Range(-2, 2);
@@ -91,14 +134,17 @@ public class FloorManager : MonoBehaviour
         }
     }
 
-    private Transform InstantiateFloor(int index, Vector3 position)
+    private Transform InstantiateFloor(Vector3 position)
     {
-        var floor = Instantiate(floorPrefab[index], position, Quaternion.identity, transform);
-        _floor.Add(floor);
+        if (_prefabPreselection.Count < 1)
+            _prefabPreselection = FloorGeneration.Init(settings);
+        var floor = Instantiate(floorData[_prefabPreselection[0]].prefab, position, Quaternion.identity, transform);
+        _prefabPreselection.RemoveAt(0);
+        _floor.Add(floor.transform);
         _floorPreviousPosition.Add(position);
-        _floor[^1].AddComponent<MeshCollider>();
+        _floor[^1].gameObject.AddComponent<MeshCollider>();
         UpdateFloorMaterialShift(_floor[^1]);
-        return floor;
+        return floor.transform;
     }
 
     private void DestroyFirstFloor()
@@ -106,6 +152,11 @@ public class FloorManager : MonoBehaviour
         Destroy(_floor[0].gameObject);
         _floor.RemoveAt(0);
         _floorPreviousPosition.RemoveAt(0);
+    }
+
+    public static bool IsGameOver()
+    {
+        return _instance._gameOver;
     }
 
     public void GameOver(GameManager.GameOverCase gameOverCase, Transform deathCause = null)
@@ -125,7 +176,7 @@ public class FloorManager : MonoBehaviour
         }
     }
 
-    private bool UpdateScrollingEnvironment(Transform[] prefab, float elementSpeed, List<Transform> element, List<Vector3> elementPreviousPosition)
+    private bool UpdateScrollingEnvironment(float elementSpeed, List<Transform> element, List<Vector3> elementPreviousPosition)
     {
         var elementToAdd = false;
         var elementToRemove = false;
@@ -143,7 +194,7 @@ public class FloorManager : MonoBehaviour
         }
         
         if (elementToAdd)
-            InstantiateFloor(Random.Range(0, floorPrefab.Length), elementPreviousPosition[0] + Vector3.back * 84f);
+            InstantiateFloor(elementPreviousPosition[0] + Vector3.back * 84f);
 
         if (elementToRemove)
             DestroyFirstFloor();
@@ -161,6 +212,11 @@ public class FloorManager : MonoBehaviour
     public static bool GetStarted()
     {
         return _instance._started;
+    }
+
+    public static FloorData[] GetFloorData()
+    {
+        return _instance.floorData;
     }
 
     private void UpdateCamera()

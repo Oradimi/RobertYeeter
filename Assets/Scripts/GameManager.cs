@@ -21,6 +21,7 @@ public class GameManager : MonoBehaviour
     [SceneLabel(SceneLabelID.Score)]
     private int _score;
 
+    private Vector3 _targetPosition;
     private float _effectTime;
     private int _gain;
     private bool _isGameOver;
@@ -41,6 +42,8 @@ public class GameManager : MonoBehaviour
         _floorManager = FindAnyObjectByType<FloorManager>();
 
         GlobalSpeed = 1f;
+        
+        _targetPosition = transform.position;
     }
     
     private void OnEnable()
@@ -51,6 +54,13 @@ public class GameManager : MonoBehaviour
     private void Update()
     {
         _instance._effectTime -= Time.deltaTime;
+        transform.position = Vector3.MoveTowards(transform.position, _targetPosition, 
+            Time.fixedDeltaTime);
+    }
+
+    public static void SetTargetPosition(Vector3 position)
+    {
+        _instance._targetPosition = position + new Vector3(0.08f, 0f, 1.25f);
     }
 
     public static void AddScore(int score)

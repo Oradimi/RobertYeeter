@@ -8732,10 +8732,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 194b7fc9a30943c4a89b33e4f6202ff9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FloorManager
-  floorPrefab:
-  - {fileID: -8679921383154817045, guid: faf35f6cb42f3b24e95a8f5e28fc9099, type: 3}
-  - {fileID: -8679921383154817045, guid: 376d6b8190d937845a144b6c4506b67c, type: 3}
-  - {fileID: -8679921383154817045, guid: 1b556453005945b4ba669f9685485f8e, type: 3}
+  floorData:
+  - prefab: {fileID: 919132149155446097, guid: 376d6b8190d937845a144b6c4506b67c, type: 3}
+    type: 0
+    zone: 0
+  - prefab: {fileID: 919132149155446097, guid: 1b556453005945b4ba669f9685485f8e, type: 3}
+    type: 1
+    zone: 0
+  - prefab: {fileID: 919132149155446097, guid: faf35f6cb42f3b24e95a8f5e28fc9099, type: 3}
+    type: 2
+    zone: 0
+  settings:
+  - type: 0
+    count: 20
+  - type: 1
+    count: 20
+  - type: 2
+    count: 20
   robertPrefab: {fileID: 1989445490068115165, guid: 94e4789806b94cb45bea7c21c6b66e55, type: 3}
   speed: 5
   cameraStartPosition: {fileID: 1826279054}

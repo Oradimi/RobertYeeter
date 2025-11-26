@@ -88,13 +88,7 @@ public class PlayerController : MonoBehaviour
     
     private void CheckCollision()
     {
-        // _collision1 = Physics.CheckSphere(transform.position + Vector3.back, 0.2f, LayerMask.GetMask("Default"));
-        // if (!Physics.CheckSphere(transform.position + Vector3.back, 0.2f, LayerMask.GetMask("Default")))
-        // {
-        //     _highPosition.y += 0.2f;
-        // }
-
-        if (_inWater)
+        if (_inWater || FloorManager.IsGameOver())
             return;
         
         var ray = new Ray(transform.position + Vector3.up, Vector3.down);
