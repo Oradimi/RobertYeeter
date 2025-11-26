@@ -93,9 +93,9 @@ public class GameManager : MonoBehaviour
         _instance._distanceTraveled = 0;
     }
 
-    public static int GetCombo()
+    public static float GetDistanceTraveled()
     {
-        return _instance._combo;
+        return _instance._distanceTraveled;
     }
 
     public static void GameOver(GameOverCase gameOverCase, Transform deathCause = null)

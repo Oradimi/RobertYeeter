@@ -4954,7 +4954,7 @@ MonoBehaviour:
       - Value: 2
       - Value: 2
       - Value: 2
-      maxConnectionDistance: 0.15505591
+      maxConnectionDistance: 0.1550559
       userEdit: 0
     preBuildData:
       enabled: 0
@@ -6074,7 +6074,7 @@ MonoBehaviour:
       - Value: 2
       - Value: 2
       - Value: 2
-      maxConnectionDistance: 0.07610976
+      maxConnectionDistance: 0.07610975
       userEdit: 0
     preBuildData:
       enabled: 0
@@ -8734,22 +8734,34 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FloorManager
   floorData:
   - prefab: {fileID: 919132149155446097, guid: 376d6b8190d937845a144b6c4506b67c, type: 3}
-    type: 0
-    zone: 0
-  - prefab: {fileID: 919132149155446097, guid: 1b556453005945b4ba669f9685485f8e, type: 3}
     type: 1
     zone: 0
-  - prefab: {fileID: 919132149155446097, guid: faf35f6cb42f3b24e95a8f5e28fc9099, type: 3}
+  - prefab: {fileID: 919132149155446097, guid: 1b556453005945b4ba669f9685485f8e, type: 3}
     type: 2
     zone: 0
-  - prefab: {fileID: 919132149155446097, guid: 376d6b8190d937845a144b6c4506b67c, type: 3}
-    type: 0
-    zone: 1
-  - prefab: {fileID: 919132149155446097, guid: 1b556453005945b4ba669f9685485f8e, type: 3}
+  - prefab: {fileID: 919132149155446097, guid: faf35f6cb42f3b24e95a8f5e28fc9099, type: 3}
+    type: 4
+    zone: 0
+  - prefab: {fileID: 919132149155446097, guid: 8575c2153160e3c41b28e4acaf9e13ef, type: 3}
+    type: 10
+    zone: 0
+  - prefab: {fileID: 919132149155446097, guid: 65aa80e4a72596a40828b0f1604878f0, type: 3}
+    type: 9
+    zone: 0
+  - prefab: {fileID: 919132149155446097, guid: ac4456f128d14624cb9a347803a62188, type: 3}
     type: 1
     zone: 1
-  - prefab: {fileID: 919132149155446097, guid: faf35f6cb42f3b24e95a8f5e28fc9099, type: 3}
+  - prefab: {fileID: 919132149155446097, guid: 61c81343cdb708444850758ab56fc5f4, type: 3}
     type: 2
+    zone: 1
+  - prefab: {fileID: 919132149155446097, guid: 035ad91b448d79e4aabec55acb899953, type: 3}
+    type: 4
+    zone: 1
+  - prefab: {fileID: 919132149155446097, guid: 8575c2153160e3c41b28e4acaf9e13ef, type: 3}
+    type: 10
+    zone: 1
+  - prefab: {fileID: 919132149155446097, guid: 65aa80e4a72596a40828b0f1604878f0, type: 3}
+    type: 9
     zone: 1
   zoneTextures:
   - zone: 0

@@ -88,6 +88,9 @@ public class PlayerController : MonoBehaviour
         _chargeCooldown -= Time.fixedDeltaTime;
         _isJumping = _jumpTime > 0.4f;
         _isFalling = _jumpTime > 0f && !_isJumping;
+
+        if (Vector3.Distance(transform.position, _targetPosition) < 0.1f)
+            _direction = 0f;
     }
 
     private bool _collision1 = false;
@@ -101,7 +104,12 @@ public class PlayerController : MonoBehaviour
         
         var ray = new Ray(transform.position + Vector3.up, Vector3.down);
         Physics.Raycast(ray, out var hit, 1.2f, LayerMask.GetMask("Default"));
-        if (hit.collider)
+        if (_isJumping)
+        {
+            if (hit.collider && Mathf.Abs(hit.point.y - transform.position.y) < 0.2f)
+                _targetPosition = new Vector3(_targetPosition.x, hit.point.y, _targetPosition.z);
+        }
+        else if (hit.collider)
         {
             _targetPosition = new Vector3(_targetPosition.x, hit.point.y, _targetPosition.z);
         }
@@ -220,7 +228,12 @@ public class PlayerController : MonoBehaviour
 
     private bool TargetingWater()
     {
-        return _targetPosition.x == 0f && _targetPosition.y < 1f;
+        if (Physics.CheckSphere(transform.position + new Vector3(_direction, 0f, -0.4f), 0.1f,
+                LayerMask.GetMask("Default")))
+            return false;
+        
+        var ray = new Ray(transform.position + new Vector3(_direction, 0f, -0.4f), Vector3.down);
+        return Physics.Raycast(ray, out _, 10f, LayerMask.GetMask("Default"));
     }
 
     private void OnCharge(InputAction.CallbackContext ctx)

@@ -18,11 +18,14 @@ public class FloorManager : MonoBehaviour
         [Group("Data")]
         public Zone zone;
         
+        [Flags]
         public enum Type
         {
-            Standard,
-            Narrow,
-            Bridge,
+            None = 0,
+            Standard = 1,
+            Narrow = 2,
+            Bridge = 4,
+            Exit = 8,
         }
 
         public enum Zone
@@ -152,9 +155,25 @@ public class FloorManager : MonoBehaviour
         }
         else
         {
-            _cameraTarget = cameraEndPosition.position;
-            GameManager.SetTargetPosition(Vector3.zero);
+            var isPlayerLow = GameManager.GetPlayer().transform.position.y < -10f;
+            if (isPlayerLow)
+            {
+                _cameraTarget = cameraEndPosition.position + Vector3.down * 10f;
+                GameManager.SetTargetPosition(Vector3.down * 10f);
+            }
+            else
+            {
+                _cameraTarget = cameraEndPosition.position;
+                GameManager.SetTargetPosition(Vector3.zero);
+            }
         }
+        
+        var isPlayerVeryHigh = GameManager.GetPlayer().transform.position.y > 10f;
+        if (isPlayerVeryHigh)
+            _cameraTarget = GameManager.GetPlayer().transform.position;
+        
+        if (_camera.transform.position.y < -10f)
+            ChangeZone();
 
         var floorScrollSpeed = GameManager.GlobalSpeed * speed;
         _enemyInstantiationReady = UpdateScrollingEnvironment(floorScrollSpeed, _floor, _floorPreviousPosition);
@@ -288,6 +307,39 @@ public class FloorManager : MonoBehaviour
                 cameraEndPosition.eulerAngles = new Vector3(0f, -5f, 0f);
                 break;
         }
+    }
+
+    private void ChangeZone()
+    {
+        _floor = new List<Transform>();
+        _floorPreviousPosition = new List<Vector3>();
+
+        var children = GetComponentsInChildren<Transform>();
+        foreach (var child in children)
+            if (child != transform)
+                Destroy(child.gameObject);
+
+        var typeEnumValues = Enum.GetValues(typeof(FloorData.Type));
+        _settings = new FloorGeneration.Settings[typeEnumValues.Length];
+        for (var i = 0; i < typeEnumValues.Length; i++)
+        {
+            var type = (FloorData.Type)typeEnumValues.GetValue(i);
+            _settings[i] = new FloorGeneration.Settings
+            {
+                type = type
+            };
+        }
+        
+        var zoneEnumValues = Enum.GetValues(typeof(FloorData.Zone));
+        var newZone = (FloorData.Zone)zoneEnumValues.GetValue(Random.Range(0, zoneEnumValues.Length));
+        while (_currentZone == newZone)
+            newZone = (FloorData.Zone)zoneEnumValues.GetValue(Random.Range(0, zoneEnumValues.Length));
+        
+        GameManager.GetPlayer().transform.position = new Vector3(GameManager.GetPlayer().transform.position.x, 30f, GameManager.GetPlayer().transform.position.z);
+        _camera.transform.position = GameManager.GetPlayer().transform.position;
+        _currentZone = newZone;
+        _prefabPreselection = FloorGeneration.Init(_settings);
+        InstantiateFloor(Vector3.forward * 30f);
     }
 
     private bool UpdateScrollingEnvironment(float elementSpeed, List<Transform> element, List<Vector3> elementPreviousPosition)

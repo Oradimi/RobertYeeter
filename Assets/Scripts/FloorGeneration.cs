@@ -71,6 +71,9 @@ public static class FloorGeneration
                     throw new ArgumentOutOfRangeException();
             }
             
+            if (GameManager.GetDistanceTraveled() > 1000f && Random.Range(0, 3) == 0)
+                selectedType |= FloorManager.FloorData.Type.Exit;
+            
             previousType = selectedType;
             tempSettings[(int)selectedType].count++;
 
@@ -81,6 +84,16 @@ public static class FloorGeneration
             {
                 if (floorData[j].type == selectedType && floorData[j].zone == currentZone)
                     typeIndices.Add(j);
+            }
+
+            if (typeIndices.Count <= 0 && selectedType.HasFlag(FloorManager.FloorData.Type.Exit))
+            {
+                selectedType |= FloorManager.FloorData.Type.Exit;
+                for (var j = 0; j < floorData.Length; j++)
+                {
+                    if (floorData[j].type == selectedType && floorData[j].zone == currentZone)
+                        typeIndices.Add(j);
+                }
             }
             
             if (typeIndices.Count <= 0)
