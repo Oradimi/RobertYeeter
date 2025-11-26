@@ -26,6 +26,7 @@ public class GameManager : MonoBehaviour
 
     private Vector3 _targetPosition;
     private float _effectTime;
+    private int _combo;
     private int _gain;
     private bool _isGameOver;
     
@@ -51,7 +52,12 @@ public class GameManager : MonoBehaviour
     
     private void OnEnable()
     {
-        SceneLabelOverlay.OnSetSpecialAttribute = LabelEffect;
+        SceneLabelOverlay.OnSetSpecialAttribute += GameManagerLabelEffect;
+    }
+    
+    private void OnDisable()
+    {
+        SceneLabelOverlay.OnSetSpecialAttribute -= GameManagerLabelEffect;
     }
 
     private void FixedUpdate()
@@ -71,8 +77,13 @@ public class GameManager : MonoBehaviour
 
     public static void AddScore(int score)
     {
-        _instance._gain = score;
-        _instance._score += score;
+        if (_instance._effectTime > 0f)
+            _instance._combo++;
+        else
+            _instance._combo = 1;
+        
+        _instance._gain = _instance._combo * score;
+        _instance._score += _instance._combo * score;
         _instance._effectTime = 2f;
     }
     
@@ -80,6 +91,11 @@ public class GameManager : MonoBehaviour
     {
         _instance._score = 0;
         _instance._distanceTraveled = 0;
+    }
+
+    public static int GetCombo()
+    {
+        return _instance._combo;
     }
 
     public static void GameOver(GameOverCase gameOverCase, Transform deathCause = null)
@@ -103,7 +119,7 @@ public class GameManager : MonoBehaviour
         return _instance.player;
     }
 
-    private static void LabelEffect(SceneLabelAttribute attr, SceneLabelOverlay.SceneLabelOverlayData data)
+    private static void GameManagerLabelEffect(SceneLabelAttribute attr, SceneLabelOverlay.SceneLabelOverlayData data)
     {
         var prefix = "";
         switch (attr.ID)
@@ -121,7 +137,8 @@ public class GameManager : MonoBehaviour
 
                 var fontSize = attr.FontSize * data.GameViewScale + _instance._effectTime * 8f * data.GameViewScale;
                 var gainFontSize = _instance._effectTime * attr.FontSize * 0.6 * data.GameViewScale;
-                var color = Color.Lerp(Color.white, Color.chocolate, _instance._effectTime);
+                var comboColor = Color.Lerp(Color.chocolate, Color.crimson, (_instance._combo - 1) / 3f);
+                var color = Color.Lerp(Color.white, comboColor, _instance._effectTime);
                 attr.FormatValue = $"<size={fontSize}>{_instance._score}</size><size={gainFontSize}>+{_instance._gain}</size>";
                 attr.RichValue = $"<color=#{color.ToHexString()}>{attr.FormatValue}</color>";
                 break;

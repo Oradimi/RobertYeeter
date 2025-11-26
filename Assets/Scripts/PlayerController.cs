@@ -32,6 +32,8 @@ public class PlayerController : MonoBehaviour
     
     private Vector3 _targetPosition;
     private Vector3 _chargePosition;
+    [SceneLabel(SceneLabelID.Cooldown)]
+    private float _chargeCooldown;
     
     private bool _isCharging;
     private bool _isJumping;
@@ -52,6 +54,7 @@ public class PlayerController : MonoBehaviour
 
     private void OnEnable()
     {
+        SceneLabelOverlay.OnSetSpecialAttribute += PlayerControllerLabelEffect;
         _animator.SetBool(WetBool, false);
         _controls.Enable();
         _controls.Player.Move.performed += OnMove;
@@ -62,6 +65,7 @@ public class PlayerController : MonoBehaviour
     private void OnDisable()
     {
         DisableActionMap();
+        SceneLabelOverlay.OnSetSpecialAttribute -= PlayerControllerLabelEffect;
     }
 
     private void FixedUpdate()
@@ -73,11 +77,15 @@ public class PlayerController : MonoBehaviour
         
         CheckForJumpPrompt();
         CheckCollision();
-        
+
         _chargePosition *= chargeBreak;
         _isCharging = _chargePosition.z < -0.2f;
         
+        if (FloorManager.IsGameOver())
+            return;
+        
         _jumpTime -= Time.fixedDeltaTime;
+        _chargeCooldown -= Time.fixedDeltaTime;
         _isJumping = _jumpTime > 0.4f;
         _isFalling = _jumpTime > 0f && !_isJumping;
     }
@@ -122,7 +130,7 @@ public class PlayerController : MonoBehaviour
     private void OnDrawGizmos()
     {
         Gizmos.color = _collision1 ? Color.red : Color.green;
-        Gizmos.DrawSphere(transform.position + new Vector3(0.4f * _direction, 0.5f, -0.5f), 0.3f);
+        Gizmos.DrawSphere(_targetPosition + new Vector3(0.4f * _direction, 0.5f, -0.5f), 0.3f);
         Gizmos.color = _collision2 ? Color.red : Color.green;
         Gizmos.DrawSphere(transform.position + Vector3.up * 0.1f, 0.2f);
         Gizmos.color = _collision3 ? Color.red : Color.green;
@@ -196,11 +204,12 @@ public class PlayerController : MonoBehaviour
         
         var input = ctx.ReadValue<Vector2>();
         _direction = Mathf.Round(-input.x);
-        _collision1 = Physics.CheckSphere(transform.position + new Vector3(0.4f * _direction, 0.5f, -0.5f), 0.3f,
+        _collision1 = Physics.CheckSphere(_targetPosition + new Vector3(0.4f * _direction, 0.5f, -0.5f), 0.3f,
             LayerMask.GetMask("Default"));
-        if (Physics.CheckSphere(transform.position + new Vector3(0.4f * _direction, 0.5f, -0.5f), 0.3f, LayerMask.GetMask("Default")))
+        if (Physics.CheckSphere(_targetPosition + new Vector3(0.4f * _direction, 0.5f, -0.5f), 0.3f, LayerMask.GetMask("Default")))
         {
-            _audioSource.PlayOneShot(cantMoveSound);
+            if (Physics.CheckSphere(transform.position + new Vector3(0.4f * _direction, 0.5f, -0.5f), 0.2f, LayerMask.GetMask("Default")))
+                _audioSource.PlayOneShot(cantMoveSound);
             return;
         }
         
@@ -216,18 +225,35 @@ public class PlayerController : MonoBehaviour
 
     private void OnCharge(InputAction.CallbackContext ctx)
     {
-        if (_isCharging)
+        if (_isCharging || _chargeCooldown > 0f)
+        {
+            _audioSource.PlayOneShot(cantMoveSound);
             return;
+        }
+        
+        _isCharging = true;
         _animator.SetTrigger(ChargeTrigger);
         _chargePosition = new Vector3(0, 0, -2);
+        _chargeCooldown = 2f;
     }
 
     private void OnJump(InputAction.CallbackContext ctx)
     {
         if (_isJumping || _isFalling)
+        {
+            _audioSource.PlayOneShot(cantMoveSound);
             return;
-        _isCharging = false;
+        }
+        
         _animator.SetTrigger(JumpTrigger);
         _jumpTime = 1f;
+    }
+
+    private void PlayerControllerLabelEffect(SceneLabelAttribute attr, SceneLabelOverlay.SceneLabelOverlayData data)
+    {
+        if (attr.ID != SceneLabelID.Cooldown)
+            return;
+        attr.Value = _chargeCooldown > 0 ? $"{_chargeCooldown:F2}" : "";
+        attr.RichValue = !_isCharging && _chargeCooldown > 0 ? $"<color=red>{_chargeCooldown:F2}</color>" : null;
     }
 }

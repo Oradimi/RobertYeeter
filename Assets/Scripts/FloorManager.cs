@@ -56,6 +56,7 @@ public class FloorManager : MonoBehaviour
     [ShowInInspector]
     private FloorData.Zone _currentZone;
     [SerializeField] private Transform robertPrefab;
+    [SerializeField] private Transform jeanPierrePrefab;
     [SerializeField] private float speed = 5f;
     
     [SerializeField] private Transform cameraStartPosition;
@@ -75,6 +76,8 @@ public class FloorManager : MonoBehaviour
     private List<Transform> _floor;
     private List<Vector3> _floorPreviousPosition;
     private float _totalInstantiatedFloors;
+    private bool _enemyInstantiationReady;
+    private FloorData _lastInstantiatedFloor;
     
     [SerializeField] private Font interFont;
     
@@ -138,6 +141,9 @@ public class FloorManager : MonoBehaviour
         if (_gameOver)
             return;
 
+        if (_enemyInstantiationReady)
+            InstantiateEnemies();
+
         var isPlayerHigh = GameManager.GetPlayer().transform.position.y > 1f;
         if (isPlayerHigh)
         {
@@ -151,20 +157,10 @@ public class FloorManager : MonoBehaviour
         }
 
         var floorScrollSpeed = GameManager.GlobalSpeed * speed;
-        if (UpdateScrollingEnvironment(floorScrollSpeed, _floor, _floorPreviousPosition))
-        {
-            for (var i = 0; i < 9; i++)
-            {
-                var randomX = Random.Range(-2, 2);
-                if (randomX >= 0)
-                    randomX++;
-                var randomPosition = new Vector3(randomX, 0f, _floor[^1].localPosition.z - (Random.Range(0, 7) + 9 * i));
-                Instantiate(robertPrefab, randomPosition, Quaternion.identity, _floor[^1]);
-            }
-        }
+        _enemyInstantiationReady = UpdateScrollingEnvironment(floorScrollSpeed, _floor, _floorPreviousPosition);
     }
 
-    private Transform InstantiateFloor(Vector3 position)
+    private FloorData InstantiateFloor(Vector3 position)
     {
         if (_prefabPreselection.Count < 1)
             _prefabPreselection = FloorGeneration.Init(_settings);
@@ -173,11 +169,91 @@ public class FloorManager : MonoBehaviour
         var floorRenderer = floor.GetComponent<Renderer>();
         UpdateFloorMaterialShift(floorRenderer);
         UpdateFloorTextures(floorRenderer);
+        var prefabData = floorData[_prefabPreselection[0]];
         _prefabPreselection.RemoveAt(0);
         _floor.Add(floor.transform);
         _floorPreviousPosition.Add(position);
         _totalInstantiatedFloors++;
-        return floor.transform;
+        return prefabData;
+    }
+
+    private void InstantiateEnemies()
+    {
+        _enemyInstantiationReady = false;
+        for (var i = 0; i < 25; i++)
+        {
+            var pattern = Random.Range(0, 6);
+            var randomX = 0;
+            var randomPosition = Vector3.zero;
+            var ray = new Ray();
+            var hit = new RaycastHit();
+            switch (pattern)
+            {
+                case 0:
+                    randomX = Random.Range(-3, 3);
+                    if (randomX >= 0)
+                        randomX++;
+                    randomPosition = new Vector3(randomX, 0f,
+                        _floor[^1].localPosition.z - (Random.Range(0, 7) + 3 * i));
+                    ray = new Ray(randomPosition + Vector3.up * 4f, Vector3.down);
+                    if (Physics.Raycast(ray, out hit))
+                    {
+                        randomPosition += Vector3.up * hit.point.y;
+                        Instantiate(robertPrefab, randomPosition, Quaternion.identity, _floor[^1]);
+                    }
+                    break;
+                case 1:
+                    for (var j = 0; j < 3; j++)
+                    {
+                        randomX = Random.Range(-3, 3);
+                        if (randomX >= 0)
+                            randomX++;
+                        randomPosition = new Vector3(randomX, 0f,
+                            _floor[^1].localPosition.z - (Random.Range(j * 3f, 3f + j * 3f) + 9 * i));
+                        ray = new Ray(randomPosition + Vector3.up * 4f, Vector3.down);
+                        if (Physics.Raycast(ray, out hit))
+                        {
+                            randomPosition += Vector3.up * hit.point.y;
+                            Instantiate(robertPrefab, randomPosition, Quaternion.identity, _floor[^1]);
+                        }
+                    }
+                    break;
+                case 2:
+                case 5:
+                    for (var j = 0; j < 3; j++)
+                    {
+                        randomX = Random.Range(-3, 3);
+                        if (randomX >= 0)
+                            randomX++;
+                        for (var k = 0; k < 3; k++)
+                        {
+                            randomPosition = new Vector3(randomX, 0f,
+                                _floor[^1].localPosition.z - (j * 3f + 9 * i) - k);
+                            ray = new Ray(randomPosition + Vector3.up * 4f, Vector3.down);
+                            if (Physics.Raycast(ray, out hit))
+                            {
+                                randomPosition += Vector3.up * hit.point.y;
+                                Instantiate(robertPrefab, randomPosition, Quaternion.identity, _floor[^1]);
+                            }
+                        }
+                    }
+                    break;
+                case 3:
+                case 4:
+                    randomX = Random.Range(-3, 3);
+                    if (randomX >= 0)
+                        randomX++;
+                    randomPosition = new Vector3(randomX, 0f,
+                        _floor[^1].localPosition.z - (Random.Range(0, 7) + 9 * i));
+                    ray = new Ray(randomPosition + Vector3.up * 4f, Vector3.down);
+                    if (Physics.Raycast(ray, out hit))
+                    {
+                        randomPosition += Vector3.up * hit.point.y;
+                        Instantiate(jeanPierrePrefab, randomPosition, Quaternion.identity, _floor[^1]);
+                    }
+                    break;
+            }
+        }
     }
 
     private void DestroyFirstFloor()
@@ -232,7 +308,7 @@ public class FloorManager : MonoBehaviour
         }
         
         if (elementToAdd)
-            InstantiateFloor(elementPreviousPosition[0] + Vector3.back * 84f);
+            _lastInstantiatedFloor = InstantiateFloor(elementPreviousPosition[0] + Vector3.back * 84f);
 
         if (elementToRemove)
             DestroyFirstFloor();

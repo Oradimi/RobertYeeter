@@ -7,4 +7,5 @@ public enum SceneLabelID
     Switch,
     Score,
     DistanceTraveled,
+    Cooldown,
 }
