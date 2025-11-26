@@ -6,4 +6,5 @@ public enum SceneLabelID
     Default,
     Switch,
     Score,
+    DistanceTraveled,
 }

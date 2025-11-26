@@ -40,7 +40,7 @@ public static class FloorGeneration
         var indexList = new List<int>();
         var previousType = FloorManager.FloorData.Type.Standard;
 
-        for (var i = 0; i < 5; i++)
+        for (var i = 0; i < 100; i++)
         {
             var selectedType = previousType;
             var randomChance = 0;

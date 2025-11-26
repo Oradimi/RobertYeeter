@@ -115,7 +115,7 @@ public class SceneLabelOverlay : MonoBehaviour
                 objectModeHeights.TryGetValue(_objectMap[kv.Key], out var offset);
                 position = new Vector2(screenPos.x, invertedY + offset);
 
-                var fontHeight = style.fontSize;
+                var fontHeight = style.fontSize * 3f;
                 if (!objectModeHeights.TryAdd(_objectMap[kv.Key], fontHeight))
                     objectModeHeights[_objectMap[kv.Key]] += fontHeight;
             }

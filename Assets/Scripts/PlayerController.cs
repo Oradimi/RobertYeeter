@@ -109,9 +109,9 @@ public class PlayerController : MonoBehaviour
             }
         }
         
-        _collision3 = Physics.CheckSphere(transform.position + new Vector3(0f, 0.9f, -0.5f), 0.2f,
+        _collision3 = Physics.CheckSphere(transform.position + new Vector3(0f, 1.05f, -0.4f), 0.1f,
             LayerMask.GetMask("Default"));
-        if (Physics.CheckSphere(transform.position + new Vector3(0f, 0.9f, -0.5f), 0.2f, LayerMask.GetMask("Default")))
+        if (Physics.CheckSphere(transform.position + new Vector3(0f, 1.05f, -0.4f), 0.1f, LayerMask.GetMask("Default")))
         {
             PlayPunchSound();
             SetCaught();
@@ -126,7 +126,7 @@ public class PlayerController : MonoBehaviour
         Gizmos.color = _collision2 ? Color.red : Color.green;
         Gizmos.DrawSphere(transform.position + Vector3.up * 0.1f, 0.2f);
         Gizmos.color = _collision3 ? Color.red : Color.green;
-        Gizmos.DrawSphere(transform.position + new Vector3(0f, 0.9f, -0.5f), 0.2f);
+        Gizmos.DrawSphere(transform.position + new Vector3(0f, 1.05f, -0.4f), 0.1f);
     }
 
     public void DisableActionMap()
@@ -152,7 +152,7 @@ public class PlayerController : MonoBehaviour
         _audioSource.PlayOneShot(punchSound);
     }
 
-    private float Speed()
+    public float Speed()
     {
         return speed * (GameManager.AffectsAnimations ? GameManager.GlobalSpeed : 1f);
     }

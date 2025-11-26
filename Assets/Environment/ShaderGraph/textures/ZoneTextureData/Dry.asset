@@ -14,5 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ZoneTextureData
   floorMain: {fileID: 2800000, guid: 3544e4298b1e8e14d8072da8c01b930b, type: 3}
   floorDetail: {fileID: 2800000, guid: c6ba4252ab2ca9245981852a2a44750a, type: 3}
-  wallMain: {fileID: 2800000, guid: 9e284a7b52929f5468003f0e1e78360e, type: 3}
-  wallDetail: {fileID: 2800000, guid: 3736476e25db4eb4d93afe7eab730167, type: 3}
+  wallMain: {fileID: 2800000, guid: 3736476e25db4eb4d93afe7eab730167, type: 3}
+  wallDetail: {fileID: 2800000, guid: 9e284a7b52929f5468003f0e1e78360e, type: 3}

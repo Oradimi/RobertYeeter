@@ -20,6 +20,9 @@ public class GameManager : MonoBehaviour
 
     [SceneLabel(SceneLabelID.Score)]
     private int _score;
+    
+    [SceneLabel(SceneLabelID.DistanceTraveled, suffix: "m", fontSize: 12)]
+    private float _distanceTraveled;
 
     private Vector3 _targetPosition;
     private float _effectTime;
@@ -48,14 +51,17 @@ public class GameManager : MonoBehaviour
     
     private void OnEnable()
     {
-        SceneLabelOverlay.OnSetSpecialAttribute = ScoreLabelEffect;
+        SceneLabelOverlay.OnSetSpecialAttribute = LabelEffect;
     }
 
-    private void Update()
+    private void FixedUpdate()
     {
-        _instance._effectTime -= Time.deltaTime;
+        _instance._effectTime -= Time.fixedDeltaTime;
         transform.position = Vector3.MoveTowards(transform.position, _targetPosition, 
             Time.fixedDeltaTime);
+        
+        if (FloorManager.GetStarted() && !_isGameOver)
+            _instance._distanceTraveled += GetPlayer().Speed() * Time.fixedDeltaTime;
     }
 
     public static void SetTargetPosition(Vector3 position)
@@ -73,6 +79,7 @@ public class GameManager : MonoBehaviour
     public static void ResetScore()
     {
         _instance._score = 0;
+        _instance._distanceTraveled = 0;
     }
 
     public static void GameOver(GameOverCase gameOverCase, Transform deathCause = null)
@@ -96,26 +103,32 @@ public class GameManager : MonoBehaviour
         return _instance.player;
     }
 
-    private static void ScoreLabelEffect(SceneLabelAttribute attr, SceneLabelOverlay.SceneLabelOverlayData data)
+    private static void LabelEffect(SceneLabelAttribute attr, SceneLabelOverlay.SceneLabelOverlayData data)
     {
-        if (attr.ID != SceneLabelID.Score)
-            return;
-
-        var prefix = FloorManager.GetStarted() ? "" : "Score: ";
-        
-        attr.Value = $"{prefix}{_instance._score}";
-        
-        if (_instance._effectTime <= 0f)
+        var prefix = "";
+        switch (attr.ID)
         {
-            attr.FormatValue = null;
-            attr.RichValue = null;
-            return;
-        }
+            case SceneLabelID.Score:
+                prefix = FloorManager.GetStarted() ? "" : "Score: ";
+                attr.Value = $"{prefix}{_instance._score}";
+        
+                if (_instance._effectTime <= 0f)
+                {
+                    attr.FormatValue = null;
+                    attr.RichValue = null;
+                    return;
+                }
 
-        var fontSize = attr.FontSize * data.GameViewScale + _instance._effectTime * 8f * data.GameViewScale;
-        var gainFontSize = _instance._effectTime * attr.FontSize * 0.6 * data.GameViewScale;
-        var color = Color.Lerp(Color.white, Color.chocolate, _instance._effectTime);
-        attr.FormatValue = $"<size={fontSize}>{_instance._score}</size><size={gainFontSize}>+{_instance._gain}</size>";
-        attr.RichValue = $"<color=#{color.ToHexString()}>{attr.FormatValue}</color>";
+                var fontSize = attr.FontSize * data.GameViewScale + _instance._effectTime * 8f * data.GameViewScale;
+                var gainFontSize = _instance._effectTime * attr.FontSize * 0.6 * data.GameViewScale;
+                var color = Color.Lerp(Color.white, Color.chocolate, _instance._effectTime);
+                attr.FormatValue = $"<size={fontSize}>{_instance._score}</size><size={gainFontSize}>+{_instance._gain}</size>";
+                attr.RichValue = $"<color=#{color.ToHexString()}>{attr.FormatValue}</color>";
+                break;
+            case SceneLabelID.DistanceTraveled:
+                prefix = FloorManager.GetStarted() ? "" : "Distance traveled: ";
+                attr.Value = $"{prefix}{_instance._distanceTraveled:F1}";
+                break;
+        }
     }
 }
