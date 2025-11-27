@@ -80,14 +80,14 @@ public class PlayerController : MonoBehaviour
         CheckForJumpPrompt();
         CheckCollision();
 
-        _chargePosition *= chargeBreak;
+        _chargePosition *= chargeBreak + (1f - chargeBreak) * (1f - GameManager.GlobalSpeed);
         _isCharging = _chargePosition.z < -0.2f;
         
         if (FloorManager.IsGameOver())
             return;
         
-        _jumpTime -= Time.fixedDeltaTime;
-        _chargeCooldown -= Time.fixedDeltaTime;
+        _jumpTime -= Time.fixedDeltaTime * GameManager.GlobalSpeed;
+        _chargeCooldown -= Time.fixedDeltaTime * GameManager.GlobalSpeed;
         _isJumping = _jumpTime > 0.4f;
         _isFalling = _jumpTime > 0f && !_isJumping;
 
@@ -104,8 +104,8 @@ public class PlayerController : MonoBehaviour
         if (_inWater || FloorManager.IsGameOver())
             return;
         
-        var ray = new Ray(transform.position + Vector3.up * 0.5f, Vector3.down);
-        Physics.Raycast(ray, out var hit, 0.7f, LayerMask.GetMask("Default"));
+        var ray = new Ray(transform.position + Vector3.up, Vector3.down);
+        Physics.Raycast(ray, out var hit, 1.2f, LayerMask.GetMask("Default"));
         if (_isJumping)
         {
             if (hit.collider && Mathf.Abs(hit.point.y - transform.position.y) < 0.2f)
@@ -245,7 +245,7 @@ public class PlayerController : MonoBehaviour
 
     private void OnCharge(InputAction.CallbackContext ctx)
     {
-        if (_isCharging || _chargeCooldown > 0f || _chargePosition.z > 0f)
+        if (_isCharging || _chargeCooldown > 0f || _chargePosition.z > 0.01f)
         {
             _audioSource.PlayOneShot(cantMoveSound);
             return;

@@ -8,11 +8,15 @@ using Random = UnityEngine.Random;
 public class FloorManager : MonoBehaviour
 {
     [Serializable]
+    [DeclareVerticalGroup("Prefabs")]
     [DeclareVerticalGroup("Data")]
     public class FloorData
     {
-        [Required]
+        [Required, HideLabel]
+        [Group("Prefabs")]
         public GameObject prefab;
+        [Group("Prefabs")]
+        public GameObject exitPrefab;
         [Group("Data")]
         public Type type;
         [Group("Data")]
@@ -80,6 +84,7 @@ public class FloorManager : MonoBehaviour
     private List<int> _prefabPreselection;
     private List<Transform> _floor;
     private List<Vector3> _floorPreviousPosition;
+    private int _levelCount;
     private float _totalInstantiatedFloors;
     private bool _enemyInstantiationReady;
     private FloorData _lastInstantiatedFloor;
@@ -116,6 +121,7 @@ public class FloorManager : MonoBehaviour
 
         _currentZone = startingZone;
         _prefabPreselection = FloorGeneration.Init();
+        _levelCount = 1;
         InstantiateFloor(Vector3.forward * 30f);
     }
     
@@ -169,15 +175,19 @@ public class FloorManager : MonoBehaviour
     private FloorData InstantiateFloor(Vector3 position)
     {
         if (_prefabPreselection.Count < 1)
-            _prefabPreselection = FloorGeneration.Init();
-        var floor = Instantiate(floorData[_prefabPreselection[0]].prefab, position, Quaternion.identity, transform);
-        floor.AddComponent<MeshCollider>();
-        var floorRenderer = floor.GetComponent<Renderer>();
-        UpdateFloorMaterialShift(floorRenderer);
-        UpdateFloorTextures(floorRenderer);
+            _prefabPreselection = FloorGeneration.Init(_lastInstantiatedFloor.type);
+        GameObject newFloor;
+        if (floorData[_prefabPreselection[0]].exitPrefab && GameManager.IsDistanceThresholdCrossed() && Random.Range(0, 2) == 0)
+            newFloor = Instantiate(floorData[_prefabPreselection[0]].exitPrefab, position, Quaternion.identity, transform);
+        else
+            newFloor = Instantiate(floorData[_prefabPreselection[0]].prefab, position, Quaternion.identity, transform);
+        newFloor.AddComponent<MeshCollider>();
+        var newFloorRenderer = newFloor.GetComponent<Renderer>();
+        UpdateFloorMaterialShift(newFloorRenderer);
+        UpdateFloorTextures(newFloorRenderer);
         var prefabData = floorData[_prefabPreselection[0]];
         _prefabPreselection.RemoveAt(0);
-        _floor.Add(floor.transform);
+        _floor.Add(newFloor.transform);
         _floorPreviousPosition.Add(position);
         _totalInstantiatedFloors++;
         return prefabData;
@@ -293,7 +303,7 @@ public class FloorManager : MonoBehaviour
                 _gameOver = true;
                 var playerPosition = GameManager.GetPlayer().transform.position;
                 var positionNoZ = new Vector3(playerPosition.x, playerPosition.y, 0f);
-                _cameraTarget = positionNoZ + new Vector3(0.3f, 1.5f, -2f);
+                _cameraTarget = positionNoZ + new Vector3(0.3f, 1.5f, -6f);
                 cameraEndPosition.eulerAngles = new Vector3(20f, -10f, 0f);
                 break;
             case GameManager.GameOverCase.Drowned:
@@ -323,6 +333,7 @@ public class FloorManager : MonoBehaviour
         _camera.transform.position = GameManager.GetPlayer().transform.position;
         _currentZone = newZone;
         _prefabPreselection = FloorGeneration.Init();
+        _levelCount++;
         InstantiateFloor(Vector3.forward * 30f);
     }
 
@@ -383,6 +394,11 @@ public class FloorManager : MonoBehaviour
     public static FloorData[] GetFloorData()
     {
         return _instance.floorData;
+    }
+
+    public static int GetLevelCount()
+    {
+        return _instance._levelCount;
     }
 
     private void UpdateCamera()

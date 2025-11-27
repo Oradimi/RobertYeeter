@@ -1626,6 +1626,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
   player: {fileID: 5866666021316399469}
+  nextLevelDistance: 1000
 --- !u!4 &347394190 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8083549426942088242, guid: 885f4d1c37a2c534ab604e77bbc253be, type: 3}
@@ -4954,7 +4955,7 @@ MonoBehaviour:
       - Value: 2
       - Value: 2
       - Value: 2
-      maxConnectionDistance: 0.15505591
+      maxConnectionDistance: 0.1550559
       userEdit: 0
     preBuildData:
       enabled: 0
@@ -6074,7 +6075,7 @@ MonoBehaviour:
       - Value: 2
       - Value: 2
       - Value: 2
-      maxConnectionDistance: 0.07610976
+      maxConnectionDistance: 0.07610975
       userEdit: 0
     preBuildData:
       enabled: 0
@@ -8734,34 +8735,28 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FloorManager
   floorData:
   - prefab: {fileID: 919132149155446097, guid: 376d6b8190d937845a144b6c4506b67c, type: 3}
+    exitPrefab: {fileID: 919132149155446097, guid: 65aa80e4a72596a40828b0f1604878f0, type: 3}
     type: 1
     zone: 0
   - prefab: {fileID: 919132149155446097, guid: 1b556453005945b4ba669f9685485f8e, type: 3}
+    exitPrefab: {fileID: 919132149155446097, guid: 8575c2153160e3c41b28e4acaf9e13ef, type: 3}
     type: 2
     zone: 0
   - prefab: {fileID: 919132149155446097, guid: faf35f6cb42f3b24e95a8f5e28fc9099, type: 3}
+    exitPrefab: {fileID: 0}
     type: 4
     zone: 0
-  - prefab: {fileID: 919132149155446097, guid: 8575c2153160e3c41b28e4acaf9e13ef, type: 3}
-    type: 10
-    zone: 0
-  - prefab: {fileID: 919132149155446097, guid: 65aa80e4a72596a40828b0f1604878f0, type: 3}
-    type: 9
-    zone: 0
   - prefab: {fileID: 919132149155446097, guid: ac4456f128d14624cb9a347803a62188, type: 3}
+    exitPrefab: {fileID: 919132149155446097, guid: 4beeb29b2b712814a8cd228cd39c4b3e, type: 3}
     type: 1
     zone: 1
   - prefab: {fileID: 919132149155446097, guid: 61c81343cdb708444850758ab56fc5f4, type: 3}
+    exitPrefab: {fileID: 919132149155446097, guid: 4697ed06b97995c43aecd5e7478ff9ca, type: 3}
     type: 2
     zone: 1
   - prefab: {fileID: 919132149155446097, guid: 035ad91b448d79e4aabec55acb899953, type: 3}
+    exitPrefab: {fileID: 0}
     type: 4
-    zone: 1
-  - prefab: {fileID: 919132149155446097, guid: 8575c2153160e3c41b28e4acaf9e13ef, type: 3}
-    type: 10
-    zone: 1
-  - prefab: {fileID: 919132149155446097, guid: 65aa80e4a72596a40828b0f1604878f0, type: 3}
-    type: 9
     zone: 1
   zoneTextures:
   - zone: 0
@@ -8772,6 +8767,7 @@ MonoBehaviour:
   robertPrefab: {fileID: 1989445490068115165, guid: 94e4789806b94cb45bea7c21c6b66e55, type: 3}
   jeanPierrePrefab: {fileID: 6585976117742946880, guid: 4f69f6673b88a4548869e586e4fa0762, type: 3}
   speed: 5
+  cameraSpeed: 10
   cameraStartPosition: {fileID: 1826279054}
   cameraEndPosition: {fileID: 1893753257}
   cameraHighPosition: {fileID: 195972493}

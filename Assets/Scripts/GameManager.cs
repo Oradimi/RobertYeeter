@@ -14,6 +14,7 @@ public class GameManager : MonoBehaviour
     public static bool AffectsAnimations;
     
     [SerializeField] private PlayerController player;
+    [SerializeField] private float nextLevelDistance;
     
     private static GameManager _instance;
     private static FloorManager _floorManager;
@@ -63,6 +64,7 @@ public class GameManager : MonoBehaviour
     private void FixedUpdate()
     {
         _instance._effectTime -= Time.fixedDeltaTime;
+        _instance._effectTime = Mathf.Max(_instance._effectTime, 0f);
         transform.position = Vector3.MoveTowards(transform.position, _targetPosition, 
             Time.fixedDeltaTime);
         
@@ -93,9 +95,9 @@ public class GameManager : MonoBehaviour
         _instance._distanceTraveled = 0;
     }
 
-    public static float GetDistanceTraveled()
+    public static bool IsDistanceThresholdCrossed()
     {
-        return _instance._distanceTraveled;
+        return _instance._distanceTraveled > _instance.nextLevelDistance * FloorManager.GetLevelCount();
     }
 
     public static void GameOver(GameOverCase gameOverCase, Transform deathCause = null)

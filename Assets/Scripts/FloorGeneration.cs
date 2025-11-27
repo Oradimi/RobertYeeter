@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using Unity.VisualScripting;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -28,10 +26,10 @@ public static class FloorGeneration
         }
     }
     
-    public static List<int> Init()
+    public static List<int> Init(FloorManager.FloorData.Type carryOver = FloorManager.FloorData.Type.Standard)
     {
         var indexList = new List<int>();
-        var previousType = FloorManager.FloorData.Type.Standard;
+        var previousType = carryOver;
 
         for (var i = 0; i < 100; i++)
         {
@@ -62,9 +60,6 @@ public static class FloorGeneration
                     selectedType = FloorManager.FloorData.Type.Narrow;
             }
             
-            if (GameManager.GetDistanceTraveled() > 1000f && Random.Range(0, 2) == 0)
-                selectedType |= FloorManager.FloorData.Type.Exit;
-            
             previousType = selectedType;
 
             var floorData = FloorManager.GetFloorData();
@@ -74,16 +69,6 @@ public static class FloorGeneration
             {
                 if (floorData[j].type == selectedType && floorData[j].zone == currentZone)
                     typeIndices.Add(j);
-            }
-
-            if (typeIndices.Count <= 0 && selectedType.HasFlag(FloorManager.FloorData.Type.Exit))
-            {
-                selectedType ^= FloorManager.FloorData.Type.Exit;
-                for (var j = 0; j < floorData.Length; j++)
-                {
-                    if (floorData[j].type == selectedType && floorData[j].zone == currentZone)
-                        typeIndices.Add(j);
-                }
             }
 
             if (typeIndices.Count <= 0)
