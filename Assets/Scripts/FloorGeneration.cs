@@ -94,9 +94,15 @@ public static class FloorGeneration
                         typeIndices.Add(j);
                 }
             }
-            
+
             if (typeIndices.Count <= 0)
+            {
                 Debug.LogWarning($"The zone {currentZone} has no prefab of type {selectedType}!");
+                if (indexList.Count <= 0)
+                    indexList.Add(0);
+                return indexList;
+            }
+                
             var selectedIndex = typeIndices[typeIndices.Count <= 0 ? 0 : Random.Range(0, typeIndices.Count)];
             indexList.Add(selectedIndex);
         }
