@@ -8781,6 +8781,10 @@ MonoBehaviour:
     exitPrefab: {fileID: 0}
     type: 3
     zone: 2
+  - prefab: {fileID: 919132149155446097, guid: 79b4e90d0d14dac40863e8eac25fb93c, type: 3}
+    exitPrefab: {fileID: 0}
+    type: 1
+    zone: 2
   settings:
   - type: 1
     possibleOutcomes:
