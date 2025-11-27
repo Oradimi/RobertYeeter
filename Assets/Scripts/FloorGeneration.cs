@@ -28,16 +28,8 @@ public static class FloorGeneration
         }
     }
     
-    public static List<int> Init(Settings[] settings)
+    public static List<int> Init()
     {
-        var generationCount = 0;
-        foreach (var setting in settings)
-            generationCount += setting.count;
-        
-        var tempSettings = new List<Settings>();
-        tempSettings = settings.ToList();
-        tempSettings.Sort(Settings.CompareByType);
-        
         var indexList = new List<int>();
         var previousType = FloorManager.FloorData.Type.Standard;
 
@@ -70,11 +62,10 @@ public static class FloorGeneration
                     selectedType = FloorManager.FloorData.Type.Narrow;
             }
             
-            if (GameManager.GetDistanceTraveled() > 1000f && Random.Range(0, 3) == 0)
+            if (GameManager.GetDistanceTraveled() > 1000f && Random.Range(0, 2) == 0)
                 selectedType |= FloorManager.FloorData.Type.Exit;
             
             previousType = selectedType;
-            // tempSettings[(int)selectedType].count++;
 
             var floorData = FloorManager.GetFloorData();
             var currentZone = FloorManager.GetCurrentZone();

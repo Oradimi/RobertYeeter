@@ -20,7 +20,7 @@ public class Robert : MonoBehaviour
         _animator.speed = GameManager.AffectsAnimations ? GameManager.GlobalSpeed : 1f;
         
         if (_yeeted)
-            transform.position = Vector3.MoveTowards(transform.position, _targetPosition, 10f * Time.deltaTime);
+            transform.position = Vector3.MoveTowards(transform.position, _targetPosition, 10f * Time.fixedDeltaTime);
         
         if (Physics.CheckSphere(transform.position, 0.5f, LayerMask.GetMask("Player")))
             PlayerTouched();

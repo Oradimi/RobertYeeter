@@ -34,6 +34,7 @@ public class PlayerController : MonoBehaviour
     private Vector3 _chargePosition;
     [SceneLabel(SceneLabelID.Cooldown)]
     private float _chargeCooldown;
+    private float _initialChargeBreak;
     
     private bool _isCharging;
     private bool _isJumping;
@@ -50,6 +51,7 @@ public class PlayerController : MonoBehaviour
         _controls = new PlayerControls();
         _targetPosition = Vector3.right;
         _chargePosition = Vector3.zero;
+        _initialChargeBreak = chargeBreak;
     }
 
     private void OnEnable()
@@ -89,13 +91,13 @@ public class PlayerController : MonoBehaviour
         _isJumping = _jumpTime > 0.4f;
         _isFalling = _jumpTime > 0f && !_isJumping;
 
-        if (Vector3.Distance(transform.position, _targetPosition) < 0.1f)
+        var positionNoZ = new Vector3(transform.position.x, transform.position.y, 0f);
+        if (Vector3.Distance(positionNoZ, _targetPosition) < 0.1f)
             _direction = 0f;
     }
 
     private bool _collision1 = false;
     private bool _collision2 = false;
-    private bool _collision3 = false;
     
     private void CheckCollision()
     {
@@ -117,24 +119,34 @@ public class PlayerController : MonoBehaviour
         {
             _targetPosition += Vector3.down * (Time.fixedDeltaTime * Speed());
         }
-        
-        if (Physics.CheckSphere(transform.position + new Vector3(0f, 1.05f, -0.4f), 0.1f, LayerMask.GetMask("Default")))
+
+        var frontCollider = transform.position + new Vector3(0f, 1.15f, -0.4f);
+        _collision1 = Physics.CheckSphere(frontCollider, 0.3f, LayerMask.GetMask("Default"));
+        if (Physics.CheckSphere(frontCollider, 0.3f, LayerMask.GetMask("Default")))
         {
+            _chargePosition = new Vector3(0f, 0f, Mathf.Max(_chargePosition.z, 0f));
+            _chargePosition += Vector3.forward * (FloorManager.GetFloorScrollSpeed() * Time.fixedDeltaTime);
+            chargeBreak = 1f;
+            if (_chargePosition.z < 2f)
+                return;
             PlayPunchSound();
             SetCaught();
             GameManager.GameOver(GameManager.GameOverCase.Caught);
+        }
+        else
+        {
+            chargeBreak = _initialChargeBreak;
         }
     }
 
     private void OnDrawGizmos()
     {
-        var roundedHeightTarget = new Vector3(DirectionCeil(transform.position.x) + _direction * 0.65f, Mathf.Max(transform.position.y, 0f), transform.position.z);
+        var roundedHeightTarget = transform.position + new Vector3(0f, 1.15f, -0.4f);
         Gizmos.color = _collision1 ? Color.red : Color.green;
         Gizmos.DrawSphere(roundedHeightTarget, 0.1f);
-        // Gizmos.color = _collision2 ? Color.red : Color.green;
-        // Gizmos.DrawSphere(transform.position + Vector3.up * 0.1f, 0.2f);
-        // Gizmos.color = _collision3 ? Color.red : Color.green;
-        // Gizmos.DrawSphere(transform.position + new Vector3(0f, 1.05f, -0.4f), 0.1f);
+        var awa = _targetPosition + new Vector3(0.4f * _direction, 0.5f, -0.1f);
+        Gizmos.color = _collision2 ? Color.red : Color.green;
+        Gizmos.DrawSphere(awa, 0.3f);
     }
 
     public void DisableActionMap()
@@ -178,7 +190,7 @@ public class PlayerController : MonoBehaviour
         
         GameManager.GlobalSpeed = 0.1f;
         GameManager.AffectsAnimations = true;
-        _promptTime -= Time.deltaTime;
+        _promptTime -= Time.fixedDeltaTime;
         _prompt = "Jump!";
         
         if (_promptTime < 0f || transform.position.y < -0.1f)
@@ -201,29 +213,39 @@ public class PlayerController : MonoBehaviour
             return;
         
         _direction = newDirection;
-        
-        if (Physics.CheckSphere(_targetPosition + new Vector3(0.4f * _direction, 0.5f, -0.5f), 0.3f, LayerMask.GetMask("Default")))
+
+        _collision2 = Physics.CheckSphere(CombinedTargetPositions() + new Vector3(0.4f * _direction, 0.5f, -0.1f), 0.3f,
+            LayerMask.GetMask("Default"));
+        if (Physics.CheckSphere(CombinedTargetPositions() + new Vector3(0.4f * _direction, 0.5f, -0.1f), 0.3f,
+                LayerMask.GetMask("Default")))
         {
-            if (Physics.CheckSphere(transform.position + new Vector3(0.4f * _direction, 0.5f, -0.5f), 0.2f, LayerMask.GetMask("Default")))
+            if (Physics.CheckSphere(transform.position + new Vector3(0.4f * _direction, 0.5f, -0.1f), 0.3f,
+                    LayerMask.GetMask("Default")))
                 _audioSource.PlayOneShot(cantMoveSound);
             return;
         }
         _targetPosition = new Vector3(Mathf.Clamp(_targetPosition.x + _direction, -3.0f, 3.0f), _targetPosition.y, _targetPosition.z);
     }
 
+    private Vector3 CombinedTargetPositions()
+    {
+        return _targetPosition + _chargePosition;
+    }
+
     private bool TargetingWater()
     {
         var roundedHeightTarget = new Vector3(DirectionCeil(transform.position.x) + _direction * 0.65f, Mathf.Max(transform.position.y, 0f), transform.position.z);
-        _collision1 = Physics.CheckSphere(roundedHeightTarget, 0.1f, LayerMask.GetMask("Default"));
         if (Physics.CheckSphere(roundedHeightTarget, 0.1f, LayerMask.GetMask("Default")))
             return false;
         var ray = new Ray(roundedHeightTarget, Vector3.down);
-        return Physics.Raycast(ray, out _, 0.5f, LayerMask.GetMask("Default"));
+        if (Physics.Raycast(ray, out var hit, 0.5f, LayerMask.GetMask("Default")))
+            return hit.normal == Vector3.up;
+        return false;
     }
 
     private void OnCharge(InputAction.CallbackContext ctx)
     {
-        if (_isCharging || _chargeCooldown > 0f)
+        if (_isCharging || _chargeCooldown > 0f || _chargePosition.z > 0f)
         {
             _audioSource.PlayOneShot(cantMoveSound);
             return;
@@ -231,7 +253,7 @@ public class PlayerController : MonoBehaviour
         
         _isCharging = true;
         _animator.SetTrigger(ChargeTrigger);
-        _chargePosition = new Vector3(0, 0, -2);
+        _chargePosition += new Vector3(0, 0, -2);
         _chargeCooldown = 2f;
     }
 
