@@ -1181,6 +1181,10 @@ PrefabInstance:
       value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 5866666021909216657, guid: 885f4d1c37a2c534ab604e77bbc253be, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5866666021909216657, guid: 885f4d1c37a2c534ab604e77bbc253be, type: 3}
       propertyPath: m_Controller
       value: 
       objectReference: {fileID: 9100000, guid: c8ea86bf09b41eb468fc0cfa708b72be, type: 2}
@@ -1938,7 +1942,7 @@ MonoBehaviour:
       teleportDistance: 0.5
       teleportRotation: 90
     tetherConstraint:
-      distanceCompression: 0.3
+      distanceCompression: 0
     distanceConstraint:
       stiffness:
         value: 1
@@ -1947,22 +1951,22 @@ MonoBehaviour:
           serializedVersion: 2
           m_Curve:
           - serializedVersion: 3
-            time: 0
-            value: 1
+            time: 0.9
+            value: 0
             inSlope: 0
-            outSlope: -0.5
-            tangentMode: 0
+            outSlope: 9.999998
+            tangentMode: 65
             weightedMode: 0
             inWeight: 0
             outWeight: 0
           - serializedVersion: 3
             time: 1
-            value: 0.5
-            inSlope: -0.5
-            outSlope: 0
-            tangentMode: 0
+            value: 1
+            inSlope: 9.999998
+            outSlope: 0.78867954
+            tangentMode: 5
             weightedMode: 0
-            inWeight: 0
+            inWeight: 0.09962404
             outWeight: 0
           m_PreInfinity: 2
           m_PostInfinity: 2
@@ -1980,17 +1984,17 @@ MonoBehaviour:
           - serializedVersion: 3
             time: 0
             value: 1
-            inSlope: -0.7955246
-            outSlope: -0.7955246
+            inSlope: -1
+            outSlope: -1
             tangentMode: 34
             weightedMode: 0
             inWeight: 0
             outWeight: 0.33333334
           - serializedVersion: 3
             time: 1
-            value: 0.2044754
-            inSlope: -0.7955246
-            outSlope: -0.7955246
+            value: 0
+            inSlope: -1
+            outSlope: -1
             tangentMode: 34
             weightedMode: 0
             inWeight: 0.33333334
@@ -1998,12 +2002,12 @@ MonoBehaviour:
           m_PreInfinity: 2
           m_PostInfinity: 2
           m_RotationOrder: 4
-      velocityAttenuation: 0
+      velocityAttenuation: 1
       gravityFalloff: 0
     angleLimitConstraint:
       useAngleLimit: 1
       limitAngle:
-        value: 180
+        value: 140
         useCurve: 1
         curve:
           serializedVersion: 2
@@ -2031,7 +2035,7 @@ MonoBehaviour:
           m_RotationOrder: 4
       stiffness: 1
     motionConstraint:
-      useMaxDistance: 1
+      useMaxDistance: 0
       maxDistance:
         value: 0.2
         useCurve: 0
@@ -2059,7 +2063,7 @@ MonoBehaviour:
           m_PreInfinity: 2
           m_PostInfinity: 2
           m_RotationOrder: 4
-      useBackstop: 0
+      useBackstop: 1
       backstopRadius: 10
       backstopDistance:
         value: 0
@@ -4955,7 +4959,7 @@ MonoBehaviour:
       - Value: 2
       - Value: 2
       - Value: 2
-      maxConnectionDistance: 0.15505591
+      maxConnectionDistance: 0.1550559
       userEdit: 0
     preBuildData:
       enabled: 0
@@ -6075,7 +6079,7 @@ MonoBehaviour:
       - Value: 2
       - Value: 2
       - Value: 2
-      maxConnectionDistance: 0.07610976
+      maxConnectionDistance: 0.07610975
       userEdit: 0
     preBuildData:
       enabled: 0
