@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60d1c64b579c4aac827754af14c593de, type: 3}
+  m_Name: Cold
+  m_EditorClassIdentifier: Assembly-CSharp::ZoneTextureData
+  floorMain: {fileID: 2800000, guid: 6ca024c8aff661d4e922a2f6f57b9292, type: 3}
+  floorDetail: {fileID: 2800000, guid: 4d82082f691a4fd4dae5dfe807ee7b55, type: 3}
+  wallMain: {fileID: 2800000, guid: baa15192c6383c94aad081923fb2c23b, type: 3}
+  wallDetail: {fileID: 2800000, guid: b898700814ef1654ab78d9b95790f4cc, type: 3}
+  ambientColor: {r: 0.03529412, g: 0.09803922, b: 0.34117648, a: 0}
+  fogColor: {r: 0.49411765, g: 0.4745098, b: 0.9372549, a: 1}

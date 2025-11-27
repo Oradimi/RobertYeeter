@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using TriInspector;
 using UnityEngine;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 using UnityEngine.SceneManagement;
 using Random = UnityEngine.Random;
 
@@ -35,6 +37,7 @@ public class FloorManager : MonoBehaviour
         {
             Lush,
             Dry,
+            Cold,
         }
     }
 
@@ -55,6 +58,7 @@ public class FloorManager : MonoBehaviour
     
     [SerializeField] private FloorData.Zone startingZone;
     [SerializeField, Min(1f)] private int exitSpawnWeight;
+    [SerializeField] private Volume volume;
     [SerializeField] private Transform robertPrefab;
     [SerializeField] private Transform jeanPierrePrefab;
     [SerializeField] private float speed = 5f;
@@ -76,6 +80,7 @@ public class FloorManager : MonoBehaviour
     [SerializeField] private Texture2D buttonHover;
     [SerializeField] private Font interFont;
 
+    private Vignette _vignette;
     private float _introTimer = 3f;
     private Camera _camera;
     private Vector3 _cameraTarget;
@@ -102,6 +107,8 @@ public class FloorManager : MonoBehaviour
         }
 
         _instance = this;
+        
+        volume.profile.TryGet(out _vignette);
         
         _camera = Camera.main;
         
@@ -319,6 +326,7 @@ public class FloorManager : MonoBehaviour
 
     private void ChangeZone()
     {
+        _levelCount++;
         _floor = new List<Transform>();
         _floorPreviousPosition = new List<Vector3>();
 
@@ -328,15 +336,11 @@ public class FloorManager : MonoBehaviour
                 Destroy(child.gameObject);
         
         var zoneEnumValues = Enum.GetValues(typeof(FloorData.Zone));
-        var newZone = (FloorData.Zone)zoneEnumValues.GetValue(Random.Range(0, zoneEnumValues.Length));
-        while (_currentZone == newZone)
-            newZone = (FloorData.Zone)zoneEnumValues.GetValue(Random.Range(0, zoneEnumValues.Length));
-        
+        var newZone = (FloorData.Zone)zoneEnumValues.GetValue((_levelCount - 1) % zoneEnumValues.Length);
         GameManager.GetPlayer().transform.position = new Vector3(GameManager.GetPlayer().transform.position.x, 30f, GameManager.GetPlayer().transform.position.z);
         _camera.transform.position = GameManager.GetPlayer().transform.position;
         _currentZone = newZone;
         _prefabPreselection = FloorGeneration.Run(settings);
-        _levelCount++;
         InstantiateFloor(Vector3.forward * 30f);
     }
 
@@ -375,16 +379,19 @@ public class FloorManager : MonoBehaviour
     private void UpdateFloorTextures(Renderer r)
     {
         var floorMaterial = r.material;
-        var currentZoneTextures = zoneTextures[0].textureData;
         foreach (var zoneTexturesSet in zoneTextures)
         {
-            if (zoneTexturesSet.zone != _currentZone || currentZoneTextures == zoneTexturesSet.textureData)
+            if (zoneTexturesSet.zone != _currentZone)
                 continue;
             
             floorMaterial.SetTexture(FloorMain, zoneTexturesSet.textureData.floorMain);
             floorMaterial.SetTexture(FloorDetail, zoneTexturesSet.textureData.floorDetail);
             floorMaterial.SetTexture(WallMain, zoneTexturesSet.textureData.wallMain);
             floorMaterial.SetTexture(WallDetail, zoneTexturesSet.textureData.wallDetail);
+            _vignette.color.Override(zoneTexturesSet.textureData.fogColor);
+            _camera.backgroundColor = zoneTexturesSet.textureData.fogColor;
+            RenderSettings.fogColor = zoneTexturesSet.textureData.fogColor;
+            RenderSettings.ambientLight = zoneTexturesSet.textureData.ambientColor;
             break;
         }
     }
