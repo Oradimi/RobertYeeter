@@ -89,7 +89,7 @@ public class PlayerController : MonoBehaviour
         _jumpTime -= Time.fixedDeltaTime * GameManager.GlobalSpeed;
         _chargeCooldown -= Time.fixedDeltaTime * GameManager.GlobalSpeed;
         _isJumping = _jumpTime > 0.4f;
-        _isFalling = _jumpTime > 0f && !_isJumping;
+        _isFalling = _jumpTime > 0.2f && !_isJumping;
 
         var positionNoZ = new Vector3(transform.position.x, transform.position.y, 0f);
         if (Vector3.Distance(positionNoZ, _targetPosition) < 0.1f)

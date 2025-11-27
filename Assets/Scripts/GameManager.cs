@@ -69,7 +69,7 @@ public class GameManager : MonoBehaviour
             Time.fixedDeltaTime);
         
         if (FloorManager.GetStarted() && !_isGameOver)
-            _instance._distanceTraveled += GetPlayer().Speed() * Time.fixedDeltaTime;
+            _instance._distanceTraveled += FloorManager.GetFloorScrollSpeed() * Time.fixedDeltaTime;
     }
 
     public static void SetTargetPosition(Vector3 position)

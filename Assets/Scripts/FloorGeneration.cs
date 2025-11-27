@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using TriInspector;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -8,25 +9,43 @@ public static class FloorGeneration
     [Serializable]
     public class Settings
     {
-        public FloorManager.FloorData.Type type;
-        public int count;
-
-        public static int CompareByType(Settings s1, Settings s2)
+        [Serializable]
+        [DeclareHorizontalGroup("Outcome")]
+        public class Outcome
         {
-            return s1.type.CompareTo(s2.type);
+            [Group("Outcome"), HideLabel]
+            public FloorManager.FloorData.Type type;
+            [Group("Outcome"), HideLabel, Unit("weight")]
+            public int weight;
+        }
+        
+        public FloorManager.FloorData.Type type;
+        [ListDrawerSettings(Draggable = true,
+            HideAddButton = false,
+            HideRemoveButton = false,
+            AlwaysExpanded = true)]
+        public Outcome[] possibleOutcomes;
+        private int _totalWeight;
+
+        public void ComputeTotalWeight()
+        {
+            foreach (var outcome in possibleOutcomes)
+                _totalWeight += outcome.weight;
         }
 
-        public Settings Clone()
+        public int GetTotalWeight()
         {
-            return new Settings()
-            {
-                type = this.type,
-                count = this.count,
-            };
+            return _totalWeight;
         }
     }
+
+    public static void Init(Settings[] settings)
+    {
+        foreach (var setting in settings)
+            setting.ComputeTotalWeight();
+    }
     
-    public static List<int> Init(FloorManager.FloorData.Type carryOver = FloorManager.FloorData.Type.Standard)
+    public static List<int> Run(Settings[] settings, FloorManager.FloorData.Type carryOver = FloorManager.FloorData.Type.Standard)
     {
         var indexList = new List<int>();
         var previousType = carryOver;
@@ -34,30 +53,22 @@ public static class FloorGeneration
         for (var i = 0; i < 100; i++)
         {
             var selectedType = previousType;
-            var randomChance = 0;
-            if (previousType.HasFlag(FloorManager.FloorData.Type.Standard))
+
+            foreach (var setting in settings)
             {
-                randomChance = Random.Range(0, 3);
-                if (randomChance == 0)
-                    selectedType = FloorManager.FloorData.Type.Standard;
-                else
-                    selectedType = FloorManager.FloorData.Type.Bridge;
-            }
-            else if (previousType.HasFlag(FloorManager.FloorData.Type.Narrow))
-            {
-                randomChance = Random.Range(0, 3);
-                if (randomChance == 0)
-                    selectedType = FloorManager.FloorData.Type.Narrow;
-                else
-                    selectedType = FloorManager.FloorData.Type.Standard;
-            }
-            else if (previousType.HasFlag(FloorManager.FloorData.Type.Bridge))
-            {
-                randomChance = Random.Range(0, 3);
-                if (randomChance == 0)
-                    selectedType = FloorManager.FloorData.Type.Standard;
-                else
-                    selectedType = FloorManager.FloorData.Type.Narrow;
+                if (setting.type != previousType)
+                    continue;
+                var randomValue = Random.Range(0, setting.GetTotalWeight());
+                var accumulatedWeight = 0;
+                foreach (var outcome in setting.possibleOutcomes)
+                {
+                    accumulatedWeight += outcome.weight;
+                    if (randomValue >= accumulatedWeight)
+                        continue;
+                    selectedType = outcome.type;
+                    break;
+                }
+                break;
             }
             
             previousType = selectedType;

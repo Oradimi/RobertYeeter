@@ -22,14 +22,13 @@ public class FloorManager : MonoBehaviour
         [Group("Data")]
         public Zone zone;
         
-        [Flags]
         public enum Type
         {
-            None = 0,
-            Standard = 1,
-            Narrow = 2,
-            Bridge = 4,
-            Exit = 8,
+            None,
+            Standard,
+            Narrow,
+            Bridge,
+            Exit,
         }
 
         public enum Zone
@@ -53,30 +52,34 @@ public class FloorManager : MonoBehaviour
     private static readonly int WallMain = Shader.PropertyToID("_WallMain");
     private static readonly int WallDetail = Shader.PropertyToID("_WallDetail");
     
-    [TableList(Draggable = true,
-        HideAddButton = false,
-        HideRemoveButton = false,
-        AlwaysExpanded = true)]
-    [SerializeField] private FloorData[] floorData;
-    [SerializeField] private ZoneTextures[] zoneTextures;
+    
     [SerializeField] private FloorData.Zone startingZone;
-    [ShowInInspector]
-    private FloorData.Zone _currentZone;
+    [SerializeField, Min(1f)] private int exitSpawnWeight;
     [SerializeField] private Transform robertPrefab;
     [SerializeField] private Transform jeanPierrePrefab;
     [SerializeField] private float speed = 5f;
     [SerializeField] private float cameraSpeed = 10f;
     
+    [TableList(Draggable = true,
+        HideAddButton = false,
+        HideRemoveButton = false,
+        AlwaysExpanded = false)]
+    [SerializeField] private FloorData[] floorData;
+    [SerializeField] private FloorGeneration.Settings[] settings;
+    [SerializeField] private ZoneTextures[] zoneTextures;
+    
     [SerializeField] private Transform cameraStartPosition;
     [SerializeField] private Transform cameraEndPosition;
     [SerializeField] private Transform cameraHighPosition;
+    
+    [SerializeField] private Texture2D button;
+    [SerializeField] private Texture2D buttonHover;
+    [SerializeField] private Font interFont;
 
     private float _introTimer = 3f;
     private Camera _camera;
     private Vector3 _cameraTarget;
     private float _cameraSpeedBoost;
-    [SerializeField] private Texture2D button;
-    [SerializeField] private Texture2D buttonHover;
     private bool _started;
     private bool _gameOver;
     
@@ -85,11 +88,10 @@ public class FloorManager : MonoBehaviour
     private List<Transform> _floor;
     private List<Vector3> _floorPreviousPosition;
     private int _levelCount;
+    private FloorData.Zone _currentZone;
     private float _totalInstantiatedFloors;
     private bool _enemyInstantiationReady;
     private FloorData _lastInstantiatedFloor;
-    
-    [SerializeField] private Font interFont;
     
     private void Awake()
     {
@@ -120,7 +122,8 @@ public class FloorManager : MonoBehaviour
                 Destroy(child.gameObject);
 
         _currentZone = startingZone;
-        _prefabPreselection = FloorGeneration.Init();
+        FloorGeneration.Init(settings);
+        _prefabPreselection = FloorGeneration.Run(settings);
         _levelCount = 1;
         InstantiateFloor(Vector3.forward * 30f);
     }
@@ -175,9 +178,9 @@ public class FloorManager : MonoBehaviour
     private FloorData InstantiateFloor(Vector3 position)
     {
         if (_prefabPreselection.Count < 1)
-            _prefabPreselection = FloorGeneration.Init(_lastInstantiatedFloor.type);
+            _prefabPreselection = FloorGeneration.Run(settings, _lastInstantiatedFloor.type);
         GameObject newFloor;
-        if (floorData[_prefabPreselection[0]].exitPrefab && GameManager.IsDistanceThresholdCrossed() && Random.Range(0, 2) == 0)
+        if (floorData[_prefabPreselection[0]].exitPrefab && GameManager.IsDistanceThresholdCrossed() && Random.Range(0, exitSpawnWeight) == 0)
             newFloor = Instantiate(floorData[_prefabPreselection[0]].exitPrefab, position, Quaternion.identity, transform);
         else
             newFloor = Instantiate(floorData[_prefabPreselection[0]].prefab, position, Quaternion.identity, transform);
@@ -332,7 +335,7 @@ public class FloorManager : MonoBehaviour
         GameManager.GetPlayer().transform.position = new Vector3(GameManager.GetPlayer().transform.position.x, 30f, GameManager.GetPlayer().transform.position.z);
         _camera.transform.position = GameManager.GetPlayer().transform.position;
         _currentZone = newZone;
-        _prefabPreselection = FloorGeneration.Init();
+        _prefabPreselection = FloorGeneration.Run(settings);
         _levelCount++;
         InstantiateFloor(Vector3.forward * 30f);
     }
