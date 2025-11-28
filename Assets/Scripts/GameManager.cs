@@ -12,6 +12,9 @@ public class GameManager : MonoBehaviour
     public static float GlobalSpeed;
     public static bool AffectsAnimations;
     
+    public static float GlobalSpeedStored;
+    public static bool AffectsAnimationsStored;
+    
     [SerializeField] private PlayerController player;
     [SerializeField] private float nextLevelDistance;
     
@@ -62,12 +65,14 @@ public class GameManager : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if (FloorManager.IsPaused() || _isGameOver)
+            return;
+        
         _instance._effectTime -= Time.fixedDeltaTime;
-        _instance._effectTime = Mathf.Max(_instance._effectTime, 0f);
         transform.position = Vector3.MoveTowards(transform.position, _targetPosition, 
             Time.fixedDeltaTime);
         
-        if (FloorManager.GetStarted() && !_isGameOver)
+        if (FloorManager.IsStarted())
             _instance._distanceTraveled += FloorManager.GetFloorScrollSpeed() * Time.fixedDeltaTime;
     }
 
@@ -101,7 +106,7 @@ public class GameManager : MonoBehaviour
 
     public static void GameOver(GameOverCase gameOverCase, Transform deathCause = null)
     {
-        if (_instance._score > 30)
+        if (_instance._score >= 30)
             UnlocksManager.Unlocked = true;
         
         if (_instance._isGameOver)
@@ -126,10 +131,10 @@ public class GameManager : MonoBehaviour
         switch (attr.ID)
         {
             case SceneLabelID.Score:
-                prefix = FloorManager.GetStarted() ? "" : "Score: ";
-                attr.Value = $"{prefix}{_instance._score}";
+                prefix = FloorManager.IsStarted() ? "" : "Score: ";
+                attr.Value = FloorManager.IsPaused() ? "Paused" : $"{prefix}{_instance._score}";
         
-                if (_instance._effectTime <= 0f)
+                if (_instance._effectTime <= 0f || FloorManager.IsPaused())
                 {
                     attr.FormatValue = null;
                     attr.RichValue = null;
@@ -144,8 +149,9 @@ public class GameManager : MonoBehaviour
                 attr.RichValue = $"<color=#{color.ToHexString()}>{attr.FormatValue}</color>";
                 break;
             case SceneLabelID.DistanceTraveled:
-                prefix = FloorManager.GetStarted() ? "" : "Distance traveled: ";
-                attr.Value = $"{prefix}{_instance._distanceTraveled:F1}";
+                prefix = FloorManager.IsStarted() ? "" : "Distance traveled: ";
+                attr.Value = FloorManager.IsPaused() ? "Escape key to resume" : $"{prefix}{_instance._distanceTraveled:F1}";
+                attr.Suffix = FloorManager.IsPaused() ? "" : "m";
                 break;
         }
     }

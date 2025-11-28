@@ -78,6 +78,7 @@ public class FloorManager : MonoBehaviour
     
     [SerializeField] private Texture2D button;
     [SerializeField] private Texture2D buttonHover;
+    [SerializeField] private Texture2D buttonDisabled;
     [SerializeField] private Font interFont;
 
     private Vignette _vignette;
@@ -87,6 +88,7 @@ public class FloorManager : MonoBehaviour
     private float _cameraSpeedBoost;
     private bool _started;
     private bool _gameOver;
+    private bool _paused;
     
     [ShowInInspector]
     private List<int> _prefabPreselection;
@@ -147,7 +149,7 @@ public class FloorManager : MonoBehaviour
         if (_introTimer < 0)
             UpdateCamera();
 
-        if (_gameOver)
+        if (_gameOver || _paused)
             return;
 
         if (_enemyInstantiationReady)
@@ -222,35 +224,33 @@ public class FloorManager : MonoBehaviour
                 case 1:
                 case 2:
                     EnemyGenerationPattern(Random.Range(-3, 4),
-                        _floor[^1].localPosition.z - (Random.Range(0, sectionLength) + section), (v) => {
+                        _floor[^1].localPosition.z - (Random.Range(0, sectionLength) + section), v => {
                             Instantiate(robertPrefab, v, Quaternion.identity, _floor[^1]);
                         });
                     break;
                 case 3:
-                case 6:
-                    for (var j = 0; j < sectionLength; j++)
+                    for (var j = 0; j < 2; j++)
                     {
                         EnemyGenerationPattern(Random.Range(-3, 4),
-                            _floor[^1].localPosition.z - (j + section), (v) => {
+                            _floor[^1].localPosition.z - (j + section), v => {
                                 Instantiate(robertPrefab, v, Quaternion.identity, _floor[^1]);
                             });
                     }
                     break;
                 case 4:
-                    var k = 0;
+                case 6:
                     for (var j = 0; j < sectionLength; j++)
                     {
                         EnemyGenerationPattern(Random.Range(-3, 4),
-                            _floor[^1].localPosition.z - (j + section), (v) => {
-                                Instantiate(robertPrefab, v + Vector3.back * k, Quaternion.identity, _floor[^1]);
-                                k++;
+                            _floor[^1].localPosition.z - (j + section), v => {
+                                Instantiate(robertPrefab, v, Quaternion.identity, _floor[^1]);
                             });
                     }
                     break;
                 case 5:
                 case 7:
                     EnemyGenerationPattern(Random.Range(-3, 4),
-                        _floor[^1].localPosition.z - (Random.Range(0, sectionLength) + section), (v) => {
+                        _floor[^1].localPosition.z - (Random.Range(0, sectionLength) + section), v => {
                             Instantiate(jeanPierrePrefab, v, Quaternion.identity, _floor[^1]);
                         });
                     break;
@@ -258,7 +258,7 @@ public class FloorManager : MonoBehaviour
                     for (var j = 0; j < sectionLength; j++)
                     {
                         EnemyGenerationPattern(Random.Range(-3, 4),
-                            _floor[^1].localPosition.z - (j + section), (v) =>
+                            _floor[^1].localPosition.z - (j + section), v =>
                             {
                                 Instantiate(j != sectionLength - 1 ? robertPrefab : jeanPierrePrefab, v, Quaternion.identity,
                                     _floor[^1]);
@@ -304,6 +304,7 @@ public class FloorManager : MonoBehaviour
 
     public void GameOver(GameManager.GameOverCase gameOverCase, Transform deathCause = null)
     {
+        GameManager.GetPlayer().DisableUIMap();
         switch (gameOverCase)
         {
             case GameManager.GameOverCase.Caught:
@@ -394,7 +395,7 @@ public class FloorManager : MonoBehaviour
         }
     }
 
-    public static bool GetStarted()
+    public static bool IsStarted()
     {
         return _instance._started;
     }
@@ -407,6 +408,30 @@ public class FloorManager : MonoBehaviour
     public static int GetLevelCount()
     {
         return _instance._levelCount;
+    }
+
+    public static bool IsPaused()
+    {
+        return _instance._paused;
+    }
+
+    public static void TogglePause()
+    {
+        _instance._paused = !_instance._paused;
+        if (_instance._paused)
+        {
+            GameManager.GetPlayer().DisableActionMap();
+            GameManager.GlobalSpeedStored = GameManager.GlobalSpeed;
+            GameManager.AffectsAnimationsStored = GameManager.AffectsAnimations;
+            GameManager.GlobalSpeed = 0f;
+            GameManager.AffectsAnimations = true;
+        }
+        else
+        {
+            GameManager.GetPlayer().EnableActionMap();
+            GameManager.GlobalSpeed = GameManager.GlobalSpeedStored;
+            GameManager.AffectsAnimations = GameManager.AffectsAnimationsStored;
+        }
     }
 
     private void UpdateCamera()
@@ -490,6 +515,16 @@ public class FloorManager : MonoBehaviour
         DrawScaledLabel(new Rect(position.x, position.y + 120, labelWidth + 200, labelHeight),
             "Meina needs to escape!\nRun into the miners named Robert.", styleLabels, 1f);
         
+        styleLabels.normal.textColor = Color.black;
+        styleLabels.hover.textColor = Color.black;
+        DrawScaledLabel(new Rect(position.x + shadowOffset + 500, position.y + shadowOffset + 120, labelWidth + 200, labelHeight),
+            "Escape to pause.\nLeft click to charge.\nSpace to Jump.", styleLabels, 0.5f);
+
+        styleLabels.normal.textColor = Color.white;
+        styleLabels.hover.textColor = Color.white;
+        DrawScaledLabel(new Rect(position.x + 500, position.y + 120, labelWidth + 200, labelHeight),
+            "Escape to pause.\nLeft click to charge.\nSpace to Jump.", styleLabels, 0.5f);
+        
         // Label shadow
         style.normal.textColor = Color.black;
         style.hover.textColor = Color.black;
@@ -519,6 +554,38 @@ public class FloorManager : MonoBehaviour
         style.hover.background = null;
         DrawScaledButton3(new Rect(position.x, position.y + 500, labelWidth + 300, labelHeight + 40f),
             UnlocksManager.GetNameDisplay() ? "Disable Enemy Names" : "Enable Enemy Names", style, 0.5f, true);
+        
+        // Label shadow
+        style.normal.textColor = Color.black;
+        style.hover.textColor = Color.black;
+        style.normal.background = UnlocksManager.audioSource.mute ? buttonDisabled : button;
+        style.hover.background = UnlocksManager.audioSource.mute ? buttonDisabled : button;
+        DrawScaledToggle(new Rect(position.x + shadowOffset + 500, position.y + shadowOffset + 500, labelWidth, labelHeight + 40f),
+            "Music", style, 0.5f, true);
+
+        // Label
+        style.normal.textColor = Color.white;
+        style.hover.textColor = Color.white;
+        style.normal.background = null;
+        style.hover.background = null;
+        DrawScaledToggle(new Rect(position.x + 500, position.y + 500, labelWidth, labelHeight + 40f),
+            "Music", style, 0.5f, true);
+        
+        // Label shadow
+        style.normal.textColor = Color.black;
+        style.hover.textColor = Color.black;
+        style.normal.background = GameManager.GetPlayer().IsMuteSoundEffects() ? buttonDisabled : button;
+        style.hover.background = GameManager.GetPlayer().IsMuteSoundEffects() ? buttonDisabled : button;
+        DrawScaledToggle(new Rect(position.x + shadowOffset + 700, position.y + shadowOffset + 500, labelWidth, labelHeight + 40f),
+            "Sounds", style, 0.5f, false);
+
+        // Label
+        style.normal.textColor = Color.white;
+        style.hover.textColor = Color.white;
+        style.normal.background = null;
+        style.hover.background = null;
+        DrawScaledToggle(new Rect(position.x + 700, position.y + 500, labelWidth, labelHeight + 40f),
+            "Sounds", style, 0.5f, false);
 
         if (UnlocksManager.Unlocked)
         {
@@ -564,6 +631,7 @@ public class FloorManager : MonoBehaviour
         {
             if (!_gameOver)
             {
+                GameManager.GetPlayer().EnableUIMap();
                 if (!UnlocksManager.audioSource.isPlaying)
                     UnlocksManager.audioSource.Play();
             }
@@ -609,6 +677,20 @@ public class FloorManager : MonoBehaviour
         var matrixBackup = GUI.matrix;
         GUIUtility.ScaleAroundPivot(Vector2.one * scale, rect.position);
         GUI.Label(rect, text, style);
+        GUI.matrix = matrixBackup;
+    }
+    
+    private void DrawScaledToggle(Rect rect, string text, GUIStyle style, float scale, bool what)
+    {
+        var matrixBackup = GUI.matrix;
+        GUIUtility.ScaleAroundPivot(Vector2.one * scale, rect.position);
+        if (GUI.Button(rect, text, style))
+        {
+            if (what)
+                UnlocksManager.audioSource.mute ^= true;
+            else
+                GameManager.GetPlayer().ToggleMuteSoundEffects();
+        }
         GUI.matrix = matrixBackup;
     }
 }

@@ -54,23 +54,29 @@ public class PlayerController : MonoBehaviour
 
     private void OnEnable()
     {
+        _audioSource.mute = UnlocksManager.soundEffectsMute;
         SceneLabelOverlay.OnSetSpecialAttribute += PlayerControllerLabelEffect;
         _animator.SetBool(WetBool, false);
         _controls.Enable();
-        _controls.Player.Move.performed += OnMove;
-        _controls.Player.Attack.performed += OnCharge;
-        _controls.Player.Jump.performed += OnJump;
+        EnableActionMap();
+        _controls.UI.Fullscreen.performed += OnFullscreen;
     }
 
     private void OnDisable()
     {
         DisableActionMap();
+        DisableUIMap();
+        _controls.UI.Fullscreen.performed -= OnFullscreen;
+        _controls.Disable();
         SceneLabelOverlay.OnSetSpecialAttribute -= PlayerControllerLabelEffect;
     }
 
     private void FixedUpdate()
     {
         _animator.speed = GameManager.AffectsAnimations ? GameManager.GlobalSpeed : 1f;
+
+        if (FloorManager.IsPaused())
+            return;
 
         transform.position = Vector3.MoveTowards(transform.position, _targetPosition + _chargePosition, 
             Speed() * Time.fixedDeltaTime);
@@ -147,12 +153,28 @@ public class PlayerController : MonoBehaviour
         Gizmos.DrawSphere(awa, 0.3f);
     }
 
+    public void EnableActionMap()
+    {
+        _controls.Player.Move.performed += OnMove;
+        _controls.Player.Attack.performed += OnCharge;
+        _controls.Player.Jump.performed += OnJump;
+    }
+
+    public void EnableUIMap()
+    {
+        _controls.UI.Pause.performed += OnPause;
+    }
+
     public void DisableActionMap()
     {
         _controls.Player.Move.performed -= OnMove;
         _controls.Player.Attack.performed -= OnCharge;
         _controls.Player.Jump.performed -= OnJump;
-        _controls.Disable();
+    }
+
+    public void DisableUIMap()
+    {
+        _controls.UI.Pause.performed -= OnPause;
     }
 
     public bool IsCharging()
@@ -267,6 +289,16 @@ public class PlayerController : MonoBehaviour
         _jumpTime = 1f;
     }
 
+    private void OnPause(InputAction.CallbackContext ctx)
+    {
+        FloorManager.TogglePause();
+    }
+
+    private void OnFullscreen(InputAction.CallbackContext ctx)
+    {
+        Screen.fullScreen = !Screen.fullScreen;
+    }
+
     private void PlayerControllerLabelEffect(SceneLabelAttribute attr, SceneLabelOverlay.SceneLabelOverlayData data)
     {
         if (attr.ID != SceneLabelID.Cooldown)
@@ -278,5 +310,16 @@ public class PlayerController : MonoBehaviour
     private float DirectionCeil(float value)
     {
         return _direction > 0 ? Mathf.Floor(value) : Mathf.Ceil(value);
+    }
+
+    public void ToggleMuteSoundEffects()
+    {
+        UnlocksManager.soundEffectsMute ^= true;
+        _audioSource.mute ^= true;
+    }
+
+    public bool IsMuteSoundEffects()
+    {
+        return _audioSource.mute;
     }
 }

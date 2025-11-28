@@ -15,6 +15,7 @@ public class UnlocksManager : MonoBehaviour
     private bool _nameDisplay;
     
     public static AudioSource audioSource;
+    public static bool soundEffectsMute;
     
     private void Awake()
     {

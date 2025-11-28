@@ -8820,6 +8820,7 @@ MonoBehaviour:
   cameraHighPosition: {fileID: 195972493}
   button: {fileID: 2800000, guid: b10308105d82b8a4a9ac94d2f400461e, type: 3}
   buttonHover: {fileID: 2800000, guid: 3fa9b3b1ac24d604e9b1cf90a3da05bd, type: 3}
+  buttonDisabled: {fileID: 2800000, guid: 2fab3416ac2875d41ad930a720bbf34c, type: 3}
   interFont: {fileID: 12800000, guid: 4c83786b872c078498f294511280bfe2, type: 3}
 --- !u!1 &1628515402 stripped
 GameObject:
