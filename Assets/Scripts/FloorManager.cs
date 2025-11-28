@@ -206,8 +206,13 @@ public class FloorManager : MonoBehaviour
     private void InstantiateEnemies()
     {
         _enemyInstantiationReady = false;
-        for (var i = 0; i < 17 + 4 * _levelCount; i++)
+        var chunk = 17f + 4f * _levelCount;
+        var chunkInt = Mathf.FloorToInt(chunk);
+        const float corridorLength = 84f;
+        var sectionLength = corridorLength / chunk;
+        for (var i = 0; i < chunkInt; i++)
         {
+            var section = Mathf.FloorToInt(i * sectionLength);
             var pattern = Random.Range(0, 5 + _levelCount);
             switch (pattern)
             {
@@ -215,26 +220,26 @@ public class FloorManager : MonoBehaviour
                 case 1:
                 case 2:
                     EnemyGenerationPattern(Random.Range(-3, 4),
-                        _floor[^1].localPosition.z - (Random.Range(0, 7) + 3 * i), (v) => {
+                        _floor[^1].localPosition.z - (Random.Range(0, sectionLength) + section), (v) => {
                             Instantiate(robertPrefab, v, Quaternion.identity, _floor[^1]);
                         });
                     break;
                 case 3:
                 case 6:
-                    for (var j = 0; j < 3; j++)
+                    for (var j = 0; j < sectionLength; j++)
                     {
                         EnemyGenerationPattern(Random.Range(-3, 4),
-                            _floor[^1].localPosition.z - (Random.Range(j * 3, j * 3 + 3) + 9 * i), (v) => {
+                            _floor[^1].localPosition.z - (j + section), (v) => {
                                 Instantiate(robertPrefab, v, Quaternion.identity, _floor[^1]);
                             });
                     }
                     break;
                 case 4:
                     var k = 0;
-                    for (var j = 0; j < 3; j++)
+                    for (var j = 0; j < sectionLength; j++)
                     {
                         EnemyGenerationPattern(Random.Range(-3, 4),
-                            _floor[^1].localPosition.z - (Random.Range(j * 3, j * 3 + 3) + 9 * i), (v) => {
+                            _floor[^1].localPosition.z - (j + section), (v) => {
                                 Instantiate(robertPrefab, v + Vector3.back * k, Quaternion.identity, _floor[^1]);
                                 k++;
                             });
@@ -243,17 +248,17 @@ public class FloorManager : MonoBehaviour
                 case 5:
                 case 7:
                     EnemyGenerationPattern(Random.Range(-3, 4),
-                        _floor[^1].localPosition.z - (Random.Range(0, 7) + 6 * i), (v) => {
+                        _floor[^1].localPosition.z - (Random.Range(0, sectionLength) + section), (v) => {
                             Instantiate(jeanPierrePrefab, v, Quaternion.identity, _floor[^1]);
                         });
                     break;
                 case 8:
-                    for (var j = 0; j < 4; j++)
+                    for (var j = 0; j < sectionLength; j++)
                     {
                         EnemyGenerationPattern(Random.Range(-3, 4),
-                            _floor[^1].localPosition.z - (Random.Range(j * 2, j * 2 + 2) + 6 * i), (v) =>
+                            _floor[^1].localPosition.z - (j + section), (v) =>
                             {
-                                Instantiate(j != 3 ? robertPrefab : jeanPierrePrefab, v, Quaternion.identity,
+                                Instantiate(j != sectionLength - 1 ? robertPrefab : jeanPierrePrefab, v, Quaternion.identity,
                                     _floor[^1]);
                             });
                     }
