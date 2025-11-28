@@ -12,6 +12,7 @@ public class UnlocksManager : MonoBehaviour
 
     private bool _clothes;
     private bool _hair;
+    private bool _nameDisplay;
     
     public static AudioSource audioSource;
     
@@ -31,35 +32,19 @@ public class UnlocksManager : MonoBehaviour
 
     public static void ChangeClothes()
     {
-        if (!_instance.baseSkin || !_instance.baseHair || !_instance.yukataSkin || !_instance.yukataSkin)
-        {
-            var objects = GameManager.GetPlayer().GetComponentsInChildren<Transform>(true);
-            foreach (var obj in objects)
-            {
-                switch (obj.name)
-                {
-                    case "Clothes_base":
-                        _instance.baseSkin = obj.gameObject;
-                        break;
-                    case "Clothes_yukata":
-                        _instance.yukataSkin = obj.gameObject;
-                        break;
-                    case "Hair_base":
-                        _instance.baseHair = obj.gameObject;
-                        break;
-                    case "Hair_bun":
-                        _instance.yukataHair = obj.gameObject;
-                        break;
-                }
-            }
-        }
-        
         _instance._clothes ^= true;
         _instance.baseSkin.SetActive(!_instance._clothes);
         _instance.yukataSkin.SetActive(_instance._clothes);
     }
-
+    
     public static void ChangeHair()
+    {
+        _instance._hair ^= true;
+        _instance.baseHair.SetActive(!_instance._hair);
+        _instance.yukataHair.SetActive(_instance._hair);
+    }
+
+    public static void InitAndApplyClothesAndHair()
     {
         if (!_instance.baseSkin || !_instance.baseHair || !_instance.yukataSkin || !_instance.yukataSkin)
         {
@@ -84,8 +69,28 @@ public class UnlocksManager : MonoBehaviour
             }
         }
         
-        _instance._hair ^= true;
+        _instance.baseSkin.SetActive(!_instance._clothes);
+        _instance.yukataSkin.SetActive(_instance._clothes);
         _instance.baseHair.SetActive(!_instance._hair);
         _instance.yukataHair.SetActive(_instance._hair);
+    }
+
+    public static void ToggleNameDisplay()
+    {
+        _instance._nameDisplay ^= true;
+    }
+
+    public static void NameDisplay(SceneLabelAttribute attr, SceneLabelOverlay.SceneLabelOverlayData data)
+    {
+        if (attr.ID != SceneLabelID.EnemyName)
+            return;
+        
+        if (!_instance._nameDisplay)
+            attr.Value = "";
+    }
+
+    public static bool GetNameDisplay()
+    {
+        return _instance._nameDisplay;
     }
 }

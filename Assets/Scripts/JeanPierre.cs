@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class JeanPierre : MonoBehaviour
 {
-    [SceneLabel(r: 1, g: 0, b: 0)]
+    [SceneLabel(SceneLabelID.EnemyName, r: 1, g: 0, b: 0)]
     [SerializeField] private string robertName = "Jean-Pierre";
     
     private Animator _animator;

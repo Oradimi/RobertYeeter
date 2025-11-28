@@ -108,6 +108,8 @@ public class FloorManager : MonoBehaviour
 
         _instance = this;
         
+        UnlocksManager.InitAndApplyClothesAndHair();
+        
         volume.profile.TryGet(out _vignette);
         
         _camera = Camera.main;
@@ -480,16 +482,17 @@ public class FloorManager : MonoBehaviour
         
         styleLabels.normal.textColor = Color.black;
         styleLabels.hover.textColor = Color.black;
-        DrawScaledLabel(new Rect(position.x + shadowOffset, position.y + shadowOffset + 120, labelWidth, labelHeight),
+        DrawScaledLabel(new Rect(position.x + shadowOffset, position.y + shadowOffset + 120, labelWidth + 200, labelHeight),
             "Meina needs to escape!\nRun into the miners named Robert.", styleLabels, 1f);
 
         styleLabels.normal.textColor = Color.white;
         styleLabels.hover.textColor = Color.white;
-        DrawScaledLabel(new Rect(position.x, position.y + 120, labelWidth, labelHeight),
+        DrawScaledLabel(new Rect(position.x, position.y + 120, labelWidth + 200, labelHeight),
             "Meina needs to escape!\nRun into the miners named Robert.", styleLabels, 1f);
         
         // Label shadow
         style.normal.textColor = Color.black;
+        style.hover.textColor = Color.black;
         DrawScaledButton(new Rect(position.x + shadowOffset, position.y + shadowOffset, labelWidth - 80f, labelHeight - 40f),
             _gameOver ? "Restart" : "Start", style, 1f);
 
@@ -500,14 +503,31 @@ public class FloorManager : MonoBehaviour
         style.hover.background = null;
         DrawScaledButton(new Rect(position.x, position.y, labelWidth - 80f, labelHeight - 40f),
             _gameOver ? "Restart" : "Start", style, 1f);
+        
+        // Label shadow
+        style.normal.textColor = Color.black;
+        style.hover.textColor = Color.black;
+        style.normal.background = button;
+        style.hover.background = buttonHover;
+        DrawScaledButton3(new Rect(position.x + shadowOffset, position.y + shadowOffset + 500, labelWidth + 300, labelHeight + 40f),
+            UnlocksManager.GetNameDisplay() ? "Disable Enemy Names" : "Enable Enemy Names", style, 0.5f, true);
+
+        // Label
+        style.normal.textColor = Color.white;
+        style.hover.textColor = Color.white;
+        style.normal.background = null;
+        style.hover.background = null;
+        DrawScaledButton3(new Rect(position.x, position.y + 500, labelWidth + 300, labelHeight + 40f),
+            UnlocksManager.GetNameDisplay() ? "Disable Enemy Names" : "Enable Enemy Names", style, 0.5f, true);
 
         if (UnlocksManager.Unlocked)
         {
             // Label shadow
             style.normal.textColor = Color.black;
+            style.hover.textColor = Color.black;
             style.normal.background = button;
             style.hover.background = buttonHover;
-            DrawScaledButton2(new Rect(position.x + shadowOffset, position.y + shadowOffset + 300, labelWidth - 120f, labelHeight + 40f),
+            DrawScaledButton2(new Rect(position.x + shadowOffset, position.y + shadowOffset + 300, labelWidth, labelHeight + 40f),
                 "Change Clothes", style, 0.5f, true);
 
             // Label
@@ -515,14 +535,15 @@ public class FloorManager : MonoBehaviour
             style.hover.textColor = Color.white;
             style.normal.background = null;
             style.hover.background = null;
-            DrawScaledButton2(new Rect(position.x, position.y + 300, labelWidth - 80f, labelHeight + 40f),
+            DrawScaledButton2(new Rect(position.x, position.y + 300, labelWidth, labelHeight + 40f),
                 "Change Clothes", style, 0.5f, true);
         
             // Label shadow
             style.normal.textColor = Color.black;
+            style.hover.textColor = Color.black;
             style.normal.background = button;
             style.hover.background = buttonHover;
-            DrawScaledButton2(new Rect(position.x + shadowOffset + 400, position.y + shadowOffset + 300, labelWidth - 120f, labelHeight + 40f),
+            DrawScaledButton2(new Rect(position.x + shadowOffset + 400, position.y + shadowOffset + 300, labelWidth, labelHeight + 40f),
                 "Change Hair", style, 0.5f, false);
 
             // Label
@@ -530,7 +551,7 @@ public class FloorManager : MonoBehaviour
             style.hover.textColor = Color.white;
             style.normal.background = null;
             style.hover.background = null;
-            DrawScaledButton2(new Rect(position.x + 400, position.y + 300, labelWidth - 80f, labelHeight + 40f),
+            DrawScaledButton2(new Rect(position.x + 400, position.y + 300, labelWidth, labelHeight + 40f),
                 "Change Hair", style, 0.5f, false);
         }
     }
@@ -568,6 +589,17 @@ public class FloorManager : MonoBehaviour
                 UnlocksManager.ChangeClothes();
             else
                 UnlocksManager.ChangeHair();
+        }
+        GUI.matrix = matrixBackup;
+    }
+    
+    private void DrawScaledButton3(Rect rect, string text, GUIStyle style, float scale, bool what)
+    {
+        var matrixBackup = GUI.matrix;
+        GUIUtility.ScaleAroundPivot(Vector2.one * scale, rect.position);
+        if (GUI.Button(rect, text, style))
+        {
+            UnlocksManager.ToggleNameDisplay();
         }
         GUI.matrix = matrixBackup;
     }

@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class Robert : MonoBehaviour
 {
-    [SceneLabel]
+    [SceneLabel(SceneLabelID.EnemyName)]
     [SerializeField] private string robertName = "Robert";
     
     private Animator _animator;
@@ -13,6 +13,16 @@ public class Robert : MonoBehaviour
     private void Awake()
     {
         _animator = GetComponent<Animator>();
+    }
+
+    private void OnEnable()
+    {
+        SceneLabelOverlay.OnSetSpecialAttribute += UnlocksManager.NameDisplay;
+    }
+    
+    private void OnDisable()
+    {
+        SceneLabelOverlay.OnSetSpecialAttribute -= UnlocksManager.NameDisplay;
     }
 
     private void FixedUpdate()

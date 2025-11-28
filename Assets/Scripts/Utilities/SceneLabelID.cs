@@ -8,4 +8,5 @@ public enum SceneLabelID
     Score,
     DistanceTraveled,
     Cooldown,
+    EnemyName,
 }
