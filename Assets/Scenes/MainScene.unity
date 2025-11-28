@@ -4959,7 +4959,7 @@ MonoBehaviour:
       - Value: 2
       - Value: 2
       - Value: 2
-      maxConnectionDistance: 0.1550559
+      maxConnectionDistance: 0.15505591
       userEdit: 0
     preBuildData:
       enabled: 0
@@ -6079,7 +6079,7 @@ MonoBehaviour:
       - Value: 2
       - Value: 2
       - Value: 2
-      maxConnectionDistance: 0.07610975
+      maxConnectionDistance: 0.07610976
       userEdit: 0
     preBuildData:
       enabled: 0
