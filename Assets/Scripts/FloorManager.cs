@@ -206,80 +206,70 @@ public class FloorManager : MonoBehaviour
     private void InstantiateEnemies()
     {
         _enemyInstantiationReady = false;
-        for (var i = 0; i < 25; i++)
+        for (var i = 0; i < 17 + 4 * _levelCount; i++)
         {
-            int randomX;
-            Vector3 randomPosition;
-            Ray ray;
-            RaycastHit hit;
-            
-            var pattern = Random.Range(0, 6);
+            var pattern = Random.Range(0, 5 + _levelCount);
             switch (pattern)
             {
                 case 0:
-                    randomX = Random.Range(-3, 3);
-                    if (randomX >= 0)
-                        randomX++;
-                    randomPosition = new Vector3(randomX, 0f,
-                        _floor[^1].localPosition.z - (Random.Range(0, 7) + 3 * i));
-                    ray = new Ray(randomPosition + Vector3.up * 4f, Vector3.down);
-                    if (Physics.Raycast(ray, out hit))
-                    {
-                        randomPosition += Vector3.up * hit.point.y;
-                        Instantiate(robertPrefab, randomPosition, Quaternion.identity, _floor[^1]);
-                    }
-                    break;
                 case 1:
-                    for (var j = 0; j < 3; j++)
-                    {
-                        randomX = Random.Range(-3, 3);
-                        if (randomX >= 0)
-                            randomX++;
-                        randomPosition = new Vector3(randomX, 0f,
-                            _floor[^1].localPosition.z - (Random.Range(j * 3f, 3f + j * 3f) + 9 * i));
-                        ray = new Ray(randomPosition + Vector3.up * 4f, Vector3.down);
-                        if (Physics.Raycast(ray, out hit))
-                        {
-                            randomPosition += Vector3.up * hit.point.y;
-                            Instantiate(robertPrefab, randomPosition, Quaternion.identity, _floor[^1]);
-                        }
-                    }
-                    break;
                 case 2:
-                case 5:
-                    for (var j = 0; j < 3; j++)
-                    {
-                        randomX = Random.Range(-3, 3);
-                        if (randomX >= 0)
-                            randomX++;
-                        for (var k = 0; k < 3; k++)
-                        {
-                            randomPosition = new Vector3(randomX, 0f,
-                                _floor[^1].localPosition.z - (j * 3f + 9 * i) - k);
-                            ray = new Ray(randomPosition + Vector3.up * 4f, Vector3.down);
-                            if (Physics.Raycast(ray, out hit))
-                            {
-                                randomPosition += Vector3.up * hit.point.y;
-                                Instantiate(robertPrefab, randomPosition, Quaternion.identity, _floor[^1]);
-                            }
-                        }
-                    }
+                    EnemyGenerationPattern(Random.Range(-3, 4),
+                        _floor[^1].localPosition.z - (Random.Range(0, 7) + 3 * i), (v) => {
+                            Instantiate(robertPrefab, v, Quaternion.identity, _floor[^1]);
+                        });
                     break;
                 case 3:
-                case 4:
-                    randomX = Random.Range(-3, 3);
-                    if (randomX >= 0)
-                        randomX++;
-                    randomPosition = new Vector3(randomX, 0f,
-                        _floor[^1].localPosition.z - (Random.Range(0, 7) + 9 * i));
-                    ray = new Ray(randomPosition + Vector3.up * 4f, Vector3.down);
-                    if (Physics.Raycast(ray, out hit))
+                case 6:
+                    for (var j = 0; j < 3; j++)
                     {
-                        randomPosition += Vector3.up * hit.point.y;
-                        Instantiate(jeanPierrePrefab, randomPosition, Quaternion.identity, _floor[^1]);
+                        EnemyGenerationPattern(Random.Range(-3, 4),
+                            _floor[^1].localPosition.z - (Random.Range(j * 3, j * 3 + 3) + 9 * i), (v) => {
+                                Instantiate(robertPrefab, v, Quaternion.identity, _floor[^1]);
+                            });
+                    }
+                    break;
+                case 4:
+                    var k = 0;
+                    for (var j = 0; j < 3; j++)
+                    {
+                        EnemyGenerationPattern(Random.Range(-3, 4),
+                            _floor[^1].localPosition.z - (Random.Range(j * 3, j * 3 + 3) + 9 * i), (v) => {
+                                Instantiate(robertPrefab, v + Vector3.back * k, Quaternion.identity, _floor[^1]);
+                                k++;
+                            });
+                    }
+                    break;
+                case 5:
+                case 7:
+                    EnemyGenerationPattern(Random.Range(-3, 4),
+                        _floor[^1].localPosition.z - (Random.Range(0, 7) + 6 * i), (v) => {
+                            Instantiate(jeanPierrePrefab, v, Quaternion.identity, _floor[^1]);
+                        });
+                    break;
+                case 8:
+                    for (var j = 0; j < 4; j++)
+                    {
+                        EnemyGenerationPattern(Random.Range(-3, 4),
+                            _floor[^1].localPosition.z - (Random.Range(j * 2, j * 2 + 2) + 6 * i), (v) =>
+                            {
+                                Instantiate(j != 3 ? robertPrefab : jeanPierrePrefab, v, Quaternion.identity,
+                                    _floor[^1]);
+                            });
                     }
                     break;
             }
+        }
+    }
+
+    private void EnemyGenerationPattern(float x, float z, Action<Vector3> pattern)
+    {
+        var randomPosition = new Vector3(x, 0f, z);
+        var ray = new Ray(randomPosition + Vector3.up * 4f, Vector3.down);
+        if (Physics.Raycast(ray, out var hit) && hit.point.y > -0.1f)
+        {
+            randomPosition += Vector3.up * hit.point.y;
+            pattern(randomPosition);
         }
     }
 
