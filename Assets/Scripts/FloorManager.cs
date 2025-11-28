@@ -319,6 +319,7 @@ public class FloorManager : MonoBehaviour
         _levelCount++;
         _floor = new List<Transform>();
         _floorPreviousPosition = new List<Vector3>();
+        _totalInstantiatedFloors = 0;
 
         var children = GetComponentsInChildren<Transform>();
         foreach (var child in children)
