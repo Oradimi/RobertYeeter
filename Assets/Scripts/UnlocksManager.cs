@@ -5,6 +5,9 @@ public class UnlocksManager : MonoBehaviour
     private static UnlocksManager _instance;
     public static bool Unlocked;
 
+    [SerializeField] private AudioClip caveAmbience;
+    [SerializeField] private AudioClip mainMusic;
+
     private GameObject baseSkin;
     private GameObject yukataSkin;
     private GameObject baseHair;
@@ -29,6 +32,16 @@ public class UnlocksManager : MonoBehaviour
         DontDestroyOnLoad(_instance);
         
         audioSource = GetComponent<AudioSource>();
+        audioSource.clip = _instance.caveAmbience;
+        audioSource.Play();
+    }
+
+    public static void PlayMainMusic()
+    {
+        if (audioSource.clip == _instance.mainMusic)
+            return;
+        audioSource.clip = _instance.mainMusic;
+        audioSource.Play();
     }
 
     public static void ChangeClothes()
@@ -92,6 +105,19 @@ public class UnlocksManager : MonoBehaviour
 
     public static bool GetNameDisplay()
     {
+#if UNITY_EDITOR
+        if (!Application.isPlaying)
+            return false;
+#endif
         return _instance._nameDisplay;
+    }
+
+    public static bool IsAudioSourceMute()
+    {
+#if UNITY_EDITOR
+        if (!Application.isPlaying)
+            return false;
+#endif
+        return audioSource.mute;
     }
 }

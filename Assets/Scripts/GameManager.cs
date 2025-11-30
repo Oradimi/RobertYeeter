@@ -125,6 +125,15 @@ public class GameManager : MonoBehaviour
         return _instance.player;
     }
 
+    public static bool IsPlayerAudioSourceMute()
+    {
+#if UNITY_EDITOR
+        if (!Application.isPlaying)
+            return false;
+#endif
+        return _instance.player.IsMuteSoundEffects();
+    }
+
     private static void GameManagerLabelEffect(SceneLabelAttribute attr, SceneLabelOverlay.SceneLabelOverlayData data)
     {
         var prefix = "";
