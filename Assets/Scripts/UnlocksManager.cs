@@ -89,9 +89,10 @@ public class UnlocksManager : MonoBehaviour
         _instance.yukataHair.SetActive(_instance._hair);
     }
 
-    public static void ToggleNameDisplay()
+    public static bool ToggleNameDisplay()
     {
         _instance._nameDisplay ^= true;
+        return _instance._nameDisplay;
     }
 
     public static void NameDisplay(SceneLabelAttribute attr, SceneLabelOverlay.SceneLabelOverlayData data)

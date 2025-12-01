@@ -312,10 +312,11 @@ public class PlayerController : MonoBehaviour
         return _direction > 0 ? Mathf.Floor(value) : Mathf.Ceil(value);
     }
 
-    public void ToggleMuteSoundEffects()
+    public bool ToggleMuteSoundEffects()
     {
         UnlocksManager.soundEffectsMute ^= true;
         _audioSource.mute ^= true;
+        return _audioSource.mute;
     }
 
     public bool IsMuteSoundEffects()

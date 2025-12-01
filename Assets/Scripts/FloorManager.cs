@@ -305,6 +305,7 @@ public class FloorManager : MonoBehaviour
     {
         _instance._started = true;
         _instance._gameOver = false;
+        UIManager.DisplayMenu(false);
     }
 
     public void GameOver(GameManager.GameOverCase gameOverCase, Transform deathCause = null)
@@ -325,6 +326,7 @@ public class FloorManager : MonoBehaviour
                 cameraEndPosition.eulerAngles = new Vector3(0f, -5f, 0f);
                 break;
         }
+        UIManager.DisplayMenu(true);
     }
 
     private void ChangeZone()
