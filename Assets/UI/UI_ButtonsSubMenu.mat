@@ -20,7 +20,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: UI_Background
+  m_Name: UI_ButtonsSubMenu
   m_Shader: {fileID: 4800000, guid: 09bb633eb9e99874499d9143e12d14f3, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
@@ -58,17 +58,16 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _CellDensity: 32
+    - _CellDensity: 8
     - _HasTransition: 1
-    - _IsVertical: 0
+    - _IsVertical: 1
     - _QueueControl: 0
     - _QueueOffset: 0
     - _Scale: 8
-    - _Shift: -0.5
-    - _Speed: 0.1
-    - _Transition: -2
+    - _Shift: 0.3
+    - _Speed: 0.2
+    - _Transition: -3.35
     - _Vertical: 0
-    - _wesh: 0
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _ScrollDirection: {r: -1, g: -1, b: 0, a: 0}
