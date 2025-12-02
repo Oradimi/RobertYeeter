@@ -29,8 +29,13 @@ public class UIManager : MonoBehaviour
     [SerializeField] private GameObject skinCategoryPrefab;
     [SerializeField] private GameObject skinPrefab;
     
-    [Header("Other Menus")]
+    [Header("Settings Menus")]
     [SerializeField] private RectTransform settingsMenu;
+    [SerializeField] private Slider musicVolume;
+    [SerializeField] private Slider soundVolume;
+    [SerializeField] private Toggle enemyNameDisplay;
+    
+    [Header("Credits Menus")]
     [SerializeField] private RectTransform creditsMenu;
     
     private void Awake()
@@ -135,6 +140,9 @@ public class UIManager : MonoBehaviour
             return;
         
         _instance.settingsMenu.gameObject.SetActive(value);
+        _instance.musicVolume.value = UnlocksManager.AudioSource.volume * 100f;
+        _instance.soundVolume.value = UnlocksManager.SoundEffectsVolume * 100f;
+        _instance.enemyNameDisplay.isOn = UnlocksManager.GetNameDisplay();
         DisplayMainMenu(!value);
     }
     
@@ -178,20 +186,24 @@ public class UIManager : MonoBehaviour
         Application.Quit();
     }
 
-    public static void ToggleEnemyNameDisplay(TextMeshProUGUI textMeshPro)
+    public static void OpenExternalLink(string url)
     {
-        textMeshPro.text = UnlocksManager.ToggleNameDisplay() ? "Disable Enemy Name Display" : "Enable Enemy Name Display";
+        Application.OpenURL(url);
     }
 
-    public static void ToggleMusic(TextMeshProUGUI textMeshPro)
+    public static void ChangeMusicVolume(float value)
     {
-        UnlocksManager.AudioSource.mute ^= true;
-        textMeshPro.text = UnlocksManager.AudioSource.mute ? "Enable Music" : "Disable Music";
+        UnlocksManager.AudioSource.volume = value * 0.01f;
     }
 
-    public static void ToggleSounds(TextMeshProUGUI textMeshPro)
+    public static void ChangeSoundEffectsVolume(float value)
     {
-        textMeshPro.text = GameManager.GetPlayer().ToggleMuteSoundEffects() ? "Enable Sounds" : "Disable Sounds";
+        GameManager.GetPlayer().ChangeSoundEffectsVolume(value);
+    }
+    
+    public static void ChangeEnemyNameDisplay(bool value)
+    {
+        UnlocksManager.ChangeEnemyNameDisplay(value);
     }
 
     public static void SetGameOverText(string text)

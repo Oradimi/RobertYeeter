@@ -56,7 +56,7 @@ public class PlayerController : MonoBehaviour
 
     private void OnEnable()
     {
-        _audioSource.mute = UnlocksManager.SoundEffectsMute;
+        _audioSource.volume = UnlocksManager.SoundEffectsVolume;
         SceneLabelOverlay.OnSetSpecialAttribute += PlayerControllerLabelEffect;
         _animator.SetBool(WetBool, false);
         _controls.Enable();
@@ -331,16 +331,12 @@ public class PlayerController : MonoBehaviour
         return _direction > 0 ? Mathf.Floor(value) : Mathf.Ceil(value);
     }
 
-    public bool ToggleMuteSoundEffects()
+    public void ChangeSoundEffectsVolume(float value)
     {
-        UnlocksManager.SoundEffectsMute ^= true;
-        _audioSource.mute ^= true;
-        return _audioSource.mute;
-    }
-
-    public bool IsMuteSoundEffects()
-    {
-        return _audioSource.mute;
+        _audioSource.volume = value * 0.01f;
+        if (!_audioSource.isPlaying)
+            _audioSource.PlayOneShot(cantMoveSound);
+        UnlocksManager.SoundEffectsVolume = _audioSource.volume;
     }
     
     private bool IsMouseOverUi()

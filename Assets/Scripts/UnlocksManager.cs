@@ -7,7 +7,7 @@ public class UnlocksManager : MonoBehaviour
     private static UnlocksManager _instance;
     
     public static AudioSource AudioSource;
-    public static bool SoundEffectsMute;
+    public static float SoundEffectsVolume;
     
     public static bool Unlocked;
     
@@ -36,6 +36,8 @@ public class UnlocksManager : MonoBehaviour
         AudioSource.clip = _instance.caveAmbience;
         AudioSource.Play();
         
+        SoundEffectsVolume = GameManager.GetPlayer().GetComponent<AudioSource>().volume;
+        
         InitSkin();
     }
 
@@ -47,9 +49,13 @@ public class UnlocksManager : MonoBehaviour
         AudioSource.Play();
     }
 
-    public static bool ToggleNameDisplay()
+    public static void ChangeEnemyNameDisplay(bool value)
     {
-        _instance._nameDisplay ^= true;
+        _instance._nameDisplay = value;
+    }
+
+    public static bool GetNameDisplay()
+    {
         return _instance._nameDisplay;
     }
 
