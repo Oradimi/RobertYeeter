@@ -8,29 +8,28 @@ using UnityEngine.UI;
 public class UIManager : MonoBehaviour
 {
     private static UIManager _instance;
-    
-    [Header("Editor")]
-    [SerializeField] private bool showUiInEditMode;
-    [Header("Main")]
-    [SerializeField] private Camera mainCamera;
-    [SerializeField] private Font interFont;
-    [Header("Resources")]
-    [SerializeField] private Texture2D button;
-    [SerializeField] private Texture2D buttonHover;
-    [SerializeField] private Texture2D buttonDisabled;
-    
+
+    [Header("Main Content")]
     [SerializeField] private RectTransform ui;
+    [SerializeField] private RectTransform mainContent;
+    [SerializeField] private Button backButton;
+    
+    [Header("Game Over Content")]
+    [SerializeField] private RectTransform gameOverMenu;
+    [SerializeField] private TextMeshProUGUI gameOverText;
+    
+    [Header("Main Menu")]
     [SerializeField] private RectTransform mainMenu;
     [SerializeField] private TextMeshProUGUI startText;
     [SerializeField] private TextMeshProUGUI highestScoreText;
-    [SerializeField] private Button backButton;
     
+    [Header("Skins Menu")]
     [SerializeField] private RectTransform skinsMenu;
     [SerializeField] private Button skinsButton;
-    [SerializeField] private SkinMenuData skinMenuData;
     [SerializeField] private GameObject skinCategoryPrefab;
     [SerializeField] private GameObject skinPrefab;
     
+    [Header("Other Menus")]
     [SerializeField] private RectTransform settingsMenu;
     [SerializeField] private RectTransform creditsMenu;
     
@@ -50,14 +49,18 @@ public class UIManager : MonoBehaviour
         DisplayMenu(true);
     }
 
-    public static void DisplayMenu(bool value)
+    public static void DisplayMenu(bool value, bool gameOver = false)
     {
         _instance.ui.gameObject.SetActive(value);
         
         if (value)
         {
-            _instance.startText.text = FloorManager.IsGameOver() ? "Restart" : "Start";
-            DisplayMainMenu(true);
+            _instance.mainContent.gameObject.SetActive(!gameOver);
+            _instance.skinsButton.gameObject.SetActive(UnlocksManager.Unlocked);
+            if (gameOver)
+                DisplayGameOverMenu(true);
+            else
+                DisplayMainMenu(true);
         }
     }
     
@@ -68,12 +71,14 @@ public class UIManager : MonoBehaviour
         
         _instance.mainMenu.gameObject.SetActive(value);
         _instance.backButton.gameObject.SetActive(!value);
+        _instance.highestScoreText.text = $"Best — {UnlocksManager.MaxScore}\tReached — {UnlocksManager.MaxDistanceTraveled:F1}m";
 
         if (value)
         {
             _instance.skinsMenu.gameObject.SetActive(false);
             _instance.settingsMenu.gameObject.SetActive(false);
             _instance.creditsMenu.gameObject.SetActive(false);
+            _instance.gameOverMenu.gameObject.SetActive(false);
         }
     }
     
@@ -93,7 +98,8 @@ public class UIManager : MonoBehaviour
             if (child != _instance.skinsMenu)
                 Destroy(child.gameObject);
 
-        foreach (var categoryUi in _instance.skinMenuData.categories)
+        var skinMenuData = UnlocksManager.GetSkinMenuData();
+        foreach (var categoryUi in skinMenuData.categories)
         {
             var categoryPrefabUi = Instantiate(_instance.skinCategoryPrefab, _instance.skinsMenu);
             categoryPrefabUi.transform.Find("CategoryLabel").GetComponent<TextMeshProUGUI>().text = categoryUi.name;
@@ -111,12 +117,12 @@ public class UIManager : MonoBehaviour
             {
                 skinPrefabUi.Key.GetComponent<Button>().onClick.AddListener(() =>
                 {
-                    var objects = GameManager.GetPlayer().GetComponentsInChildren<Transform>(true);
-                    foreach (var obj in objects)
+                    var objects = GameManager.GetPlayer().GetComponentsInChildren<Transform>(true).ToDictionary(o => o.name, o => o);
+                    UnlocksManager.SetSkin(categoryUi.name, skinPrefabUi.Value.nameInScene);
+                    foreach (var skin in skinPrefabsUi.Values)
                     {
-                        var exists = skinPrefabsUi.Values.Any(skinData => obj.name == skinData.nameInScene);
-                        if (exists && obj != GameManager.GetPlayer().transform) 
-                            obj.gameObject.SetActive(obj.name == skinPrefabUi.Value.nameInScene);
+                        var obj = objects[skin.nameInScene];
+                        obj.gameObject.SetActive(obj.name == skinPrefabUi.Value.nameInScene);
                     }
                 });
             }
@@ -141,11 +147,21 @@ public class UIManager : MonoBehaviour
         DisplayMainMenu(!value);
     }
     
+    public static void DisplayGameOverMenu(bool value)
+    {
+        if (!_instance.gameOverMenu)
+            return;
+        
+        _instance.gameOverMenu.gameObject.SetActive(value);
+        DisplayMainMenu(!value);
+    }
+    
     public static void StartGame()
     {
         if (!FloorManager.IsGameOver())
         {
             GameManager.GetPlayer().EnableUIMap();
+            GameManager.GetPlayer().PerformCharging();
             UnlocksManager.PlayMainMusic();
         }
         else
@@ -169,12 +185,17 @@ public class UIManager : MonoBehaviour
 
     public static void ToggleMusic(TextMeshProUGUI textMeshPro)
     {
-        UnlocksManager.audioSource.mute ^= true;
-        textMeshPro.text = UnlocksManager.audioSource.mute ? "Enable Music" : "Disable Music";
+        UnlocksManager.AudioSource.mute ^= true;
+        textMeshPro.text = UnlocksManager.AudioSource.mute ? "Enable Music" : "Disable Music";
     }
 
     public static void ToggleSounds(TextMeshProUGUI textMeshPro)
     {
         textMeshPro.text = GameManager.GetPlayer().ToggleMuteSoundEffects() ? "Enable Sounds" : "Disable Sounds";
+    }
+
+    public static void SetGameOverText(string text)
+    {
+        _instance.gameOverText.text = text;
     }
 }

@@ -1,5 +1,7 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.UI;
 
 public class PlayerController : MonoBehaviour
 {
@@ -54,10 +56,11 @@ public class PlayerController : MonoBehaviour
 
     private void OnEnable()
     {
-        _audioSource.mute = UnlocksManager.soundEffectsMute;
+        _audioSource.mute = UnlocksManager.SoundEffectsMute;
         SceneLabelOverlay.OnSetSpecialAttribute += PlayerControllerLabelEffect;
         _animator.SetBool(WetBool, false);
         _controls.Enable();
+        UnlocksManager.ApplySkin();
         EnableActionMap();
         _controls.UI.Fullscreen.performed += OnFullscreen;
     }
@@ -135,7 +138,7 @@ public class PlayerController : MonoBehaviour
                 return;
             PlayPunchSound();
             SetCaught();
-            GameManager.GameOver(GameManager.GameOverCase.Caught);
+            GameManager.GameOver(GameManager.GameOverCase.Bonked);
         }
         else
         {
@@ -265,12 +268,20 @@ public class PlayerController : MonoBehaviour
 
     private void OnCharge(InputAction.CallbackContext ctx)
     {
+        if (IsMouseOverUi())
+            return;
+        
         if (_isCharging || _chargeCooldown > 0f || _chargePosition.z > 0.01f)
         {
             _audioSource.PlayOneShot(cantMoveSound);
             return;
         }
-        
+
+        PerformCharging();
+    }
+
+    public void PerformCharging()
+    {
         _isCharging = true;
         _animator.SetTrigger(ChargeTrigger);
         _chargePosition += new Vector3(0, 0, -2);
@@ -303,6 +314,14 @@ public class PlayerController : MonoBehaviour
     {
         if (attr.ID != SceneLabelID.Cooldown)
             return;
+
+        if (FloorManager.IsGameOver() || !FloorManager.IsStarted())
+        {
+            attr.Value = "";
+            attr.RichValue = null;
+            return;
+        }
+        
         attr.Value = _chargeCooldown > 0 ? $"{_chargeCooldown:F2}" : "";
         attr.RichValue = !_isCharging && _chargeCooldown > 0 ? $"<color=red>{_chargeCooldown:F2}</color>" : null;
     }
@@ -314,7 +333,7 @@ public class PlayerController : MonoBehaviour
 
     public bool ToggleMuteSoundEffects()
     {
-        UnlocksManager.soundEffectsMute ^= true;
+        UnlocksManager.SoundEffectsMute ^= true;
         _audioSource.mute ^= true;
         return _audioSource.mute;
     }
@@ -322,5 +341,15 @@ public class PlayerController : MonoBehaviour
     public bool IsMuteSoundEffects()
     {
         return _audioSource.mute;
+    }
+    
+    private bool IsMouseOverUi()
+    {
+        if (!EventSystem.current)
+            return false;
+        
+        var lastRaycastResult = ((InputSystemUIInputModule)EventSystem.current.currentInputModule).GetLastRaycastResult(Mouse.current.deviceId);
+        const int uiLayer = 5;
+        return lastRaycastResult.gameObject && lastRaycastResult.gameObject.layer == uiLayer;
     }
 }

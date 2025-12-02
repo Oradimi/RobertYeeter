@@ -9,6 +9,7 @@ public class BuildScriptableObject : ScriptableObject
         Beta,
         Alpha,
         PreAlpha,
+        Dev,
     }
     
     public int buildNumber = 0;

@@ -6,6 +6,7 @@ public class GameManager : MonoBehaviour
     public enum GameOverCase
     {
         Caught,
+        Bonked,
         Drowned,
     }
     
@@ -117,6 +118,12 @@ public class GameManager : MonoBehaviour
         _instance.player.DisableActionMap();
         GlobalSpeed = 0f;
         AffectsAnimations = false;
+
+        if (_instance._score > UnlocksManager.MaxScore)
+            UnlocksManager.MaxScore = _instance._score;
+        if (_instance._distanceTraveled > UnlocksManager.MaxDistanceTraveled)
+            UnlocksManager.MaxDistanceTraveled = _instance._distanceTraveled;
+        
         _floorManager.GameOver(gameOverCase, deathCause);
     }
 
@@ -125,25 +132,16 @@ public class GameManager : MonoBehaviour
         return _instance.player;
     }
 
-    public static bool IsPlayerAudioSourceMute()
-    {
-#if UNITY_EDITOR
-        if (!Application.isPlaying)
-            return false;
-#endif
-        return _instance.player.IsMuteSoundEffects();
-    }
-
     private static void GameManagerLabelEffect(SceneLabelAttribute attr, SceneLabelOverlay.SceneLabelOverlayData data)
     {
         var prefix = "";
         switch (attr.ID)
         {
             case SceneLabelID.Score:
-                prefix = FloorManager.IsStarted() ? "" : "Score: ";
-                attr.Value = FloorManager.IsPaused() ? "Paused" : $"{prefix}{_instance._score}";
+                prefix = FloorManager.IsGameOver() ? "Score — " : "";
+                attr.Value = FloorManager.IsPaused() ? "Paused" : FloorManager.IsStarted() ? $"{prefix}{_instance._score}" : "";
         
-                if (_instance._effectTime <= 0f || FloorManager.IsPaused())
+                if (_instance._effectTime <= 0f || FloorManager.IsPaused() || FloorManager.IsGameOver())
                 {
                     attr.FormatValue = null;
                     attr.RichValue = null;
@@ -158,9 +156,9 @@ public class GameManager : MonoBehaviour
                 attr.RichValue = $"<color=#{color.ToHexString()}>{attr.FormatValue}</color>";
                 break;
             case SceneLabelID.DistanceTraveled:
-                prefix = FloorManager.IsStarted() ? "" : "Distance traveled: ";
-                attr.Value = FloorManager.IsPaused() ? "Escape key to resume" : $"{prefix}{_instance._distanceTraveled:F1}";
-                attr.Suffix = FloorManager.IsPaused() ? "" : "m";
+                prefix = FloorManager.IsGameOver() ? "Reached — " : "";
+                attr.Value = FloorManager.IsPaused() ? "Escape key to resume" : FloorManager.IsStarted() ? $"{prefix}{_instance._distanceTraveled:F1}" : "";
+                attr.Suffix = FloorManager.IsPaused() || !FloorManager.IsStarted() ? "" : "m";
                 break;
         }
     }

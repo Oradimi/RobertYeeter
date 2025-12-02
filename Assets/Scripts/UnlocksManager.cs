@@ -1,24 +1,25 @@
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class UnlocksManager : MonoBehaviour
 {
     private static UnlocksManager _instance;
+    
+    public static AudioSource AudioSource;
+    public static bool SoundEffectsMute;
+    
     public static bool Unlocked;
+    
+    public static int MaxScore;
+    public static float MaxDistanceTraveled;
 
     [SerializeField] private AudioClip caveAmbience;
     [SerializeField] private AudioClip mainMusic;
+    [SerializeField] private SkinMenuData skinMenuData;
 
-    private GameObject baseSkin;
-    private GameObject yukataSkin;
-    private GameObject baseHair;
-    private GameObject yukataHair;
-
-    private bool _clothes;
-    private bool _hair;
+    private Dictionary<string, string> _skins;
     private bool _nameDisplay;
-    
-    public static AudioSource audioSource;
-    public static bool soundEffectsMute;
     
     private void Awake()
     {
@@ -31,62 +32,19 @@ public class UnlocksManager : MonoBehaviour
         _instance = this;
         DontDestroyOnLoad(_instance);
         
-        audioSource = GetComponent<AudioSource>();
-        audioSource.clip = _instance.caveAmbience;
-        audioSource.Play();
+        AudioSource = GetComponent<AudioSource>();
+        AudioSource.clip = _instance.caveAmbience;
+        AudioSource.Play();
+        
+        InitSkin();
     }
 
     public static void PlayMainMusic()
     {
-        if (audioSource.clip == _instance.mainMusic)
+        if (AudioSource.clip == _instance.mainMusic)
             return;
-        audioSource.clip = _instance.mainMusic;
-        audioSource.Play();
-    }
-
-    public static void ChangeClothes()
-    {
-        _instance._clothes ^= true;
-        _instance.baseSkin.SetActive(!_instance._clothes);
-        _instance.yukataSkin.SetActive(_instance._clothes);
-    }
-    
-    public static void ChangeHair()
-    {
-        _instance._hair ^= true;
-        _instance.baseHair.SetActive(!_instance._hair);
-        _instance.yukataHair.SetActive(_instance._hair);
-    }
-
-    public static void InitAndApplyClothesAndHair()
-    {
-        if (!_instance.baseSkin || !_instance.baseHair || !_instance.yukataSkin || !_instance.yukataSkin)
-        {
-            var objects = GameManager.GetPlayer().GetComponentsInChildren<Transform>(true);
-            foreach (var obj in objects)
-            {
-                switch (obj.name)
-                {
-                    case "Clothes_base":
-                        _instance.baseSkin = obj.gameObject;
-                        break;
-                    case "Clothes_yukata":
-                        _instance.yukataSkin = obj.gameObject;
-                        break;
-                    case "Hair_base":
-                        _instance.baseHair = obj.gameObject;
-                        break;
-                    case "Hair_bun":
-                        _instance.yukataHair = obj.gameObject;
-                        break;
-                }
-            }
-        }
-        
-        _instance.baseSkin.SetActive(!_instance._clothes);
-        _instance.yukataSkin.SetActive(_instance._clothes);
-        _instance.baseHair.SetActive(!_instance._hair);
-        _instance.yukataHair.SetActive(_instance._hair);
+        AudioSource.clip = _instance.mainMusic;
+        AudioSource.Play();
     }
 
     public static bool ToggleNameDisplay()
@@ -104,21 +62,32 @@ public class UnlocksManager : MonoBehaviour
             attr.Value = "";
     }
 
-    public static bool GetNameDisplay()
+    public static void InitSkin()
     {
-#if UNITY_EDITOR
-        if (!Application.isPlaying)
-            return false;
-#endif
-        return _instance._nameDisplay;
+        _instance._skins = new Dictionary<string, string>();
+        foreach (var category in _instance.skinMenuData.categories)
+        {
+            _instance._skins.Add(category.name, category.skins[0].nameInScene);
+            foreach (var skin in category.skins)
+                GameManager.GetPlayer().transform.Find(skin.nameInScene).gameObject.SetActive(_instance._skins[category.name] == skin.nameInScene);
+        }
     }
 
-    public static bool IsAudioSourceMute()
+    public static void SetSkin(string category, string skinName)
     {
-#if UNITY_EDITOR
-        if (!Application.isPlaying)
-            return false;
-#endif
-        return audioSource.mute;
+        _instance._skins[category] = skinName;
+    }
+
+    public static void ApplySkin()
+    {
+        var objects = GameManager.GetPlayer().GetComponentsInChildren<Transform>(true).ToDictionary(o => o.name, o => o);
+        foreach (var category in _instance.skinMenuData.categories)
+            foreach (var skin in category.skins)
+                objects[skin.nameInScene].gameObject.SetActive(_instance._skins[category.name] == skin.nameInScene);
+    }
+    
+    public static SkinMenuData GetSkinMenuData()
+    {
+        return _instance.skinMenuData;
     }
 }

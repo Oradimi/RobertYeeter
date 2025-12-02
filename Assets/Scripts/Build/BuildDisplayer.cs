@@ -9,13 +9,7 @@ public class BuildDisplayer : MonoBehaviour
     private void Awake()
     {
         _text = GetComponent<TextMeshProUGUI>();
-        var request = Resources.LoadAsync("Build", typeof(BuildScriptableObject));
-        request.completed += Request_completed;
-    }
-    
 #if UNITY_EDITOR
-    private void Start()
-    {
         var obj = Resources.Load("Build", typeof(BuildScriptableObject));
         var buildScriptableObject = obj as BuildScriptableObject;
 
@@ -25,10 +19,14 @@ public class BuildDisplayer : MonoBehaviour
         }
         else
         {
-            _text.SetText($"v{Application.version}_{buildScriptableObject.buildNumber:000}_dev");
+            buildScriptableObject.developmentPhase = BuildScriptableObject.DevelopmentPhase.Dev;
+            _text.SetText($"v{Application.version}_{buildScriptableObject.buildNumber:000}_{buildScriptableObject.developmentPhase.ToString().ToLowerInvariant()}");
         }
-    }
 #endif
+        var request = Resources.LoadAsync("Build", typeof(BuildScriptableObject));
+        request.completed += Request_completed;
+    }
+
     private void Request_completed(AsyncOperation obj)
     {
         var buildScriptableObject = ((ResourceRequest)obj).asset as BuildScriptableObject;

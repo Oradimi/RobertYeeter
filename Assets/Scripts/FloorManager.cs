@@ -4,7 +4,6 @@ using TriInspector;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
-using UnityEngine.SceneManagement;
 using Random = UnityEngine.Random;
 
 public class FloorManager : MonoBehaviour
@@ -104,8 +103,6 @@ public class FloorManager : MonoBehaviour
         }
 
         _instance = this;
-        
-        UnlocksManager.InitAndApplyClothesAndHair();
         
         volume.profile.TryGet(out _vignette);
         
@@ -311,22 +308,31 @@ public class FloorManager : MonoBehaviour
     public void GameOver(GameManager.GameOverCase gameOverCase, Transform deathCause = null)
     {
         GameManager.GetPlayer().DisableUIMap();
+        Vector3 playerPosition;
         switch (gameOverCase)
         {
             case GameManager.GameOverCase.Caught:
                 _gameOver = true;
-                var playerPosition = GameManager.GetPlayer().transform.position;
-                var positionNoZ = new Vector3(playerPosition.x, playerPosition.y, 0f);
-                _cameraTarget = positionNoZ + new Vector3(0.3f, 1.5f, -6f);
+                playerPosition = GameManager.GetPlayer().transform.position;
+                _cameraTarget = playerPosition + new Vector3(0.3f, 0.8f, -1.5f);
                 cameraEndPosition.eulerAngles = new Vector3(20f, -10f, 0f);
+                UIManager.SetGameOverText("You got caught...");
+                break;
+            case GameManager.GameOverCase.Bonked:
+                _gameOver = true;
+                playerPosition = GameManager.GetPlayer().transform.position;
+                _cameraTarget = playerPosition + new Vector3(0.3f, 0.8f, -1.5f);
+                cameraEndPosition.eulerAngles = new Vector3(20f, -10f, 0f);
+                UIManager.SetGameOverText("You bonked...");
                 break;
             case GameManager.GameOverCase.Drowned:
                 _gameOver = true;
                 _cameraTarget = new Vector3(0.1f, 0f, -0.7f);
                 cameraEndPosition.eulerAngles = new Vector3(0f, -5f, 0f);
+                UIManager.SetGameOverText("You're drenched...");
                 break;
         }
-        UIManager.DisplayMenu(true);
+        UIManager.DisplayMenu(true, true);
     }
 
     private void ChangeZone()
