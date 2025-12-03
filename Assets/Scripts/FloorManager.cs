@@ -1,52 +1,14 @@
 using System;
 using System.Collections.Generic;
-using TriInspector;
+using SceneLabel;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
+using Floor = So.Floor;
 using Random = UnityEngine.Random;
 
 public class FloorManager : MonoBehaviour
 {
-    [Serializable]
-    [DeclareVerticalGroup("Prefabs")]
-    [DeclareVerticalGroup("Data")]
-    public class FloorData
-    {
-        [Required, HideLabel]
-        [Group("Prefabs")]
-        public GameObject prefab;
-        [Group("Prefabs")]
-        public GameObject exitPrefab;
-        [Group("Data")]
-        public Type type;
-        [Group("Data")]
-        public Zone zone;
-        
-        public enum Type
-        {
-            None,
-            Standard,
-            Narrow,
-            Bridge,
-            Exit,
-        }
-
-        public enum Zone
-        {
-            Lush,
-            Dry,
-            Cold,
-        }
-    }
-
-    [Serializable]
-    public class ZoneTextures
-    {
-        public FloorData.Zone zone;
-        public ZoneTextureData textureData;
-    }
-    
     private static FloorManager _instance;
     private static readonly int ZShift = Shader.PropertyToID("_ZShift");
     private static readonly int FloorMain = Shader.PropertyToID("_FloorMain");
@@ -54,26 +16,17 @@ public class FloorManager : MonoBehaviour
     private static readonly int WallMain = Shader.PropertyToID("_WallMain");
     private static readonly int WallDetail = Shader.PropertyToID("_WallDetail");
     
-    
-    [SerializeField] private FloorData.Zone startingZone;
-    [SerializeField, Min(1f)] private int exitSpawnWeight;
+    [SerializeField] private Floor.Data.Zone startingZone;
     [SerializeField] private Volume volume;
     [SerializeField] private Transform robertPrefab;
     [SerializeField] private Transform jeanPierrePrefab;
     [SerializeField] private float speed = 5f;
     [SerializeField] private float cameraSpeed = 10f;
-    
-    [TableList(Draggable = true,
-        HideAddButton = false,
-        HideRemoveButton = false,
-        AlwaysExpanded = false)]
-    [SerializeField] private FloorData[] floorData;
-    [SerializeField] private FloorGeneration.Settings[] settings;
-    [SerializeField] private ZoneTextures[] zoneTextures;
+
+    [SerializeField] private Floor soFloor;
     
     [SerializeField] private Transform cameraStartPosition;
-    [SerializeField] private Transform cameraEndPosition;
-    [SerializeField] private Transform cameraHighPosition;
+    [SerializeField] private Transform cameraTarget;
 
     private Vignette _vignette;
     private float _introTimer = 3f;
@@ -84,15 +37,14 @@ public class FloorManager : MonoBehaviour
     private bool _gameOver;
     private bool _paused;
     
-    [ShowInInspector]
     private List<int> _prefabPreselection;
     private List<Transform> _floor;
     private List<Vector3> _floorPreviousPosition;
     private int _levelCount;
-    private FloorData.Zone _currentZone;
+    private Floor.Data.Zone _currentZone;
     private float _totalInstantiatedFloors;
     private bool _enemyInstantiationReady;
-    private FloorData _lastInstantiatedFloor;
+    private Floor.Data _lastInstantiatedFloor;
     
     private void Awake()
     {
@@ -108,13 +60,13 @@ public class FloorManager : MonoBehaviour
         
         _camera = Camera.main;
         
-        if (floorData.Length < 1 || !robertPrefab
-            || !_camera || !cameraStartPosition || !cameraEndPosition)
+        if (soFloor.data.Length < 1 || !robertPrefab
+            || !_camera || !cameraStartPosition || !cameraTarget)
             return;
         
         _camera.transform.position = cameraStartPosition.position;
         _camera.transform.rotation = cameraStartPosition.rotation;
-        _cameraTarget = cameraEndPosition.position;
+        _cameraTarget = cameraTarget.position;
         
         _floor = new List<Transform>();
         _floorPreviousPosition = new List<Vector3>();
@@ -125,16 +77,26 @@ public class FloorManager : MonoBehaviour
                 Destroy(child.gameObject);
 
         _currentZone = startingZone;
-        FloorGeneration.Init(settings);
-        _prefabPreselection = FloorGeneration.Run(settings);
+        FloorGeneration.Init(soFloor.settings);
+        _prefabPreselection = FloorGeneration.Run(soFloor.settings);
         _levelCount = 1;
         InstantiateFloor(Vector3.forward * 30f);
     }
     
+    private void OnEnable()
+    {
+        SceneLabelOverlay.OnSetSpecialAttribute += GameManager.GameManagerLabelEffect;
+    }
+    
+    private void OnDisable()
+    {
+        SceneLabelOverlay.OnSetSpecialAttribute -= GameManager.GameManagerLabelEffect;
+    }
+    
     private void FixedUpdate()
     {
-        if (!_started || floorData.Length < 1 || !robertPrefab
-            || !_camera || !cameraStartPosition || !cameraEndPosition)
+        if (!_started || soFloor.data.Length < 1 || !robertPrefab
+            || !_camera || !cameraStartPosition || !cameraTarget)
             return;
 
         _introTimer -= Time.fixedDeltaTime;
@@ -151,24 +113,24 @@ public class FloorManager : MonoBehaviour
         switch (playerAltitude)
         {
             case > 10f:
-                _cameraTarget = cameraHighPosition.position + GameManager.GetPlayer().transform.position;
+                _cameraTarget = cameraTarget.position + Vector3.up + GameManager.GetPlayer().transform.position;
                 _cameraSpeedBoost = 4f;
-                GameManager.SetTargetPosition(cameraEndPosition.position + GameManager.GetPlayer().transform.position);
+                GameManager.SetTargetPosition(cameraTarget.position + GameManager.GetPlayer().transform.position);
                 break;
             case > 1f:
-                _cameraTarget = cameraHighPosition.position;
+                _cameraTarget = cameraTarget.position + Vector3.up;
                 _cameraSpeedBoost = 1f;
                 GameManager.SetTargetPosition(Vector3.up);
                 break;
             case > -10f:
-                _cameraTarget = cameraEndPosition.position;
+                _cameraTarget = cameraTarget.position;
                 _cameraSpeedBoost = 1f;
                 GameManager.SetTargetPosition(Vector3.zero);
                 break;
             default:
-                _cameraTarget = cameraEndPosition.position + GameManager.GetPlayer().transform.position;
+                _cameraTarget = cameraTarget.position + GameManager.GetPlayer().transform.position;
                 _cameraSpeedBoost = 4f;
-                GameManager.SetTargetPosition(cameraEndPosition.position + GameManager.GetPlayer().transform.position);
+                GameManager.SetTargetPosition(cameraTarget.position + GameManager.GetPlayer().transform.position);
                 break;
         }
         
@@ -178,20 +140,20 @@ public class FloorManager : MonoBehaviour
         _enemyInstantiationReady = UpdateScrollingEnvironment(GetFloorScrollSpeed(), _floor, _floorPreviousPosition);
     }
 
-    private FloorData InstantiateFloor(Vector3 position)
+    private Floor.Data InstantiateFloor(Vector3 position)
     {
         if (_prefabPreselection.Count < 1)
-            _prefabPreselection = FloorGeneration.Run(settings, _lastInstantiatedFloor.type);
+            _prefabPreselection = FloorGeneration.Run(soFloor.settings, _lastInstantiatedFloor.type);
         GameObject newFloor;
-        if (floorData[_prefabPreselection[0]].exitPrefab && GameManager.IsDistanceThresholdCrossed() && Random.Range(0, exitSpawnWeight) == 0)
-            newFloor = Instantiate(floorData[_prefabPreselection[0]].exitPrefab, position, Quaternion.identity, transform);
+        if (soFloor.data[_prefabPreselection[0]].exitPrefab && Random.Range(0f, 1f) < GameManager.NextLevelStairsChance())
+            newFloor = Instantiate(soFloor.data[_prefabPreselection[0]].exitPrefab, position, Quaternion.identity, transform);
         else
-            newFloor = Instantiate(floorData[_prefabPreselection[0]].prefab, position, Quaternion.identity, transform);
+            newFloor = Instantiate(soFloor.data[_prefabPreselection[0]].prefab, position, Quaternion.identity, transform);
         newFloor.AddComponent<MeshCollider>();
         var newFloorRenderer = newFloor.GetComponent<Renderer>();
         UpdateFloorMaterialShift(newFloorRenderer);
         UpdateFloorTextures(newFloorRenderer);
-        var prefabData = floorData[_prefabPreselection[0]];
+        var prefabData = soFloor.data[_prefabPreselection[0]];
         _prefabPreselection.RemoveAt(0);
         _floor.Add(newFloor.transform);
         _floorPreviousPosition.Add(position);
@@ -288,7 +250,7 @@ public class FloorManager : MonoBehaviour
         return _instance._gameOver;
     }
 
-    public static FloorData.Zone GetCurrentZone()
+    public static Floor.Data.Zone GetCurrentZone()
     {
         return _instance._currentZone;
     }
@@ -305,30 +267,29 @@ public class FloorManager : MonoBehaviour
         UIManager.DisplayMenu(false);
     }
 
-    public void GameOver(GameManager.GameOverCase gameOverCase, Transform deathCause = null)
+    public static void GameOver(GameManager.GameOverCase gameOverCase, Transform deathCause = null)
     {
         GameManager.GetPlayer().DisableUIMap();
+        _instance._gameOver = true;
         Vector3 playerPosition;
         switch (gameOverCase)
         {
             case GameManager.GameOverCase.Caught:
-                _gameOver = true;
                 playerPosition = GameManager.GetPlayer().transform.position;
-                _cameraTarget = playerPosition + new Vector3(0.3f, 0.8f, -1.5f);
-                cameraEndPosition.eulerAngles = new Vector3(20f, -10f, 0f);
+                _instance._cameraTarget = playerPosition + new Vector3(0.3f, 0.8f, -1.5f);
+                _instance.cameraTarget.eulerAngles = new Vector3(20f, -10f, 0f);
                 UIManager.SetGameOverText("You got caught...");
                 break;
             case GameManager.GameOverCase.Bonked:
-                _gameOver = true;
                 playerPosition = GameManager.GetPlayer().transform.position;
-                _cameraTarget = playerPosition + new Vector3(0.3f, 0.8f, -1.5f);
-                cameraEndPosition.eulerAngles = new Vector3(20f, -10f, 0f);
+                _instance._cameraTarget = playerPosition + new Vector3(0.3f, 0.8f, -1.5f);
+                _instance.cameraTarget.eulerAngles = new Vector3(20f, -10f, 0f);
                 UIManager.SetGameOverText("You bonked...");
                 break;
             case GameManager.GameOverCase.Drowned:
-                _gameOver = true;
-                _cameraTarget = new Vector3(0.1f, 0f, -0.7f);
-                cameraEndPosition.eulerAngles = new Vector3(0f, -5f, 0f);
+                playerPosition = GameManager.GetPlayer().transform.position;
+                _instance._cameraTarget = new Vector3(playerPosition.x, 0f, -0.7f);
+                _instance.cameraTarget.eulerAngles = new Vector3(0f, -5f, 0f);
                 UIManager.SetGameOverText("You're drenched...");
                 break;
         }
@@ -347,12 +308,12 @@ public class FloorManager : MonoBehaviour
             if (child != transform)
                 Destroy(child.gameObject);
         
-        var zoneEnumValues = Enum.GetValues(typeof(FloorData.Zone));
-        var newZone = (FloorData.Zone)zoneEnumValues.GetValue((_levelCount - 1) % zoneEnumValues.Length);
+        var zoneEnumValues = Enum.GetValues(typeof(Floor.Data.Zone));
+        var newZone = (Floor.Data.Zone)zoneEnumValues.GetValue((_levelCount - 1) % zoneEnumValues.Length);
         GameManager.GetPlayer().transform.position = new Vector3(GameManager.GetPlayer().transform.position.x, 30f, GameManager.GetPlayer().transform.position.z);
         _camera.transform.position = GameManager.GetPlayer().transform.position;
         _currentZone = newZone;
-        _prefabPreselection = FloorGeneration.Run(settings);
+        _prefabPreselection = FloorGeneration.Run(soFloor.settings);
         InstantiateFloor(Vector3.forward * 30f);
     }
 
@@ -391,19 +352,19 @@ public class FloorManager : MonoBehaviour
     private void UpdateFloorTextures(Renderer r)
     {
         var floorMaterial = r.material;
-        foreach (var zoneTexturesSet in zoneTextures)
+        foreach (var zoneTexturesSet in soFloor.zoneTextures)
         {
             if (zoneTexturesSet.zone != _currentZone)
                 continue;
             
-            floorMaterial.SetTexture(FloorMain, zoneTexturesSet.textureData.floorMain);
-            floorMaterial.SetTexture(FloorDetail, zoneTexturesSet.textureData.floorDetail);
-            floorMaterial.SetTexture(WallMain, zoneTexturesSet.textureData.wallMain);
-            floorMaterial.SetTexture(WallDetail, zoneTexturesSet.textureData.wallDetail);
-            _vignette.color.Override(zoneTexturesSet.textureData.fogColor);
-            _camera.backgroundColor = zoneTexturesSet.textureData.fogColor;
-            RenderSettings.fogColor = zoneTexturesSet.textureData.fogColor;
-            RenderSettings.ambientLight = zoneTexturesSet.textureData.ambientColor;
+            floorMaterial.SetTexture(FloorMain, zoneTexturesSet.data.floorMain);
+            floorMaterial.SetTexture(FloorDetail, zoneTexturesSet.data.floorDetail);
+            floorMaterial.SetTexture(WallMain, zoneTexturesSet.data.wallMain);
+            floorMaterial.SetTexture(WallDetail, zoneTexturesSet.data.wallDetail);
+            _vignette.color.Override(zoneTexturesSet.data.fogColor);
+            _camera.backgroundColor = zoneTexturesSet.data.fogColor;
+            RenderSettings.fogColor = zoneTexturesSet.data.fogColor;
+            RenderSettings.ambientLight = zoneTexturesSet.data.ambientColor;
             break;
         }
     }
@@ -413,9 +374,9 @@ public class FloorManager : MonoBehaviour
         return _instance._started;
     }
 
-    public static FloorData[] GetFloorData()
+    public static Floor.Data[] GetFloorData()
     {
-        return _instance.floorData;
+        return _instance.soFloor.data;
     }
 
     public static int GetLevelCount()
@@ -451,7 +412,7 @@ public class FloorManager : MonoBehaviour
     {
         _camera.transform.position = Vector3.MoveTowards(_camera.transform.position, _cameraTarget,
             _cameraSpeedBoost * cameraSpeed * Time.fixedDeltaTime);
-        _camera.transform.forward = Vector3.Slerp(_camera.transform.forward, cameraEndPosition.forward, 
+        _camera.transform.forward = Vector3.Slerp(_camera.transform.forward, cameraTarget.forward, 
             cameraSpeed * Time.fixedDeltaTime);
     }
 }

@@ -1,51 +1,17 @@
-using System;
 using System.Collections.Generic;
-using TriInspector;
 using UnityEngine;
+using Floor = So.Floor;
 using Random = UnityEngine.Random;
 
 public static class FloorGeneration
 {
-    [Serializable]
-    public class Settings
-    {
-        [Serializable]
-        [DeclareHorizontalGroup("Outcome")]
-        public class Outcome
-        {
-            [Group("Outcome"), HideLabel]
-            public FloorManager.FloorData.Type type;
-            [Group("Outcome"), HideLabel, Unit("weight")]
-            public int weight;
-        }
-        
-        public FloorManager.FloorData.Type type;
-        [ListDrawerSettings(Draggable = true,
-            HideAddButton = false,
-            HideRemoveButton = false,
-            AlwaysExpanded = true)]
-        public Outcome[] possibleOutcomes;
-        private int _totalWeight;
-
-        public void ComputeTotalWeight()
-        {
-            foreach (var outcome in possibleOutcomes)
-                _totalWeight += outcome.weight;
-        }
-
-        public int GetTotalWeight()
-        {
-            return _totalWeight;
-        }
-    }
-
-    public static void Init(Settings[] settings)
+    public static void Init(Floor.Settings[] settings)
     {
         foreach (var setting in settings)
             setting.ComputeTotalWeight();
     }
     
-    public static List<int> Run(Settings[] settings, FloorManager.FloorData.Type carryOver = FloorManager.FloorData.Type.Standard)
+    public static List<int> Run(Floor.Settings[] settings, Floor.Data.Type carryOver = Floor.Data.Type.Standard)
     {
         var indexList = new List<int>();
         var previousType = carryOver;

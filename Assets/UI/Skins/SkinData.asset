@@ -12,20 +12,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6a6401b0a78e434488757b447faea396, type: 3}
   m_Name: SkinData
   m_EditorClassIdentifier: Assembly-CSharp::SkinMenuData
-  categories:
+  data:
   - name: Clothes
     skins:
     - name: Traditional
       sprite: {fileID: 21300000, guid: d8c1806757939714098824ad072e05e7, type: 3}
       nameInScene: Clothes_base
+      scoreRequired: 0
     - name: Yukata
       sprite: {fileID: 21300000, guid: f566676bd2b41144393c19265d01ef6b, type: 3}
       nameInScene: Clothes_yukata
+      scoreRequired: 30
   - name: Hair
     skins:
     - name: Usual
       sprite: {fileID: 21300000, guid: ec8efe0020a2fc34fa0ad096d8168a68, type: 3}
       nameInScene: Hair_base
+      scoreRequired: 0
     - name: Bun
       sprite: {fileID: 21300000, guid: ac930a3510baea74d84b72bac7b32683, type: 3}
       nameInScene: Hair_bun
+      scoreRequired: 10

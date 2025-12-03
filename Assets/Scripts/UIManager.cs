@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using So;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -38,6 +39,19 @@ public class UIManager : MonoBehaviour
     [Header("Credits Menus")]
     [SerializeField] private RectTransform creditsMenu;
     
+    [Header("Sound Effects")]
+    [SerializeField] private AudioClip openMenu;
+    [SerializeField] private AudioClip closeMenu;
+    [SerializeField] private AudioClip enableSetting;
+    [SerializeField] private AudioClip disableSetting;
+    [SerializeField] private AudioClip cantSelect;
+    
+    [Header("Colors")]
+    [SerializeField] private Color normalColor;
+    [SerializeField] private Color selectedColor;
+    [SerializeField] private Color normalTextColor;
+    [SerializeField] private Color selectedTextColor;
+    
     private void Awake()
     {
         if (_instance)
@@ -61,7 +75,7 @@ public class UIManager : MonoBehaviour
         if (value)
         {
             _instance.mainContent.gameObject.SetActive(!gameOver);
-            _instance.skinsButton.gameObject.SetActive(UnlocksManager.Unlocked);
+            _instance.skinsButton.gameObject.SetActive(GameManager.MaxScore >= 10);
             if (gameOver)
                 DisplayGameOverMenu(true);
             else
@@ -76,7 +90,7 @@ public class UIManager : MonoBehaviour
         
         _instance.mainMenu.gameObject.SetActive(value);
         _instance.backButton.gameObject.SetActive(!value);
-        _instance.highestScoreText.text = $"Best — {UnlocksManager.MaxScore}\tReached — {UnlocksManager.MaxDistanceTraveled:F1}m";
+        _instance.highestScoreText.text = $"Best — {GameManager.MaxScore}\tReached — {GameManager.MaxDistanceTraveled:F1}m";
 
         if (value)
         {
@@ -103,32 +117,86 @@ public class UIManager : MonoBehaviour
             if (child != _instance.skinsMenu)
                 Destroy(child.gameObject);
 
-        var skinMenuData = UnlocksManager.GetSkinMenuData();
-        foreach (var categoryUi in skinMenuData.categories)
+        var soSkin = GameManager.GetSoSkin();
+        foreach (var categoryUi in soSkin.data)
         {
             var categoryPrefabUi = Instantiate(_instance.skinCategoryPrefab, _instance.skinsMenu);
             categoryPrefabUi.transform.Find("CategoryLabel").GetComponent<TextMeshProUGUI>().text = categoryUi.name;
-            var skinPrefabsUi = new Dictionary<GameObject, SkinMenuData.SkinData>();
+            var skinPrefabsUi = new Dictionary<GameObject, Skin.Category.Data>();
             
             foreach (var skinUi in categoryUi.skins)
             {
                 var skinPrefabUi = Instantiate(_instance.skinPrefab, categoryPrefabUi.transform);
-                skinPrefabUi.transform.Find("SkinName").GetComponent<TextMeshProUGUI>().text = skinUi.name;
-                skinPrefabUi.transform.Find("SkinImageCanvas/SkinImage").GetComponent<Image>().sprite = skinUi.sprite;
+                
+                if (GameManager.MaxScore < skinUi.scoreRequired)
+                {
+                    var textMesh = skinPrefabUi.transform.Find("SkinName").GetComponent<TextMeshProUGUI>();
+                    textMesh.text = $"{skinUi.scoreRequired}+ points";
+                    var image = skinPrefabUi.transform.Find("SkinImageCanvas/SkinImage").GetComponent<Image>();
+                    image.sprite = skinUi.sprite;
+                    image.color = new Color(image.color.r, image.color.g, image.color.b, 0.4f);
+                }
+                else
+                {
+                    skinPrefabUi.transform.Find("SkinName").GetComponent<TextMeshProUGUI>().text = skinUi.name;
+                    skinPrefabUi.transform.Find("SkinImageCanvas/SkinImage").GetComponent<Image>().sprite = skinUi.sprite;
+                }
+                
                 skinPrefabsUi.Add(skinPrefabUi, skinUi);
             }
 
             foreach (var skinPrefabUi in skinPrefabsUi)
             {
-                skinPrefabUi.Key.GetComponent<Button>().onClick.AddListener(() =>
+                var button = skinPrefabUi.Key.GetComponent<Button>();
+                
+                var objects = GameManager.GetPlayer().GetComponentsInChildren<Transform>(true).ToDictionary(o => o.name, o => o);
+                var currentSkin = GameManager.GetSkin(categoryUi.name);
+                var textMesh = skinPrefabUi.Key.transform.Find("SkinName").GetComponent<TextMeshProUGUI>();
+                if (currentSkin == skinPrefabUi.Value.nameInScene)
                 {
-                    var objects = GameManager.GetPlayer().GetComponentsInChildren<Transform>(true).ToDictionary(o => o.name, o => o);
-                    UnlocksManager.SetSkin(categoryUi.name, skinPrefabUi.Value.nameInScene);
-                    foreach (var skin in skinPrefabsUi.Values)
+                    textMesh.color = _instance.selectedTextColor;
+                    button.interactable = false;
+                    var block = button.colors;
+                    block.disabledColor = _instance.selectedColor;
+                    button.colors = block;
+                }
+                else
+                {
+                    button.interactable = GameManager.MaxScore >= skinPrefabUi.Value.scoreRequired;
+                }
+                
+                button.onClick.AddListener(() =>
+                {
+                    GameManager.SetSkin(categoryUi.name, skinPrefabUi.Value.nameInScene);
+                    foreach (var skin in skinPrefabsUi)
                     {
-                        var obj = objects[skin.nameInScene];
-                        obj.gameObject.SetActive(obj.name == skinPrefabUi.Value.nameInScene);
+                        var obj = objects[skin.Value.nameInScene];
+                        var match = obj.name == skinPrefabUi.Value.nameInScene;
+                        obj.gameObject.SetActive(match);
+                        var localTextMesh = skin.Key.transform.Find("SkinName").GetComponent<TextMeshProUGUI>();
+                        var localButton = skin.Key.GetComponent<Button>();
+                        if (match)
+                        {
+                            localTextMesh.color = _instance.selectedTextColor;
+                            localButton.interactable = false;
+                            var block = localButton.colors;
+                            block.disabledColor = _instance.selectedColor;
+                            localButton.colors = block;
+                        }
+                        else
+                        {
+                            localTextMesh.color = _instance.normalTextColor;
+                            localButton.interactable = true;
+                            var block = localButton.colors;
+                            block.disabledColor = _instance.normalColor;
+                            localButton.colors = block;
+                        }
                     }
+                });
+                
+                button.onClick.AddListener(() =>
+                {
+                    PlayToggleSetting(true);
                 });
             }
         }
@@ -140,9 +208,9 @@ public class UIManager : MonoBehaviour
             return;
         
         _instance.settingsMenu.gameObject.SetActive(value);
-        _instance.musicVolume.value = UnlocksManager.AudioSource.volume * 100f;
-        _instance.soundVolume.value = UnlocksManager.SoundEffectsVolume * 100f;
-        _instance.enemyNameDisplay.isOn = UnlocksManager.GetNameDisplay();
+        _instance.musicVolume.SetValueWithoutNotify(GameManager.AudioSource.volume * 100f);
+        _instance.soundVolume.SetValueWithoutNotify(GameManager.SoundEffectsVolume * 100f);
+        _instance.enemyNameDisplay.SetIsOnWithoutNotify(GameManager.EnemyNameDisplay);
         DisplayMainMenu(!value);
     }
     
@@ -170,7 +238,7 @@ public class UIManager : MonoBehaviour
         {
             GameManager.GetPlayer().EnableUIMap();
             GameManager.GetPlayer().PerformCharging();
-            UnlocksManager.PlayMainMusic();
+            GameManager.PlayMainMusic();
         }
         else
         {
@@ -193,7 +261,7 @@ public class UIManager : MonoBehaviour
 
     public static void ChangeMusicVolume(float value)
     {
-        UnlocksManager.AudioSource.volume = value * 0.01f;
+        GameManager.AudioSource.volume = value * 0.01f;
     }
 
     public static void ChangeSoundEffectsVolume(float value)
@@ -203,11 +271,31 @@ public class UIManager : MonoBehaviour
     
     public static void ChangeEnemyNameDisplay(bool value)
     {
-        UnlocksManager.ChangeEnemyNameDisplay(value);
+        GameManager.EnemyNameDisplay = value;
     }
 
     public static void SetGameOverText(string text)
     {
         _instance.gameOverText.text = text;
+    }
+
+    public static void PlayOpenMenu()
+    {
+        GameManager.GetPlayer().PlaySound(_instance.openMenu);
+    }
+
+    public static void PlayCloseMenu()
+    {
+        GameManager.GetPlayer().PlaySound(_instance.closeMenu);
+    }
+    
+    public static void PlayToggleSetting(bool value)
+    {
+        GameManager.GetPlayer().PlaySound(value ? _instance.enableSetting : _instance.disableSetting);
+    }
+    
+    public static void PlayCantSelect()
+    {
+        GameManager.GetPlayer().PlaySound(_instance.cantSelect);
     }
 }

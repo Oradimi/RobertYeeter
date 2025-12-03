@@ -1,3 +1,4 @@
+using SceneLabel;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -52,15 +53,16 @@ public class PlayerController : MonoBehaviour
         _targetPosition = Vector3.right;
         _chargePosition = Vector3.zero;
         _initialChargeBreak = chargeBreak;
+        GameManager.SetPlayer(this);
     }
 
     private void OnEnable()
     {
-        _audioSource.volume = UnlocksManager.SoundEffectsVolume;
+        _audioSource.volume = GameManager.SoundEffectsVolume;
         SceneLabelOverlay.OnSetSpecialAttribute += PlayerControllerLabelEffect;
         _animator.SetBool(WetBool, false);
         _controls.Enable();
-        UnlocksManager.ApplySkin();
+        GameManager.ApplySkin();
         EnableActionMap();
         _controls.UI.Fullscreen.performed += OnFullscreen;
     }
@@ -103,8 +105,8 @@ public class PlayerController : MonoBehaviour
             _direction = 0f;
     }
 
-    private bool _collision1 = false;
-    private bool _collision2 = false;
+    private bool _collision1;
+    private bool _collision2;
     
     private void CheckCollision()
     {
@@ -193,6 +195,11 @@ public class PlayerController : MonoBehaviour
     public void PlayPunchSound()
     {
         _audioSource.PlayOneShot(punchSound);
+    }
+
+    public void PlaySound(AudioClip clip)
+    {
+        _audioSource.PlayOneShot(clip);
     }
 
     public float Speed()
@@ -336,7 +343,7 @@ public class PlayerController : MonoBehaviour
         _audioSource.volume = value * 0.01f;
         if (!_audioSource.isPlaying)
             _audioSource.PlayOneShot(cantMoveSound);
-        UnlocksManager.SoundEffectsVolume = _audioSource.volume;
+        GameManager.SoundEffectsVolume = _audioSource.volume;
     }
     
     private bool IsMouseOverUi()

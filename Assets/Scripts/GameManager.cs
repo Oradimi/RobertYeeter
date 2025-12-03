@@ -1,4 +1,7 @@
-using Unity.VisualScripting;
+using System.Collections.Generic;
+using System.Linq;
+using SceneLabel;
+using So;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
@@ -10,17 +13,31 @@ public class GameManager : MonoBehaviour
         Drowned,
     }
     
+    private static GameManager _instance;
+    
+    public static int MaxScore;
+    public static float MaxDistanceTraveled;
+    
+    public static AudioSource AudioSource;
+    public static float SoundEffectsVolume;
+    public static bool EnemyNameDisplay;
+    
     public static float GlobalSpeed;
     public static bool AffectsAnimations;
     
     public static float GlobalSpeedStored;
     public static bool AffectsAnimationsStored;
     
+    [Header("Data")]
+    [SerializeField] private Skin soSkin;
     [SerializeField] private PlayerController player;
     [SerializeField] private float nextLevelDistance;
     
-    private static GameManager _instance;
-    private static FloorManager _floorManager;
+    [Header("Music")]
+    [SerializeField] private AudioClip caveAmbience;
+    [SerializeField] private AudioClip mainMusic;
+
+    private Dictionary<string, string> _skins;
 
     [SceneLabel(SceneLabelID.Score)]
     private int _score;
@@ -32,41 +49,34 @@ public class GameManager : MonoBehaviour
     private float _effectTime;
     private int _combo;
     private int _gain;
-    private bool _isGameOver;
     
     private void Awake()
     {
-        if (!player)
-            return;
-        
         if (_instance)
         {
-            Destroy(this);
+            Destroy(gameObject);
             return;
         }
 
         _instance = this;
+        DontDestroyOnLoad(_instance);
         
-        _floorManager = FindAnyObjectByType<FloorManager>();
-
+        AudioSource = GetComponent<AudioSource>();
+        AudioSource.clip = _instance.caveAmbience;
+        AudioSource.Play();
+        
+        SoundEffectsVolume = _instance.player.GetComponent<AudioSource>().volume;
+        
         GlobalSpeed = 1f;
         
         _targetPosition = transform.position;
-    }
-    
-    private void OnEnable()
-    {
-        SceneLabelOverlay.OnSetSpecialAttribute += GameManagerLabelEffect;
-    }
-    
-    private void OnDisable()
-    {
-        SceneLabelOverlay.OnSetSpecialAttribute -= GameManagerLabelEffect;
+        
+        InitSkin();
     }
 
     private void FixedUpdate()
     {
-        if (FloorManager.IsPaused() || _isGameOver)
+        if (FloorManager.IsPaused() || FloorManager.IsGameOver())
             return;
         
         _instance._effectTime -= Time.fixedDeltaTime;
@@ -100,31 +110,28 @@ public class GameManager : MonoBehaviour
         _instance._distanceTraveled = 0;
     }
 
-    public static bool IsDistanceThresholdCrossed()
+    public static float NextLevelStairsChance()
     {
-        return _instance._distanceTraveled > _instance.nextLevelDistance * FloorManager.GetLevelCount();
+        return (_instance._distanceTraveled - _instance.nextLevelDistance * (FloorManager.GetLevelCount() - 1)) / _instance.nextLevelDistance;
     }
 
     public static void GameOver(GameOverCase gameOverCase, Transform deathCause = null)
     {
-        if (_instance._score >= 30)
-            UnlocksManager.Unlocked = true;
-        
-        if (_instance._isGameOver)
-            return;
-        _instance._isGameOver = true;
-        if (!_floorManager)
-            return;
         _instance.player.DisableActionMap();
         GlobalSpeed = 0f;
         AffectsAnimations = false;
 
-        if (_instance._score > UnlocksManager.MaxScore)
-            UnlocksManager.MaxScore = _instance._score;
-        if (_instance._distanceTraveled > UnlocksManager.MaxDistanceTraveled)
-            UnlocksManager.MaxDistanceTraveled = _instance._distanceTraveled;
+        if (_instance._score > MaxScore)
+            MaxScore = _instance._score;
+        if (_instance._distanceTraveled > MaxDistanceTraveled)
+            MaxDistanceTraveled = _instance._distanceTraveled;
         
-        _floorManager.GameOver(gameOverCase, deathCause);
+        FloorManager.GameOver(gameOverCase, deathCause);
+    }
+
+    public static void SetPlayer(PlayerController player)
+    {
+        _instance.player = player;
     }
 
     public static PlayerController GetPlayer()
@@ -132,16 +139,16 @@ public class GameManager : MonoBehaviour
         return _instance.player;
     }
 
-    private static void GameManagerLabelEffect(SceneLabelAttribute attr, SceneLabelOverlay.SceneLabelOverlayData data)
+    public static void GameManagerLabelEffect(SceneLabelAttribute attr, SceneLabelOverlay.SceneLabelOverlayData data)
     {
-        var prefix = "";
+        string prefix;
         switch (attr.ID)
         {
             case SceneLabelID.Score:
                 prefix = FloorManager.IsGameOver() ? "Score — " : "";
                 attr.Value = FloorManager.IsPaused() ? "Paused" : FloorManager.IsStarted() ? $"{prefix}{_instance._score}" : "";
         
-                if (_instance._effectTime <= 0f || FloorManager.IsPaused() || FloorManager.IsGameOver())
+                if (_instance._effectTime <= 0f || FloorManager.IsPaused() || FloorManager.IsGameOver() || !FloorManager.IsStarted())
                 {
                     attr.FormatValue = null;
                     attr.RichValue = null;
@@ -153,7 +160,7 @@ public class GameManager : MonoBehaviour
                 var comboColor = Color.Lerp(Color.chocolate, Color.crimson, (_instance._combo - 1) / 3f);
                 var color = Color.Lerp(Color.white, comboColor, _instance._effectTime);
                 attr.FormatValue = $"<size={fontSize}>{_instance._score}</size><size={gainFontSize}>+{_instance._gain}</size>";
-                attr.RichValue = $"<color=#{color.ToHexString()}>{attr.FormatValue}</color>";
+                attr.RichValue = $"<color=#{ColorUtility.ToHtmlStringRGB(color)}>{attr.FormatValue}</color>";
                 break;
             case SceneLabelID.DistanceTraveled:
                 prefix = FloorManager.IsGameOver() ? "Reached — " : "";
@@ -161,5 +168,58 @@ public class GameManager : MonoBehaviour
                 attr.Suffix = FloorManager.IsPaused() || !FloorManager.IsStarted() ? "" : "m";
                 break;
         }
+    }
+
+    public static void PlayMainMusic()
+    {
+        if (AudioSource.clip == _instance.mainMusic)
+            return;
+        AudioSource.clip = _instance.mainMusic;
+        AudioSource.Play();
+    }
+
+    public static void EnemyNameDisplayLabelEffect(SceneLabelAttribute attr, SceneLabelOverlay.SceneLabelOverlayData data)
+    {
+        if (attr.ID != SceneLabelID.EnemyName)
+            return;
+        
+        if (!EnemyNameDisplay)
+            attr.Value = "";
+
+        attr.RichValue = attr.Value.ToString() == "Jean-Pierre" ? $"<color=red>{attr.Value}</color>" : null;
+    }
+
+    private static void InitSkin()
+    {
+        _instance._skins = new Dictionary<string, string>();
+        foreach (var category in _instance.soSkin.data)
+        {
+            _instance._skins.Add(category.name, category.skins[0].nameInScene);
+            foreach (var skin in category.skins)
+                _instance.player.transform.Find(skin.nameInScene).gameObject.SetActive(_instance._skins[category.name] == skin.nameInScene);
+        }
+    }
+
+    public static string GetSkin(string category)
+    {
+        return _instance._skins[category];
+    }
+
+    public static void SetSkin(string category, string skinName)
+    {
+        _instance._skins[category] = skinName;
+    }
+
+    public static void ApplySkin()
+    {
+        var objects = _instance.player.GetComponentsInChildren<Transform>(true).ToDictionary(o => o.name, o => o);
+        foreach (var category in _instance.soSkin.data)
+            foreach (var skin in category.skins)
+                objects[skin.nameInScene].gameObject.SetActive(_instance._skins[category.name] == skin.nameInScene);
+    }
+    
+    public static Skin GetSoSkin()
+    {
+        return _instance.soSkin;
     }
 }
