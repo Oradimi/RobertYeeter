@@ -77,6 +77,7 @@ namespace So
 
             public void ComputeTotalWeight()
             {
+                _totalWeight = 0;
                 foreach (var outcome in possibleOutcomes)
                     _totalWeight += outcome.weight;
             }

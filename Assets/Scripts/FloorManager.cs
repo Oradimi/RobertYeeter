@@ -270,6 +270,7 @@ public class FloorManager : MonoBehaviour
     public static void GameOver(GameManager.GameOverCase gameOverCase, Transform deathCause = null)
     {
         GameManager.GetPlayer().DisableUIMap();
+        GameManager.SaveData();
         _instance._gameOver = true;
         Vector3 playerPosition;
         switch (gameOverCase)

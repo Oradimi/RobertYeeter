@@ -22,7 +22,7 @@ MonoBehaviour:
     - name: Yukata
       sprite: {fileID: 21300000, guid: f566676bd2b41144393c19265d01ef6b, type: 3}
       nameInScene: Clothes_yukata
-      scoreRequired: 30
+      scoreRequired: 50
   - name: Hair
     skins:
     - name: Usual
@@ -32,4 +32,4 @@ MonoBehaviour:
     - name: Bun
       sprite: {fileID: 21300000, guid: ac930a3510baea74d84b72bac7b32683, type: 3}
       nameInScene: Hair_bun
-      scoreRequired: 10
+      scoreRequired: 30

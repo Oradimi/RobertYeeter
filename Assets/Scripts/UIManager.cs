@@ -75,7 +75,7 @@ public class UIManager : MonoBehaviour
         if (value)
         {
             _instance.mainContent.gameObject.SetActive(!gameOver);
-            _instance.skinsButton.gameObject.SetActive(GameManager.MaxScore >= 10);
+            _instance.skinsButton.gameObject.SetActive(GameManager.PlayerData.MaxScore >= 10);
             if (gameOver)
                 DisplayGameOverMenu(true);
             else
@@ -90,7 +90,7 @@ public class UIManager : MonoBehaviour
         
         _instance.mainMenu.gameObject.SetActive(value);
         _instance.backButton.gameObject.SetActive(!value);
-        _instance.highestScoreText.text = $"Best — {GameManager.MaxScore}\tReached — {GameManager.MaxDistanceTraveled:F1}m";
+        _instance.highestScoreText.text = $"Best — {GameManager.PlayerData.MaxScore}\tReached — {GameManager.PlayerData.MaxDistanceTraveled:F1}m";
 
         if (value)
         {
@@ -127,8 +127,9 @@ public class UIManager : MonoBehaviour
             foreach (var skinUi in categoryUi.skins)
             {
                 var skinPrefabUi = Instantiate(_instance.skinPrefab, categoryPrefabUi.transform);
-                
-                if (GameManager.MaxScore < skinUi.scoreRequired)
+
+                GameManager.PlayerData.SelectedSkins.TryGetValue(categoryUi.name, out var skinName);
+                if (GameManager.PlayerData.MaxScore < skinUi.scoreRequired && skinName != skinUi.nameInScene)
                 {
                     var textMesh = skinPrefabUi.transform.Find("SkinName").GetComponent<TextMeshProUGUI>();
                     textMesh.text = $"{skinUi.scoreRequired}+ points";
@@ -162,12 +163,13 @@ public class UIManager : MonoBehaviour
                 }
                 else
                 {
-                    button.interactable = GameManager.MaxScore >= skinPrefabUi.Value.scoreRequired;
+                    button.interactable = GameManager.PlayerData.MaxScore >= skinPrefabUi.Value.scoreRequired;
                 }
                 
                 button.onClick.AddListener(() =>
                 {
                     GameManager.SetSkin(categoryUi.name, skinPrefabUi.Value.nameInScene);
+                    GameManager.SaveData();
                     foreach (var skin in skinPrefabsUi)
                     {
                         var obj = objects[skin.Value.nameInScene];
@@ -262,16 +264,22 @@ public class UIManager : MonoBehaviour
     public static void ChangeMusicVolume(float value)
     {
         GameManager.AudioSource.volume = value * 0.01f;
+        GameManager.PlayerData.MusicVolume = Mathf.FloorToInt(value);
+        GameManager.SaveData();
     }
 
     public static void ChangeSoundEffectsVolume(float value)
     {
         GameManager.GetPlayer().ChangeSoundEffectsVolume(value);
+        GameManager.PlayerData.SoundVolume = Mathf.FloorToInt(value);
+        GameManager.SaveData();
     }
     
     public static void ChangeEnemyNameDisplay(bool value)
     {
         GameManager.EnemyNameDisplay = value;
+        GameManager.PlayerData.EnemyNameDisplay = value;
+        GameManager.SaveData();
     }
 
     public static void SetGameOverText(string text)

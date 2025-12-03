@@ -1,8 +1,11 @@
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using SceneLabel;
 using So;
 using UnityEngine;
+using Utilities;
 
 public class GameManager : MonoBehaviour
 {
@@ -15,8 +18,8 @@ public class GameManager : MonoBehaviour
     
     private static GameManager _instance;
     
-    public static int MaxScore;
-    public static float MaxDistanceTraveled;
+    public static PlayerData PlayerData;
+    public static readonly string PlayerDataPath = "/saveData";
     
     public static AudioSource AudioSource;
     public static float SoundEffectsVolume;
@@ -36,8 +39,6 @@ public class GameManager : MonoBehaviour
     [Header("Music")]
     [SerializeField] private AudioClip caveAmbience;
     [SerializeField] private AudioClip mainMusic;
-
-    private Dictionary<string, string> _skins;
 
     [SceneLabel(SceneLabelID.Score)]
     private int _score;
@@ -61,16 +62,12 @@ public class GameManager : MonoBehaviour
         _instance = this;
         DontDestroyOnLoad(_instance);
         
-        AudioSource = GetComponent<AudioSource>();
-        AudioSource.clip = _instance.caveAmbience;
-        AudioSource.Play();
-        
-        SoundEffectsVolume = _instance.player.GetComponent<AudioSource>().volume;
-        
         GlobalSpeed = 1f;
-        
         _targetPosition = transform.position;
         
+        InitPlayerData();
+        InitAudio();
+        InitSettings();
         InitSkin();
     }
 
@@ -121,10 +118,10 @@ public class GameManager : MonoBehaviour
         GlobalSpeed = 0f;
         AffectsAnimations = false;
 
-        if (_instance._score > MaxScore)
-            MaxScore = _instance._score;
-        if (_instance._distanceTraveled > MaxDistanceTraveled)
-            MaxDistanceTraveled = _instance._distanceTraveled;
+        if (_instance._score > PlayerData.MaxScore)
+            PlayerData.MaxScore = _instance._score;
+        if (_instance._distanceTraveled > PlayerData.MaxDistanceTraveled)
+            PlayerData.MaxDistanceTraveled = _instance._distanceTraveled;
         
         FloorManager.GameOver(gameOverCase, deathCause);
     }
@@ -188,26 +185,84 @@ public class GameManager : MonoBehaviour
 
         attr.RichValue = attr.Value.ToString() == "Jean-Pierre" ? $"<color=red>{attr.Value}</color>" : null;
     }
+    
+    private static void InitPlayerData()
+    {
+        try
+        {
+            PlayerData = DataService.LoadData<PlayerData>(PlayerDataPath);
+        }
+        catch (Exception e)
+        {
+            if (e is not FileNotFoundException)
+            {
+                var path = Application.persistentDataPath + PlayerDataPath;
+                var bytes = File.ReadAllBytes(path);
+                File.WriteAllBytes(path + "Corrupted", bytes);
+                Debug.LogError("Invalid save file. Created backup.");
+            }
+            
+            PlayerData = new PlayerData
+            {
+                MusicVolume = 40,
+                SoundVolume = 40,
+                SelectedSkins = new Dictionary<string, string>()
+            };
+
+            var obj = Resources.Load("Build", typeof(BuildScriptableObject));
+            var buildScriptableObject = obj as BuildScriptableObject;
+
+            if (buildScriptableObject == null)
+                Debug.LogError("Build scriptable object not found in resources directory.");
+            else
+                PlayerData.Build = buildScriptableObject.buildNumber;
+
+            SaveData();
+        }
+    }
+
+    private static void InitAudio()
+    {
+        AudioSource = _instance.GetComponent<AudioSource>();
+        AudioSource.clip = _instance.caveAmbience;
+        AudioSource.Play();
+        AudioSource.volume = PlayerData.MusicVolume * 0.01f;
+
+        var playerAudioSource = _instance.player.GetComponent<AudioSource>();
+        playerAudioSource.volume = PlayerData.SoundVolume * 0.01f;
+        SoundEffectsVolume = playerAudioSource.volume;
+    }
+
+    private static void InitSettings()
+    {
+        EnemyNameDisplay = PlayerData.EnemyNameDisplay;
+    }
 
     private static void InitSkin()
     {
-        _instance._skins = new Dictionary<string, string>();
         foreach (var category in _instance.soSkin.data)
         {
-            _instance._skins.Add(category.name, category.skins[0].nameInScene);
+            if (!PlayerData.SelectedSkins.TryGetValue(category.name, out _))
+                PlayerData.SelectedSkins.Add(category.name, category.skins[0].nameInScene);
+            
             foreach (var skin in category.skins)
-                _instance.player.transform.Find(skin.nameInScene).gameObject.SetActive(_instance._skins[category.name] == skin.nameInScene);
+                _instance.player.transform.Find(skin.nameInScene).gameObject.SetActive(PlayerData.SelectedSkins[category.name] == skin.nameInScene);
         }
+    }
+    
+    public static void SaveData()
+    {
+        DataService.SaveData(PlayerDataPath, PlayerData);
     }
 
     public static string GetSkin(string category)
     {
-        return _instance._skins[category];
+        return PlayerData.SelectedSkins[category];
     }
 
     public static void SetSkin(string category, string skinName)
     {
-        _instance._skins[category] = skinName;
+        PlayerData.SelectedSkins[category] = skinName;
     }
 
     public static void ApplySkin()
@@ -215,7 +270,7 @@ public class GameManager : MonoBehaviour
         var objects = _instance.player.GetComponentsInChildren<Transform>(true).ToDictionary(o => o.name, o => o);
         foreach (var category in _instance.soSkin.data)
             foreach (var skin in category.skins)
-                objects[skin.nameInScene].gameObject.SetActive(_instance._skins[category.name] == skin.nameInScene);
+                objects[skin.nameInScene].gameObject.SetActive(PlayerData.SelectedSkins[category.name] == skin.nameInScene);
     }
     
     public static Skin GetSoSkin()

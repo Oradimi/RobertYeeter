@@ -21,7 +21,7 @@ namespace Utilities
 
             if (buildScriptableObject == null)
             {
-                Debug.LogError("Build scriptable object not found in resources directory! Check build log for errors!");
+                Debug.LogError("Build scriptable object not found in resources directory.");
             }
             else
             {
