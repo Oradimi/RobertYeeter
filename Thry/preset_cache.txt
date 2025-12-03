@@ -1,18 +1,9 @@
 1.1.0
 
 _full_
-Example/Hologram/Additive;62a278a074e00c94ba4aa2181a2ae166
-Example/Hologram/Fade;3f8642ecde170d8408527738fd5392f4
-Example/Video Effects/CRT;184220e68e6660c43b5c86d9d6385a81
-Example/Video Effects/GameBoy;5982d97f856cb8644a2a291618472530
-Example/Video Effects/LCD;dcc08de1c605ef74e9c9a6a0d3999fb9
-Example/Video Effects/OLED;15e2af2268763664b94fd0619e5153a5
-Example/Video Effects/TN Panel;a79dd004459fd1d45961efa3622c4f47
 Shading/Shading/Cloth;2807a42a52df1c44d97cf5e17934fb66
 Shading/Shading/Shade Maps;0dfb68f3451a286408b0be70c899a6c2
 SpecialFX/DepthFX/Fade Near Object;85ae851a357ebf4429ba502c9c0a1a64
-Example/Ice;8d183e97b99f26040a156cbc60955feb
-Example/Sunglasses (Early Outline);e882f4d57a954904b8a144bdcea017ea
 Lighting/Full UTS2;b3ea4f0c69d93b14ca1f17342c9502fa
 Rendering/Double Sided;3015a1788cdd8dc4cb79bd921cbffb59
 Teeh's Quick Shading Models/QuickCel;3376ba1da5060904fad953f4af5802ee
@@ -21,7 +12,6 @@ Teeh's Quick Shading Models/QuickToon;a9b85a227a5eca54eb8736f6221ed4b3
 Teeh's Quick Shading Models/QuickWrap;c3bc736fe193e3f43a32e9f2ab399887
 TwoPassParticle/Aura;e901563556c598048b412751960648fc
 LilToon Shading Preset;bf8c5ab91bf6aaa49b949bf74998ddc2
-MP_Slime;a4f86e8a74171954fbc15b5ee578dfb7
 PBR+GI Compatibility;97cc2bfac2a8e7e4692d7c7ad9eeec80
 
 m_start_emission1Options
@@ -99,7 +89,7 @@ Volume Bands/12-Band;0b416ffba1a7d97429ff71b7efc9230c
 Volume Bands/4-Band;c616aa2d7967623489243ae874323c90
 Volume Bands/8-Band;be96e40be3814e84fbca071cf6782a66
 Volume Bands/Reset;53395a2a59ff2f148b53eafd66967204
-Oldschool VFD;e521e7368b5839d4d927e507e15593eb
+Oldschool VFD;34b907ecea29f974aaf32f618e246a5b
 
 m_start_Alpha
 Alpha to Coverage + Dithering;11cc49b1463fe4240ae384b23baf0f67
@@ -135,7 +125,7 @@ Min Brightness/.01 (Recognizable);82c5aafb37530a643b4e3f9421d5fda5
 Min Brightness/.1 (Glowstick);a5dc2b822da4d1a428581dfadf5f3dbb
 Min Brightness/0 (Correct);26af5cb87deb3ed4c8c2032134d84d5d
 "PBR";372d7ee2fdaa3914986be8eb2b0cdd0d
-Teeh Custom;9392d94f15870434facaa649d54973f0
+Teeh Custom;6b98b5e879972824d913a41f992c833c
 
 m_start_OutlineAudioLink
 10W;4439ffc714f4ad44ab0bd637620826d7

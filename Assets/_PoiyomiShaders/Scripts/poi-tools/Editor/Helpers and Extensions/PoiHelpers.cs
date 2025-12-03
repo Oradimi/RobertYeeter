@@ -274,5 +274,18 @@ namespace Poi.Tools
             var matSwapKeyframes = materialSwapCurveBindings.SelectMany(binding => AnimationUtility.GetObjectReferenceCurve(animationClip, binding));
             return matSwapKeyframes.Select(frame => frame.value as Material).Distinct();
         }
+
+        public static bool IsURP()
+        {
+            UnityEngine.Rendering.RenderPipelineAsset graphicPipelineAsset = UnityEngine.Rendering.GraphicsSettings.currentRenderPipeline;
+            if (graphicPipelineAsset != null)
+            {
+                if (graphicPipelineAsset.GetType().Name.IndexOf("UniversalRenderPipelineAsset", StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 }

@@ -1273,8 +1273,8 @@ namespace Poiyomi.ModularShaderSystem
             if (shader == null) return modules;
             HashSet<string> collectionIDs = new HashSet<string>();
 
-            FindActiveModules(shader.BaseModules, activeEnablers, modules, collectionIDs);
-            FindActiveModules(shader.AdditionalModules, activeEnablers, modules, collectionIDs);
+            FindActiveModules(shader.BaseModules, activeEnablers, modules, collectionIDs, shader, true);
+            FindActiveModules(shader.AdditionalModules, activeEnablers, modules, collectionIDs, shader, false);
 
             if(duplicatedModules != null)
                 ApplyDupliactes(modules, duplicatedModules);
@@ -1282,16 +1282,30 @@ namespace Poiyomi.ModularShaderSystem
             return modules.Distinct().ToList();
         }
 
-        private static void FindActiveModules(IEnumerable<ShaderModule> modules, Dictionary<string, int> activeEnablers, List<ShaderModule> output, HashSet<string> collectionIDs)
+        private static void FindActiveModules(IEnumerable<ShaderModule> modules, Dictionary<string, int> activeEnablers, List<ShaderModule> output, HashSet<string> collectionIDs, ModularShader shader, bool isBaseModules)
         {
-            foreach (var module in modules)
+            var modulesList = modules.ToList();
+            for (int i = 0; i < modulesList.Count; i++)
             {
+                var module = modulesList[i];
                 if (module == null) continue;
+                
+                if (isBaseModules && shader != null && shader.BaseModulesEnabled != null && i < shader.BaseModulesEnabled.Count && !shader.BaseModulesEnabled[i])
+                    continue;
+                
                 if (module is ModuleCollection collection)
                 {
                     if (collectionIDs.Contains(collection.Id)) continue;
                     collectionIDs.Add(collection.Id);
-                    FindActiveModules(collection.Modules, activeEnablers, output, collectionIDs);
+                    var collectionModulesList = collection.Modules.ToList();
+                    var filteredModules = new List<ShaderModule>();
+                    for (int j = 0; j < collectionModulesList.Count; j++)
+                    {
+                        if (collection.ModulesEnabled != null && j < collection.ModulesEnabled.Count && !collection.ModulesEnabled[j])
+                            continue;
+                        filteredModules.Add(collectionModulesList[j]);
+                    }
+                    FindActiveModules(filteredModules, activeEnablers, output, collectionIDs, shader, false);
                     continue;
                 }
                 bool hasEnabler = module.EnableProperties.Any(x => x != null && !string.IsNullOrEmpty(x.Name));

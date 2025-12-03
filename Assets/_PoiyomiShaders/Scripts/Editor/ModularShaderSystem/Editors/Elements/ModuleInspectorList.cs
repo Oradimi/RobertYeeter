@@ -4,6 +4,7 @@ using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
+using Poiyomi.ModularShaderSystem.CibbiExtensions;
 
 namespace Poiyomi.ModularShaderSystem.UI
 {
@@ -17,6 +18,15 @@ namespace Poiyomi.ModularShaderSystem.UI
         private List<string> _loadedModules;
 
         private bool _hasFoldingBeenForced;
+        
+        private ModularShader _modularShader;
+        private SerializedProperty _baseModulesEnabled;
+        private ModuleCollection _moduleCollection;
+        private SerializedProperty _modulesEnabled;
+        private string _searchFilter = "";
+        private TextField _searchField;
+        private VisualElement _toggleAllContainer;
+        private readonly Dictionary<int, VisualElement> _moduleItemLookup = new Dictionary<int, VisualElement>();
 
         public InspectorListItem draggedElement { get; set; }
         public bool _highlightDrops;
@@ -63,6 +73,11 @@ namespace Poiyomi.ModularShaderSystem.UI
                 }
 
                 if (dropIndex > draggedElement.index) dropIndex--;
+                SerializedProperty enabledArray = _baseModulesEnabled ?? _modulesEnabled;
+                if (enabledArray != null)
+                {
+                    enabledArray.MoveArrayElement(draggedElement.index, dropIndex);
+                }
                 _array.MoveArrayElement(draggedElement.index, dropIndex);
                 bool expanded = _array.GetArrayElementAtIndex(dropIndex).isExpanded;
                 _array.GetArrayElementAtIndex(dropIndex).isExpanded = _array.GetArrayElementAtIndex(draggedElement.index).isExpanded;
@@ -104,6 +119,20 @@ namespace Poiyomi.ModularShaderSystem.UI
                 {
                     if (_hasFoldingBeenForced) obj.isExpanded = _listContainer.value;
                     else _listContainer.value = obj.isExpanded;
+                    
+                    _modularShader = obj.serializedObject.targetObject as ModularShader;
+                    if (_modularShader != null)
+                    {
+                        _baseModulesEnabled = obj.serializedObject.FindProperty("BaseModulesEnabled");
+                    }
+                    else
+                    {
+                        _moduleCollection = obj.serializedObject.targetObject as ModuleCollection;
+                        if (_moduleCollection != null)
+                        {
+                            _modulesEnabled = obj.serializedObject.FindProperty("ModulesEnabled");
+                        }
+                    }
                 }
                 UpdateList();
             }
@@ -114,14 +143,259 @@ namespace Poiyomi.ModularShaderSystem.UI
 #endif
         }
 
+        private void SyncEnabledStateArray()
+        {
+            SerializedProperty enabledArray = _baseModulesEnabled ?? _modulesEnabled;
+            if (enabledArray == null || _array == null)
+                return;
+                
+            if (enabledArray.arraySize != _array.arraySize)
+            {
+                enabledArray.arraySize = _array.arraySize;
+                for (int i = 0; i < enabledArray.arraySize; i++)
+                {
+                    enabledArray.GetArrayElementAtIndex(i).boolValue = true;
+                }
+                enabledArray.serializedObject.ApplyModifiedProperties();
+            }
+        }
+
+        private bool MatchesSearch(ShaderModule module, string search)
+        {
+            if (string.IsNullOrWhiteSpace(search) || module == null)
+                return true;
+                
+            string searchLower = search.ToLowerInvariant();
+            
+            if ((!string.IsNullOrEmpty(module.Name) && module.Name.ToLowerInvariant().Contains(searchLower)) ||
+                (!string.IsNullOrEmpty(module.Id) && module.Id.ToLowerInvariant().Contains(searchLower)))
+            {
+                return true;
+            }
+            
+            if (module.Templates != null)
+            {
+                foreach (var template in module.Templates)
+                {
+                    if (template.Keywords != null)
+                    {
+                        foreach (var keyword in template.Keywords)
+                        {
+                            if (!string.IsNullOrEmpty(keyword) && keyword.ToLowerInvariant().Contains(searchLower))
+                                return true;
+                        }
+                    }
+                    
+                    if (template.Template != null && template.Template.Keywords != null)
+                    {
+                        foreach (var keyword in template.Template.Keywords)
+                        {
+                            if (!string.IsNullOrEmpty(keyword) && keyword.ToLowerInvariant().Contains(searchLower))
+                                return true;
+                        }
+                    }
+                }
+            }
+            
+            return false;
+        }
+
+        private void ApplySearchHighlight()
+        {
+            foreach (var kvp in _moduleItemLookup)
+            {
+                int index = kvp.Key;
+                var moduleItem = kvp.Value;
+                if (moduleItem == null || _array == null || index >= _array.arraySize)
+                    continue;
+
+                ShaderModule module = (ShaderModule)_array.GetArrayElementAtIndex(index).objectReferenceValue;
+                bool matchesSearch = MatchesSearch(module, _searchFilter);
+
+                if (!string.IsNullOrWhiteSpace(_searchFilter))
+                {
+                    if (matchesSearch)
+                    {
+                        moduleItem.AddToClassList("module-search-match");
+                        moduleItem.RemoveFromClassList("module-search-no-match");
+                    }
+                    else
+                    {
+                        moduleItem.AddToClassList("module-search-no-match");
+                        moduleItem.RemoveFromClassList("module-search-match");
+                    }
+                }
+                else
+                {
+                    moduleItem.RemoveFromClassList("module-search-match");
+                    moduleItem.RemoveFromClassList("module-search-no-match");
+                }
+            }
+        }
+
         public void UpdateList()
         {
-            _listContainer.Clear();
-            _drops.Clear();
-
             if (_array == null)
                 return;
+            
+            bool searchFocused = _searchField != null && 
+                                 _searchField.focusController != null && 
+                                 _searchField.focusController.focusedElement == _searchField;
+            
+            if (searchFocused)
+            {
+                return;
+            }
+                
+            SyncEnabledStateArray();
+            
             _listContainer.text = _array.displayName;
+            
+            SerializedProperty enabledArray = _baseModulesEnabled ?? _modulesEnabled;
+            if (enabledArray != null && enabledArray.arraySize > 0)
+            {
+                if (_toggleAllContainer == null)
+                {
+                    _toggleAllContainer = new VisualElement();
+                    _toggleAllContainer.style.flexDirection = FlexDirection.Row;
+                    _toggleAllContainer.style.marginBottom = 4;
+                    _toggleAllContainer.style.paddingLeft = 4;
+                    _toggleAllContainer.style.paddingRight = 4;
+                    _toggleAllContainer.name = "ToggleAllContainer";
+                    
+                    var toggleAllNew = new Toggle();
+                    toggleAllNew.text = "Toggle All";
+                    toggleAllNew.style.marginRight = 8;
+                    toggleAllNew.name = "ToggleAll";
+                    
+                    toggleAllNew.RegisterValueChangedCallback(evt =>
+                    {
+                        SerializedProperty enabledArr = _baseModulesEnabled ?? _modulesEnabled;
+                        if (enabledArr != null)
+                        {
+                            for (int i = 0; i < enabledArr.arraySize; i++)
+                            {
+                                enabledArr.GetArrayElementAtIndex(i).boolValue = evt.newValue;
+                            }
+                            enabledArr.serializedObject.ApplyModifiedProperties();
+                            if (_modularShader != null)
+                                EditorUtility.SetDirty(_modularShader);
+                            else if (_moduleCollection != null)
+                                EditorUtility.SetDirty(_moduleCollection);
+                            UpdateList();
+                        }
+                    });
+                    
+                    _toggleAllContainer.Add(toggleAllNew);
+                    
+                    _searchField = new TextField();
+                    _searchField.value = _searchFilter;
+                    _searchField.style.flexGrow = 1;
+                    _searchField.style.marginLeft = 8;
+                    _searchField.style.minWidth = 150;
+                    _searchField.name = "SearchField";
+                    
+                    var placeholder = new Label("Search modules...");
+                    placeholder.style.position = Position.Absolute;
+                    placeholder.style.left = 8;
+                    placeholder.style.top = 2;
+                    placeholder.style.color = new StyleColor(new Color(0.5f, 0.5f, 0.5f, 0.75f));
+                    placeholder.pickingMode = PickingMode.Ignore;
+                    placeholder.name = "SearchPlaceholder";
+                    if (!string.IsNullOrEmpty(_searchFilter))
+                        placeholder.style.display = DisplayStyle.None;
+                    _searchField.Add(placeholder);
+                    
+                    var clearButton = new Button(() =>
+                    {
+                        _searchFilter = "";
+                        _searchField.value = "";
+                        var ph = _searchField.Q<Label>("SearchPlaceholder");
+                        if (ph != null)
+                            ph.style.display = DisplayStyle.Flex;
+                        ApplySearchHighlight();
+                        _searchField.Focus();
+                    });
+                    clearButton.text = "✕";
+                    clearButton.style.width = 20;
+                    clearButton.style.height = 20;
+                    clearButton.style.marginLeft = 4;
+                    clearButton.style.paddingLeft = 0;
+                    clearButton.style.paddingRight = 0;
+                    clearButton.style.fontSize = 12;
+                    clearButton.name = "SearchClearButton";
+                    if (string.IsNullOrEmpty(_searchFilter))
+                        clearButton.style.display = DisplayStyle.None;
+                    
+                    _searchField.RegisterValueChangedCallback(evt =>
+                    {
+                        _searchFilter = evt.newValue;
+                        var ph = _searchField.Q<Label>("SearchPlaceholder");
+                        if (ph != null)
+                        {
+                            if (string.IsNullOrEmpty(evt.newValue))
+                                ph.style.display = DisplayStyle.Flex;
+                            else
+                                ph.style.display = DisplayStyle.None;
+                        }
+                        if (clearButton != null)
+                        {
+                            if (string.IsNullOrEmpty(evt.newValue))
+                                clearButton.style.display = DisplayStyle.None;
+                            else
+                                clearButton.style.display = DisplayStyle.Flex;
+                        }
+                        ApplySearchHighlight();
+                    });
+                    
+                    _toggleAllContainer.Add(_searchField);
+                    _toggleAllContainer.Add(clearButton);
+                    _listContainer.Add(_toggleAllContainer);
+                }
+                
+                var toggleAll = _toggleAllContainer.Q<Toggle>("ToggleAll");
+                if (toggleAll != null)
+                {
+                    bool allEnabled = true;
+                    bool allDisabled = true;
+                    for (int i = 0; i < enabledArray.arraySize; i++)
+                    {
+                        bool enabled = enabledArray.GetArrayElementAtIndex(i).boolValue;
+                        if (enabled) allDisabled = false;
+                        else allEnabled = false;
+                    }
+                    
+                    toggleAll.SetValueWithoutNotify(allEnabled);
+                }
+                
+                // Don't touch the search field - it manages its own value through the callback
+            }
+            
+            var itemsToRemove = new List<VisualElement>();
+            foreach (var child in _listContainer.Children())
+            {
+                if (child != _toggleAllContainer && child != _addButton)
+                    itemsToRemove.Add(child);
+            }
+            
+            if (_toggleAllContainer != null)
+            {
+                var clearButton = _toggleAllContainer.Q<Button>("SearchClearButton");
+                if (clearButton != null)
+                {
+                    if (string.IsNullOrEmpty(_searchFilter))
+                        clearButton.style.display = DisplayStyle.None;
+                    else
+                        clearButton.style.display = DisplayStyle.Flex;
+                }
+            }
+            foreach (var item in itemsToRemove)
+            {
+                item.RemoveFromHierarchy();
+            }
+            
+            _drops.Clear();
+            
             CreateDrop();
 
             _loadedModules = new List<string>();
@@ -138,12 +412,41 @@ namespace Poiyomi.ModularShaderSystem.UI
 
 
 
+            _moduleItemLookup.Clear();
             for (int i = 0; i < _array.arraySize; i++)
             {
                 int index = i;
 
                 var moduleItem = new VisualElement();
+                moduleItem.style.flexDirection = FlexDirection.Row;
+                moduleItem.style.alignItems = Align.Center;
+                moduleItem.style.flexGrow = 1;
+                moduleItem.style.minWidth = 0;
+                
+                Toggle toggle = null;
+                if (enabledArray != null)
+                {
+                    toggle = new Toggle();
+                    toggle.bindingPath = enabledArray.GetArrayElementAtIndex(index).propertyPath;
+                    toggle.Bind(_array.serializedObject);
+                    toggle.RegisterValueChangedCallback(evt =>
+                    {
+                        enabledArray.serializedObject.ApplyModifiedProperties();
+                        if (_modularShader != null)
+                            EditorUtility.SetDirty(_modularShader);
+                        else if (_moduleCollection != null)
+                            EditorUtility.SetDirty(_moduleCollection);
+                    });
+                    toggle.style.marginRight = 8;
+                    toggle.style.flexShrink = 0;
+                    moduleItem.Add(toggle);
+                }
+                
                 var objectField = new ObjectField();//_array.GetArrayElementAtIndex(index));
+                objectField.style.flexGrow = 1;
+                objectField.style.minWidth = 0;
+                objectField.style.flexShrink = 1;
+                objectField.style.overflow = Overflow.Hidden;
 
                 SerializedProperty propertyValue = _array.GetArrayElementAtIndex(index);
 
@@ -188,17 +491,25 @@ namespace Poiyomi.ModularShaderSystem.UI
                     }
                 });
 
+                ShaderModule module = (ShaderModule)propertyValue.objectReferenceValue;
+                
                 var item = new InspectorListItem(this, moduleItem, _array, index, _showElementsButtons);
                 item.removeButton.RegisterCallback<PointerUpEvent>((evt) => RemoveItem(index));
+                item.duplicateButton.RegisterCallback<PointerUpEvent>((evt) => DuplicateItem(index));
                 item.upButton.RegisterCallback<PointerUpEvent>((evt) => MoveUpItem(index));
                 item.downButton.RegisterCallback<PointerUpEvent>((evt) => MoveDownItem(index));
+                
                 _listContainer.Add(item);
+                _moduleItemLookup[index] = moduleItem;
                 CreateDrop();
 
-                CheckModuleValidity((ShaderModule)propertyValue.objectReferenceValue, infoLabel, moduleItem);
+                CheckModuleValidity(module, infoLabel, moduleItem);
             }
-            if (enabledSelf)
+            ApplySearchHighlight();
+
+                if (enabledSelf)
                 _listContainer.Add(_addButton);
+
         }
 
         private void CreateDrop()
@@ -291,6 +602,11 @@ namespace Poiyomi.ModularShaderSystem.UI
         {
             if (_array != null)
             {
+                SerializedProperty enabledArray = _baseModulesEnabled ?? _modulesEnabled;
+                if (enabledArray != null)
+                {
+                    enabledArray.DeleteArrayElementAtIndex(index);
+                }
                 if (index < _array.arraySize - 1)
                     _array.GetArrayElementAtIndex(index).isExpanded = _array.GetArrayElementAtIndex(index + 1).isExpanded;
                 var elementProperty = _array.GetArrayElementAtIndex(index);
@@ -307,6 +623,11 @@ namespace Poiyomi.ModularShaderSystem.UI
         {
             if (_array != null && index > 0)
             {
+                SerializedProperty enabledArray = _baseModulesEnabled ?? _modulesEnabled;
+                if (enabledArray != null)
+                {
+                    enabledArray.MoveArrayElement(index, index - 1);
+                }
                 _array.MoveArrayElement(index, index - 1);
                 bool expanded = _array.GetArrayElementAtIndex(index).isExpanded;
                 _array.GetArrayElementAtIndex(index).isExpanded = _array.GetArrayElementAtIndex(index - 1).isExpanded;
@@ -321,10 +642,36 @@ namespace Poiyomi.ModularShaderSystem.UI
         {
             if (_array != null && index < _array.arraySize - 1)
             {
+                SerializedProperty enabledArray = _baseModulesEnabled ?? _modulesEnabled;
+                if (enabledArray != null)
+                {
+                    enabledArray.MoveArrayElement(index, index + 1);
+                }
                 _array.MoveArrayElement(index, index + 1);
                 bool expanded = _array.GetArrayElementAtIndex(index).isExpanded;
                 _array.GetArrayElementAtIndex(index).isExpanded = _array.GetArrayElementAtIndex(index + 1).isExpanded;
                 _array.GetArrayElementAtIndex(index + 1).isExpanded = expanded;
+                _array.serializedObject.ApplyModifiedProperties();
+            }
+
+            UpdateList();
+        }
+
+        public void DuplicateItem(int index)
+        {
+            if (_array != null && index < _array.arraySize)
+            {
+                _array.InsertArrayElementAtIndex(index + 1);
+                var sourceElement = _array.GetArrayElementAtIndex(index);
+                var duplicateElement = _array.GetArrayElementAtIndex(index + 1);
+                duplicateElement.objectReferenceValue = sourceElement.objectReferenceValue;
+                duplicateElement.isExpanded = sourceElement.isExpanded;
+                SerializedProperty enabledArray = _baseModulesEnabled ?? _modulesEnabled;
+                if (enabledArray != null)
+                {
+                    enabledArray.InsertArrayElementAtIndex(index + 1);
+                    enabledArray.GetArrayElementAtIndex(index + 1).boolValue = enabledArray.GetArrayElementAtIndex(index).boolValue;
+                }
                 _array.serializedObject.ApplyModifiedProperties();
             }
 
@@ -336,6 +683,12 @@ namespace Poiyomi.ModularShaderSystem.UI
             if (_array != null)
             {
                 _array.InsertArrayElementAtIndex(_array.arraySize);
+                SerializedProperty enabledArray = _baseModulesEnabled ?? _modulesEnabled;
+                if (enabledArray != null)
+                {
+                    enabledArray.InsertArrayElementAtIndex(_array.arraySize - 1);
+                    enabledArray.GetArrayElementAtIndex(_array.arraySize - 1).boolValue = true;
+                }
                 _array.serializedObject.ApplyModifiedProperties();
             }
 

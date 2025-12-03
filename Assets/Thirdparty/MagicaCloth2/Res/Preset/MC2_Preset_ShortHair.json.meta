@@ -9,6 +9,6 @@ AssetOrigin:
   serializedVersion: 1
   productId: 242307
   packageName: Magica Cloth 2
-  packageVersion: 2.16.1
-  assetPath: Assets/Plugins/MagicaCloth2/Res/Preset/MC2_Preset_ShortHair.json
-  uploadId: 756593
+  packageVersion: 2.16.4
+  assetPath: Assets/MagicaCloth2/Res/Preset/MC2_Preset_ShortHair.json
+  uploadId: 800766

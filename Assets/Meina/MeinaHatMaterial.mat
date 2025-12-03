@@ -15,21 +15,24 @@ Material:
   m_InvalidKeywords:
   - BSSBLOOMFOGTYPE_HEIGHT
   - POI_MATCAP0_CUSTOM_NORMAL
+  - PROP_RGBMASK
   - VIGNETTE_MASKED
   - _LIGHTINGMODE_TEXTURERAMP
   - _RIM2STYLE_LILTOON
   - _RIMSTYLE_LILTOON
   - _STOCHASTICMODE_DELIOT_HEITZ
+  - _STYLIZEDREFLECTIONMODE_UNITYCHAN
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: 2000
   stringTagMap:
     AllLockedGUIDS: b2519fad080fe584fac03f0106a5030e
-    OriginalKeywords: BSSBLOOMFOGTYPE_HEIGHT POI_MATCAP0_CUSTOM_NORMAL VIGNETTE_MASKED
-      _LIGHTINGMODE_TEXTURERAMP _RIM2STYLE_LILTOON _RIMSTYLE_LILTOON _STOCHASTICMODE_DELIOT_HEITZ
+    OriginalKeywords: BSSBLOOMFOGTYPE_HEIGHT POI_MATCAP0_CUSTOM_NORMAL PROP_RGBMASK
+      VIGNETTE_MASKED _LIGHTINGMODE_TEXTURERAMP _RIM2STYLE_LILTOON _RIMSTYLE_LILTOON
+      _STOCHASTICMODE_DELIOT_HEITZ _STYLIZEDREFLECTIONMODE_UNITYCHAN
     OriginalShader: .poiyomi/Poiyomi Toon URP
-    OriginalShaderGUID: 4e1b5e7450cb69649b25e46733a9d46b
+    OriginalShaderGUID: 748928d1166844c439fff99dfe913fa6
     RenderType: Opaque
     VRCFallback: MobileToonDoubleSided
     _BlueAlphaAddAnimated: 1
@@ -270,9 +273,11 @@ Material:
     - _AnisoColorMapUV: 0
     - _AnisoDebugMode: 0
     - _AnisoDebugToggle: 0
+    - _AnisoFadeByLightDirection: 0
     - _AnisoGlobalMask: 0
     - _AnisoGlobalMaskBlendType: 2
     - _AnisoHideInShadow: 1
+    - _AnisoNormalBlend: 1
     - _AnisoReplace: 0
     - _AnisoUseBaseColor: 0
     - _AnisoUseLightColor: 1
@@ -611,6 +616,10 @@ Material:
     - _Decal3VideoEmissionStrength: 0
     - _Decal3VideoEnabled: 0
     - _Decal3VideoFitToScale: 1
+    - _DecalAlphaIntensity: 1
+    - _DecalAlphaIntensity1: 1
+    - _DecalAlphaIntensity2: 1
+    - _DecalAlphaIntensity3: 1
     - _DecalBlendAlpha: 0
     - _DecalBlendAlpha1: 0
     - _DecalBlendAlpha2: 1
@@ -2217,11 +2226,15 @@ Material:
     - _ShadingShadeMapBlendType: 0
     - _Shadow2ndBlur: 0.3
     - _Shadow2ndBorder: 0.5
+    - _Shadow2ndColorTexAddition: 0
     - _Shadow2ndColorTexUV: 0
+    - _Shadow2ndNormalStrength: 1
     - _Shadow2ndReceive: 0
     - _Shadow3rdBlur: 0.1
     - _Shadow3rdBorder: 0.25
+    - _Shadow3rdColorTexAddition: 0
     - _Shadow3rdColorTexUV: 0
+    - _Shadow3rdNormalStrength: 1
     - _Shadow3rdReceive: 0
     - _ShadowBlur: 0.1
     - _ShadowBorder: 0.5
@@ -2229,12 +2242,14 @@ Material:
     - _ShadowBorderMaskLOD: 0
     - _ShadowBorderMaskUV: 0
     - _ShadowBorderRange: 0
+    - _ShadowColorTexAddition: 0
     - _ShadowColorTexUV: 0
     - _ShadowEnvStrength: 0
     - _ShadowFlatBlur: 1
     - _ShadowFlatBorder: 1
     - _ShadowMainStrength: 0
     - _ShadowMaskType: 0
+    - _ShadowNormalStrength: 1
     - _ShadowOffset: 0.3
     - _ShadowPostAO: 0
     - _ShadowReceive: 0
@@ -3077,6 +3092,7 @@ Material:
     - s_end_OutlineZOffset: 0
     - s_end_PBRSecondSpecular: 0
     - s_end_PBRSplitMaskSample: 0
+    - s_end_PPPosterization: 0
     - s_end_ParallaxInternalHueShift: 0
     - s_end_ParallaxInternalLayerColoring: 0
     - s_end_ParallaxInternalLayerControls: 0
@@ -3313,6 +3329,7 @@ Material:
     - s_start_OutlineZOffset: 0
     - s_start_PBRSecondSpecular: 0
     - s_start_PBRSplitMaskSample: 0
+    - s_start_PPPosterization: 0
     - s_start_ParallaxInternalHueShift: 0
     - s_start_ParallaxInternalLayerColoring: 1
     - s_start_ParallaxInternalLayerControls: 1

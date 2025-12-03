@@ -179,7 +179,11 @@ namespace MagicaCloth2
 #if true
             // Unity2023のみ何故かGizmoTypeの挙動が異なり、実際には選択されてなくても親が選択中だとSelectedフラグが立ってしまう。
             // そのため、Selectedフラグに関してはここで手動で判定することにする。
+#if UNITY_6000_3_OR_NEWER
+            if (Selection.Contains(component.gameObject.GetEntityId()))
+#else
             if (Selection.Contains(component.gameObject.GetInstanceID()))
+#endif
                 gizmoType |= GizmoType.Selected;
             else
                 gizmoType &= ~GizmoType.Selected;
@@ -956,8 +960,7 @@ namespace MagicaCloth2
                 drawList.Clear();
                 bool isPainting = ClothPainter.IsPainting();
                 bool isPlaying = EditorApplication.isPlaying;
-                var camPos = sceneView.camera.transform.position;
-                Quaternion camRot = sceneView.camera.transform.rotation;
+                sceneView.camera.transform.GetPositionAndRotation(out var camPos, out Quaternion camRot);
 
                 lock (editClothDict)
                 {

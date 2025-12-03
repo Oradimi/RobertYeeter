@@ -4,7 +4,6 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 using Poi.Tools.Menus;
-using UnityEngine.Rendering;
 
 namespace Poi.Tools.ShaderTranslator.Translations.Menu
 {
@@ -353,20 +352,6 @@ namespace Poi.Tools.ShaderTranslator.Translations.Menu
 
         #region Helper Functions
 
-        static bool IsURP()
-        {
-            RenderPipelineAsset graphicPipelineAsset = GraphicsSettings.currentRenderPipeline;
-            if (graphicPipelineAsset != null)
-            {
-                if (graphicPipelineAsset.GetType().Name.IndexOf("UniversalRenderPipelineAsset", StringComparison.OrdinalIgnoreCase) >= 0)
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-
         static void _TranslateMaterialsInObject(GameObject obj, bool isPro)
         {
             var allMaterials = obj.GetComponentsInChildren<Renderer>(true).SelectMany(m => m.sharedMaterials).Where(m => m != null).ToList();
@@ -404,7 +389,7 @@ namespace Poi.Tools.ShaderTranslator.Translations.Menu
                 return;
             }
 
-            string URP = IsURP() ? "URP" : "";
+            string URP = PoiHelpers.IsURP() ? "URP" : "";
             string suffix = isPro ? "Pro" : "Toon";
             string shaderName = $"{ShaderNameBase} {suffix} {URP}".Trim();
 
@@ -467,7 +452,7 @@ namespace Poi.Tools.ShaderTranslator.Translations.Menu
                 return;
             }
 
-            string URP = IsURP() ? "URP" : "";
+            string URP = PoiHelpers.IsURP() ? "URP" : "";
             string shaderSuffix = isPro ? "Pro" : "Toon";
             string shaderName = $"{ShaderNameBase} {shaderSuffix} {URP}".Trim();
             Undo.RegisterFullObjectHierarchyUndo(material, $"Translate {material.name} to Poiyomi {shaderSuffix}");

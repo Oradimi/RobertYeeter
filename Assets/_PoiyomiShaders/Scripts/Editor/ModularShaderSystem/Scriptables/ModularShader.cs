@@ -30,6 +30,8 @@ namespace Poiyomi.ModularShaderSystem
         
         public List<ShaderModule> BaseModules;
         
+        [HideInInspector] public List<bool> BaseModulesEnabled = new List<bool>();
+        
         [HideInInspector] public List<ShaderModule> AdditionalModules;
         
         public bool LockBaseModules;

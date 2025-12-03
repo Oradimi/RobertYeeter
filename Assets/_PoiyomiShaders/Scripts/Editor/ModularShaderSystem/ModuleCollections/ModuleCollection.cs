@@ -9,5 +9,7 @@ namespace Poiyomi.ModularShaderSystem.CibbiExtensions
     public class ModuleCollection : ShaderModule
     {
         public List<ShaderModule> Modules;
+        
+        [HideInInspector] public List<bool> ModulesEnabled = new List<bool>();
     }
 }

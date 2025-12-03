@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
@@ -28,6 +29,19 @@ namespace Poiyomi.ModularShaderSystem.UI
             if(!areModulesEditable)
                 baseModulesField.SetFoldingState(true);
             baseModulesField.SetEnabled(areModulesEditable);
+            
+            if (_shader.BaseModulesEnabled == null || _shader.BaseModulesEnabled.Count != _shader.BaseModules.Count)
+            {
+                if (_shader.BaseModulesEnabled == null)
+                    _shader.BaseModulesEnabled = new List<bool>();
+                    
+                _shader.BaseModulesEnabled.Clear();
+                for (int i = 0; i < _shader.BaseModules.Count; i++)
+                {
+                    _shader.BaseModulesEnabled.Add(true);
+                }
+                EditorUtility.SetDirty(_shader);
+            }
 
             var templateField = _root.Q<ObjectField>("ShaderTemplateField");
             templateField.objectType = typeof(TemplateAsset);

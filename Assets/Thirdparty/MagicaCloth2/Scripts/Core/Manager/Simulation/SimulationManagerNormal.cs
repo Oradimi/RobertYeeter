@@ -1282,7 +1282,7 @@ namespace MagicaCloth2
 
                     if (math.abs(ylen) > y)
                     {
-                        v -= dir * (math.abs(ylen) - y) * math.sign(ylen);
+                        v -= (math.abs(ylen) - y) * math.sign(ylen) * dir;
                     }
                 }
             }
@@ -1509,7 +1509,7 @@ namespace MagicaCloth2
                     // ■摩擦
                     float friction = frictionArray[pindex];
                     float3 cn = collisionNormalArray[pindex];
-                    bool isCollision = math.lengthsq(cn) > Define.System.Epsilon; // 接触の有無
+                    bool isCollision = math.lengthsq(cn) > Define.System.Epsilon && friction > Define.System.Epsilon; // 接触の有無
                     float staticFrictionParam = param.colliderCollisionConstraint.staticFriction * tdata.scaleRatio;
                     float dynamicFrictionParam = param.colliderCollisionConstraint.dynamicFriction;
 #endif
@@ -1517,7 +1517,7 @@ namespace MagicaCloth2
 #if true
                     // ■静止摩擦
                     float staticFriction = staticFrictionArray[pindex];
-                    if (isCollision && friction > 0.0f && staticFrictionParam > 0.0f)
+                    if (isCollision && staticFrictionParam > 0.0f)
                     {
                         // 接線方向の移動速度から計算する
                         var v = nextPos - oldPos;
@@ -1559,7 +1559,7 @@ namespace MagicaCloth2
 #if true
                     // ■動摩擦
                     // 衝突面との角度が大きいほど減衰が強くなる(MC1)
-                    if (friction > Define.System.Epsilon && isCollision && dynamicFrictionParam > 0.0f && sqVel >= Define.System.Epsilon)
+                    if (isCollision && dynamicFrictionParam > 0.0f && sqVel >= Define.System.Epsilon)
                     {
                         //float dot = math.dot(cn, math.normalize(velocity));
                         float dot = math.dot(cn, normalVelocity);

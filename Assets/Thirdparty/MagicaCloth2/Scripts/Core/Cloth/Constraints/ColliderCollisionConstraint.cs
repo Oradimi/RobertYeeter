@@ -590,7 +590,9 @@ namespace MagicaCloth2
                 var attrE0 = attributes[vE.x];
                 var attrE1 = attributes[vE.y];
                 // 両方とも固定なら不要
-                if (attrE0.IsMove() == false && attrE1.IsMove() == false)
+                bool isMove0 = attrE0.IsMove();
+                bool isMove1 = attrE1.IsMove();
+                if (isMove0 == false && isMove1 == false)
                     continue;
                 int pstart = tdata.particleChunk.startIndex;
                 int2 pE = edge + pstart;
@@ -704,17 +706,20 @@ namespace MagicaCloth2
                     //Develop.Assert(cfr > 0.0f);
                     var friction = 1.0f - math.saturate(mindist / cfr);
 
-                    // 大きい場合のみ上書き
-                    InterlockUtility.Max(pE.x, friction, floatPt);
-                    InterlockUtility.Max(pE.y, friction, floatPt);
-
                     // 摩擦用接触法線平均化
                     //Develop.Assert(math.length(collisionNormal) > 0.0f);
                     collisionNormal = math.normalize(collisionNormal);
 
-                    // 接触法線集計（すべて加算する）
-                    InterlockUtility.AddFloat3(pE.x, collisionNormal, vecBPt);
-                    InterlockUtility.AddFloat3(pE.y, collisionNormal, vecBPt);
+                    if (isMove0)
+                    {
+                        InterlockUtility.Max(pE.x, friction, floatPt);
+                        InterlockUtility.AddFloat3(pE.x, collisionNormal, vecBPt);
+                    }
+                    if (isMove1)
+                    {
+                        InterlockUtility.Max(pE.y, friction, floatPt);
+                        InterlockUtility.AddFloat3(pE.y, collisionNormal, vecBPt);
+                    }
                 }
             }
         }

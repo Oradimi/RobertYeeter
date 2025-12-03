@@ -1247,7 +1247,7 @@ namespace MagicaCloth2
                     // 相互コリジョン
                     ref var stdata = ref *(teamPt + tdata.syncTeamId);
                     int syncFlag = TeamManager.Flag_Sync_EdgeEdge + (contactKind * 3);
-                    if (tdata.flag.IsSet(syncFlag))
+                    if (tdata.flag.IsSet(syncFlag) && stdata.IsProcess && stdata.ParticleCount > 0)
                     {
                         //Debug.Log($"Sync detection contact. myTeam:{teamId}, myKind:{myKind}, tarTeam:{teamId}, tarKind:{tarKind}");
 
@@ -1972,47 +1972,50 @@ namespace MagicaCloth2
                 if (tdata.syncTeamId > 0)
                 {
                     ref var stdata = ref *(teamPt + tdata.syncTeamId);
-                    if (tdata.flag.IsSet(TeamManager.Flag_Sync_EdgeTriangleIntersect))
+                    if (stdata.IsProcess && stdata.ParticleCount > 0)
                     {
-                        DetectionIntersect(
-                            workerCount,
-                            workerIndex,
-                            frameIndex,
-                            // edge
-                            teamId,
-                            ref tdata,
-                            KindEdge,
-                            // triangle
-                            tdata.syncTeamId,
-                            ref stdata,
-                            KindTriangle,
-                            // self collision
-                            ref primitiveArrayB,
-                            ref uniformGridStartCountBuffer,
-                            // intersect
-                            ref intersectQueue
-                            );
-                    }
-                    if (tdata.flag.IsSet(TeamManager.Flag_Sync_TriangleEdgeIntersect))
-                    {
-                        DetectionIntersect(
-                            workerCount,
-                            workerIndex,
-                            frameIndex,
-                            // triangle
-                            teamId,
-                            ref tdata,
-                            KindTriangle,
-                            // edge
-                            tdata.syncTeamId,
-                            ref stdata,
-                            KindEdge,
-                            // self collision
-                            ref primitiveArrayB,
-                            ref uniformGridStartCountBuffer,
-                            // intersect
-                            ref intersectQueue
-                            );
+                        if (tdata.flag.IsSet(TeamManager.Flag_Sync_EdgeTriangleIntersect))
+                        {
+                            DetectionIntersect(
+                                workerCount,
+                                workerIndex,
+                                frameIndex,
+                                // edge
+                                teamId,
+                                ref tdata,
+                                KindEdge,
+                                // triangle
+                                tdata.syncTeamId,
+                                ref stdata,
+                                KindTriangle,
+                                // self collision
+                                ref primitiveArrayB,
+                                ref uniformGridStartCountBuffer,
+                                // intersect
+                                ref intersectQueue
+                                );
+                        }
+                        if (tdata.flag.IsSet(TeamManager.Flag_Sync_TriangleEdgeIntersect))
+                        {
+                            DetectionIntersect(
+                                workerCount,
+                                workerIndex,
+                                frameIndex,
+                                // triangle
+                                teamId,
+                                ref tdata,
+                                KindTriangle,
+                                // edge
+                                tdata.syncTeamId,
+                                ref stdata,
+                                KindEdge,
+                                // self collision
+                                ref primitiveArrayB,
+                                ref uniformGridStartCountBuffer,
+                                // intersect
+                                ref intersectQueue
+                                );
+                        }
                     }
                 }
                 //Debug.Log($"Detection intersect. team:{teamId}, Count:{writeCount}");

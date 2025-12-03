@@ -13,42 +13,18 @@ namespace MagicaCloth2
     [CanEditMultipleObjects]
     public class MagicaClothEditor : MagicaEditorBase
     {
-        //=========================================================================================
-        private void Awake()
-        {
-            // 選択のたびに呼ばれるのでMonoの動作とは異なる
-            //Debug.Log("MagicaClothEditor.Awake");
-        }
 
-        private void OnEnable()
+        protected void OnEnable()
         {
             //Debug.Log("MagicaClothEditor.OnEnable");
             ClothEditorManager.OnEditMeshBuildComplete += OnEditMeshBuildComplete;
         }
 
-        private void OnDisable()
+        protected void OnDisable()
         {
             //Debug.Log("MagicaClothEditor.OnDisable");
             ClothEditorManager.OnEditMeshBuildComplete -= OnEditMeshBuildComplete;
             ClothPainter.ExitPaint();
-        }
-
-        private void OnDestroy()
-        {
-            // 選択が外れるたびに呼ばれるのでMonoの動作とは異なる
-            //Debug.Log("MagicaClothEditor.OnDestroy");
-            //Debug.Log(target != null);
-        }
-
-        private void OnValidate()
-        {
-            // どうもMonoのValidateは違う
-            //Debug.Log("MagicaClothEditor.OnValidate");
-        }
-
-        private void Reset()
-        {
-            //Debug.Log("MagicaClothEditor.Reset");
         }
 
         //=========================================================================================
@@ -124,7 +100,11 @@ namespace MagicaCloth2
 
                 // ただしコンポーネントがProjectビューで選択されている場合は再構築しない
                 // Hierarchyおよびプレハブモードはこれに該当しない
+#if UNITY_6000_3_OR_NEWER
+                bool inProject = AssetDatabase.Contains(cloth.gameObject.GetEntityId());
+#else
                 bool inProject = AssetDatabase.Contains(cloth.gameObject.GetInstanceID());
+#endif
                 if (inProject == false)
                 {
                     //Develop.Log($"[{cloth.name}] rebuild. active:{nowActive}, inProject:{inProject}");

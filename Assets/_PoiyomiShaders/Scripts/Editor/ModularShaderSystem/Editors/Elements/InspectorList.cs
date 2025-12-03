@@ -134,6 +134,7 @@ namespace Poiyomi.ModularShaderSystem.UI
                 element.Bind(_array.GetArrayElementAtIndex(index).serializedObject);
                 var item = new InspectorListItem(this, element, _array, index, _showElementsButtons);
                 item.removeButton.RegisterCallback<PointerUpEvent>((evt) => RemoveItem(index));
+                item.duplicateButton.RegisterCallback<PointerUpEvent>((evt) => DuplicateItem(index));
                 item.upButton.RegisterCallback<PointerUpEvent>((evt) => MoveUpItem(index));
                 item.downButton.RegisterCallback<PointerUpEvent>((evt) => MoveDownItem(index));
                 _listContainer.Add(item);
@@ -209,6 +210,21 @@ namespace Poiyomi.ModularShaderSystem.UI
             UpdateList();
         }
 
+        public void DuplicateItem(int index)
+        {
+            if (_array != null && index < _array.arraySize)
+            {
+                _array.InsertArrayElementAtIndex(index + 1);
+                var sourceElement = _array.GetArrayElementAtIndex(index);
+                var duplicateElement = _array.GetArrayElementAtIndex(index + 1);
+                duplicateElement.objectReferenceValue = sourceElement.objectReferenceValue;
+                duplicateElement.isExpanded = sourceElement.isExpanded;
+                _array.serializedObject.ApplyModifiedProperties();
+            }
+
+            UpdateList();
+        }
+
         public void AddItem()
         {
             if (_array != null)
@@ -249,8 +265,10 @@ namespace Poiyomi.ModularShaderSystem.UI
         public Button removeButton;
         public Button upButton;
         public Button downButton;
+        public Button duplicateButton;
 
         public VisualElement dragArea;
+        public VisualElement buttonsArea;
 
         public Vector2 startPosition;
 
@@ -279,7 +297,7 @@ namespace Poiyomi.ModularShaderSystem.UI
                 AddToClassList("inspector-list-drag-enabled");
             });
 
-            VisualElement buttonsArea = new VisualElement();
+            buttonsArea = new VisualElement();
 
             RegisterCallback<GeometryChangedEvent>(e =>
             {
@@ -288,34 +306,60 @@ namespace Poiyomi.ModularShaderSystem.UI
                 {
                     buttonsArea.AddToClassList("inspector-list-buttons-container-vertical");
                     buttonsArea.Add(removeButton);
+                    buttonsArea.Add(duplicateButton);
                     buttonsArea.Add(upButton);
                     buttonsArea.Add(downButton);
                 }
                 else
                 {
                     buttonsArea.AddToClassList("inspector-list-buttons-container-horizontal");
+                    buttonsArea.Add(duplicateButton);
                     buttonsArea.Add(upButton);
                     buttonsArea.Add(downButton);
                     buttonsArea.Add(removeButton);
                 }
             });
 
+            duplicateButton = new Button();
+            duplicateButton.name = "DuplicateInspectorListItem";
+            duplicateButton.AddToClassList("inspector-list-duplicate-button");
+            var duplicateIcon = EditorGUIUtility.IconContent("d_Toolbar Plus");
+            if (duplicateIcon != null && duplicateIcon.image != null)
+            {
+                duplicateButton.style.backgroundImage = new StyleBackground(duplicateIcon.image as Texture2D);
+            }
             upButton = new Button();
             upButton.name = "UpInspectorListItem";
             upButton.AddToClassList("inspector-list-up-button");
+            var upIcon = EditorGUIUtility.IconContent("d_scrollup");
+            if (upIcon != null && upIcon.image != null)
+            {
+                upButton.style.backgroundImage = new StyleBackground(upIcon.image as Texture2D);
+            }
             if (index == 0)
                 upButton.SetEnabled(false);
             downButton = new Button();
             downButton.name = "DownInspectorListItem";
             downButton.AddToClassList("inspector-list-down-button");
+            var downIcon = EditorGUIUtility.IconContent("d_scrolldown");
+            if (downIcon != null && downIcon.image != null)
+            {
+                downButton.style.backgroundImage = new StyleBackground(downIcon.image as Texture2D);
+            }
             if (index >= array.arraySize - 1)
                 downButton.SetEnabled(false);
             removeButton = new Button();
             removeButton.name = "RemoveInspectorListItem";
             removeButton.AddToClassList("inspector-list-remove-button");
+            var removeIcon = EditorGUIUtility.IconContent("d_Toolbar Minus");
+            if (removeIcon != null && removeIcon.image != null)
+            {
+                removeButton.style.backgroundImage = new StyleBackground(removeIcon.image as Texture2D);
+            }
 
             if (showButtonsText)
             {
+                duplicateButton.text = "dup";
                 upButton.text = "up";
                 downButton.text = "down";
                 removeButton.text = "-";
