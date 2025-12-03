@@ -33,7 +33,9 @@ public class UIManager : MonoBehaviour
     [Header("Settings Menus")]
     [SerializeField] private RectTransform settingsMenu;
     [SerializeField] private Slider musicVolume;
+    [SerializeField] private TextMeshProUGUI musicVolumeLabel;
     [SerializeField] private Slider soundVolume;
+    [SerializeField] private TextMeshProUGUI soundVolumeLabel;
     [SerializeField] private Toggle enemyNameDisplay;
     
     [Header("Credits Menus")]
@@ -211,7 +213,9 @@ public class UIManager : MonoBehaviour
         
         _instance.settingsMenu.gameObject.SetActive(value);
         _instance.musicVolume.SetValueWithoutNotify(GameManager.AudioSource.volume * 100f);
+        _instance.musicVolumeLabel.text = GameManager.PlayerData.MusicVolume.ToString();
         _instance.soundVolume.SetValueWithoutNotify(GameManager.SoundEffectsVolume * 100f);
+        _instance.soundVolumeLabel.text = GameManager.PlayerData.SoundVolume.ToString();
         _instance.enemyNameDisplay.SetIsOnWithoutNotify(GameManager.EnemyNameDisplay);
         DisplayMainMenu(!value);
     }
@@ -266,6 +270,7 @@ public class UIManager : MonoBehaviour
         GameManager.AudioSource.volume = value * 0.01f;
         GameManager.PlayerData.MusicVolume = Mathf.FloorToInt(value);
         GameManager.SaveData();
+        _instance.musicVolumeLabel.text = GameManager.PlayerData.MusicVolume.ToString();
     }
 
     public static void ChangeSoundEffectsVolume(float value)
@@ -273,6 +278,7 @@ public class UIManager : MonoBehaviour
         GameManager.GetPlayer().ChangeSoundEffectsVolume(value);
         GameManager.PlayerData.SoundVolume = Mathf.FloorToInt(value);
         GameManager.SaveData();
+        _instance.soundVolumeLabel.text = GameManager.PlayerData.SoundVolume.ToString();
     }
     
     public static void ChangeEnemyNameDisplay(bool value)
