@@ -254,7 +254,7 @@ public class PlayerController : MonoBehaviour
 
     private void CloseEyes()
     {
-        _blinkTarget = _animator.GetBool(WetBool) ? 0.5f : 1f;
+        _blinkTarget = _animator.GetBool(WetBool) ? 0.7f : 1f;
         _blinkTimer = Random.Range(0.20f, 0.25f);
     }
 

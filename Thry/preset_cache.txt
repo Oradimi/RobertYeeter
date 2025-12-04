@@ -89,7 +89,7 @@ Volume Bands/12-Band;0b416ffba1a7d97429ff71b7efc9230c
 Volume Bands/4-Band;c616aa2d7967623489243ae874323c90
 Volume Bands/8-Band;be96e40be3814e84fbca071cf6782a66
 Volume Bands/Reset;53395a2a59ff2f148b53eafd66967204
-Oldschool VFD;34b907ecea29f974aaf32f618e246a5b
+Oldschool VFD;e521e7368b5839d4d927e507e15593eb
 
 m_start_Alpha
 Alpha to Coverage + Dithering;11cc49b1463fe4240ae384b23baf0f67
@@ -125,7 +125,7 @@ Min Brightness/.01 (Recognizable);82c5aafb37530a643b4e3f9421d5fda5
 Min Brightness/.1 (Glowstick);a5dc2b822da4d1a428581dfadf5f3dbb
 Min Brightness/0 (Correct);26af5cb87deb3ed4c8c2032134d84d5d
 "PBR";372d7ee2fdaa3914986be8eb2b0cdd0d
-Teeh Custom;6b98b5e879972824d913a41f992c833c
+Teeh Custom;9392d94f15870434facaa649d54973f0
 
 m_start_OutlineAudioLink
 10W;4439ffc714f4ad44ab0bd637620826d7
