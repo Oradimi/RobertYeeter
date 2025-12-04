@@ -1604,6 +1604,11 @@ Shader "Hidden/Locked/.poiyomi/Poiyomi Toon URP/8b65420ea653adc42a88160eb3f236db
 		{
 			return dotToDegrees(dot(normalize(a), normalize(b)));
 		}
+		float poiFastAtan(float x)
+		{
+			return x * (abs(x) * (1.5707963 * abs(x) - 0.00507668) + 0.420691) /
+			(abs(x) * (abs(x) * (0.633387806 + abs(x)) + 0.671041944) + 0.215192627);
+		}
 		float _VRChatCameraMode;
 		float _VRChatMirrorMode;
 		float VRCCameraMode()
@@ -2799,7 +2804,7 @@ Shader "Hidden/Locked/.poiyomi/Poiyomi Toon URP/8b65420ea653adc42a88160eb3f236db
 			float width, height;
 			unity_SpecCube0.GetDimensions(width, height);
 			hasReflection = !(width * height < 2);
-			#if USE_FORWARD_PLUS
+			#if CLUSTER_HAS_REFLECTION_PROBES
 			urp_ReflProbes_Atlas.GetDimensions(width, height);
 			hasReflection = hasReflection | !(width * height < 2);
 			#endif
@@ -2872,6 +2877,13 @@ Shader "Hidden/Locked/.poiyomi/Poiyomi Toon URP/8b65420ea653adc42a88160eb3f236db
  #define PROP_GLITTERCOLORMAP 
  #define OPTIMIZER_ENABLED 
 			#pragma target 5.0
+			#pragma skip_variants DECALS_OFF DECALS_3RT DECALS_4RT DECAL_SURFACE_GRADIENT _DBUFFER_MRT1 _DBUFFER_MRT2 _DBUFFER_MRT3 _DECAL_NORMAL_BLEND_LOW _DECAL_NORMAL_BLEND_MEDIUM _DECAL_NORMAL_BLEND_HIGH _DECAL_LAYERS
+			#pragma skip_variants _MAIN_LIGHT_SHADOWS_SCREEN _SCREEN_SPACE_OCCLUSION _USE_FAST_SRGB_LINEAR_CONVERSION _LIGHT_LAYERS
+			#if !defined(POI_WORLD)
+			#pragma skip_variants _ADDITIONAL_LIGHT_SHADOWS _ADDITIONAL_LIGHTS_VERTEX LIGHTMAP_ON DYNAMICLIGHTMAP_ON LIGHTMAP_SHADOW_MIXING SHADOWS_SHADOWMASK DIRLIGHTMAP_COMBINED _MIXED_LIGHTING_SUBTRACTIVE
+			#endif
+			#pragma vertex vert
+			#pragma fragment frag
 			#if POI_PIPE == POI_URP
 			#pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE
 			#pragma multi_compile _ _ADDITIONAL_LIGHTS
@@ -2879,7 +2891,6 @@ Shader "Hidden/Locked/.poiyomi/Poiyomi Toon URP/8b65420ea653adc42a88160eb3f236db
 			#pragma multi_compile_fragment _ _SHADOWS_SOFT
 			#pragma multi_compile_fragment _ _REFLECTION_PROBE_BLENDING
 			#pragma multi_compile_fragment _ _REFLECTION_PROBE_BOX_PROJECTION
-			#pragma multi_compile_fragment _ _FORWARD_PLUS
 			#pragma multi_compile _ FOG_EXP2
 			#endif
 			#if POI_PIPE == POI_BIRP
@@ -2887,16 +2898,12 @@ Shader "Hidden/Locked/.poiyomi/Poiyomi Toon URP/8b65420ea653adc42a88160eb3f236db
 			#pragma multi_compile_vertex _ FOG_EXP2
 			#pragma multi_compile_fragment _ VERTEXLIGHT_ON
 			#endif
+			#ifdef POI_WORLD
+			#pragma multi_compile _ LIGHTMAP_ON
+			#pragma multi_compile _ DYNAMICLIGHTMAP_ON
+			#endif
 			#pragma multi_compile_instancing
 			#define POI_PASS_BASE
-			#pragma skip_variants LIGHTMAP_ON DYNAMICLIGHTMAP_ON LIGHTMAP_SHADOW_MIXING SHADOWS_SHADOWMASK DIRLIGHTMAP_COMBINED _MIXED_LIGHTING_SUBTRACTIVE
-			#pragma skip_variants DECALS_OFF DECALS_3RT DECALS_4RT DECAL_SURFACE_GRADIENT _DBUFFER_MRT1 _DBUFFER_MRT2 _DBUFFER_MRT3 _DECAL_NORMAL_BLEND_LOW _DECAL_NORMAL_BLEND_MEDIUM _DECAL_NORMAL_BLEND_HIGH _DECAL_LAYERS
-			#pragma skip_variants _ADDITIONAL_LIGHT_SHADOWS _ADDITIONAL_LIGHTS_VERTEX _MAIN_LIGHT_SHADOWS_SCREEN _SCREEN_SPACE_OCCLUSION _USE_FAST_SRGB_LINEAR_CONVERSION _LIGHT_LAYERS
-			#if POI_PIPE != POI_URP
-			#pragma skip_variants PROBE_VOLUMES_OFF PROBE_VOLUMES_L1 PROBE_VOLUMES_L2
-			#endif
-			#pragma vertex vert
-			#pragma fragment frag
 			#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/CommonMaterial.hlsl"
 			#include "Packages/com.unity.render-pipelines.core/Runtime/Lighting/ProbeVolume/ProbeVolume.hlsl"
 			#include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/ProbeVolumeVariants.hlsl"
@@ -3868,6 +3875,9 @@ Shader "Hidden/Locked/.poiyomi/Poiyomi Toon URP/8b65420ea653adc42a88160eb3f236db
 				#if defined(LIGHTMAP_ON)
 				OUTPUT_LIGHTMAP_UV(v.uv1.xy, unity_LightmapST, o.lightmapUV.xy);
 				#endif
+				#ifdef DYNAMICLIGHTMAP_ON
+				OUTPUT_LIGHTMAP_UV(v.uv2.xy, unity_LightmapST, o.lightmapUV.zw);
+				#endif
 				o.localPos = v.vertex;
 				o.worldPos = mul(unity_ObjectToWorld, o.localPos);
 				float3 localOffset = float3(0, 0, 0);
@@ -3892,7 +3902,7 @@ Shader "Hidden/Locked/.poiyomi/Poiyomi Toon URP/8b65420ea653adc42a88160eb3f236db
 					applyReducedRenderClipDistance(o);
 				}
 				#ifdef POI_PASS_META
-				o.pos = UnityMetaVertexPosition(v.vertex, v.uv1.xy, v.uv2.xy, unity_LightmapST, unity_DynamicLightmapST);
+				o.pos = UnityMetaVertexPosition(v.vertex.xyz, v.uv1.xy, v.uv2.xy, unity_LightmapST, unity_DynamicLightmapST);
 				#endif
 				#ifdef POI_PASS_MOTION_VECTORS
 				#if defined(APPLICATION_SPACE_WARP_MOTION)
@@ -6215,7 +6225,7 @@ Shader "Hidden/Locked/.poiyomi/Poiyomi Toon URP/8b65420ea653adc42a88160eb3f236db
 				poiMesh.tangentSpaceNormal = UnpackNormal(float4(0.5, 0.5, 1, 1));
 				#endif
 				#ifdef VIGNETTE
-				#if !defined(POI_PASS_SHADOW) && !defined(POI_PASS_OUTLINE)
+				#if !defined(POI_PASS_SHADOW) && !defined(POI_PASS_OUTLINE) && !defined(POI_PASS_MOTION_VECTORS)
 				calculateRGBNormals(poiMesh, poiMods);
 				#endif
 				#endif
@@ -6494,6 +6504,7 @@ Shader "Hidden/Locked/.poiyomi/Poiyomi Toon URP/8b65420ea653adc42a88160eb3f236db
 					#if USE_CLUSTER_LIGHT_LOOP
 					UNITY_LOOP for (uint lightIndex = 0; lightIndex < min(URP_FP_DIRECTIONAL_LIGHTS_COUNT, POI_MAX_VISIBLE_LIGHTS); lightIndex++)
 					{
+						CLUSTER_LIGHT_LOOP_SUBTRACTIVE_LIGHT_CHECK
 						Light additionalLight = GetAdditionalLight(lightIndex, poiMesh.worldPos, poiLight.shadowMask);
 						PoiLight poiLightAdd;
 						PoiAdditionalLightCopy(poiLightAdd, poiLight, additionalLight, POI_DIRECTIONAL, poiDetailShadowMain);
@@ -6625,6 +6636,13 @@ Shader "Hidden/Locked/.poiyomi/Poiyomi Toon URP/8b65420ea653adc42a88160eb3f236db
  #define PROP_GLITTERCOLORMAP 
  #define OPTIMIZER_ENABLED 
 			#pragma target 5.0
+			#pragma skip_variants DECALS_OFF DECALS_3RT DECALS_4RT DECAL_SURFACE_GRADIENT _DBUFFER_MRT1 _DBUFFER_MRT2 _DBUFFER_MRT3 _DECAL_NORMAL_BLEND_LOW _DECAL_NORMAL_BLEND_MEDIUM _DECAL_NORMAL_BLEND_HIGH _DECAL_LAYERS
+			#pragma skip_variants _MAIN_LIGHT_SHADOWS_SCREEN _SCREEN_SPACE_OCCLUSION _USE_FAST_SRGB_LINEAR_CONVERSION _LIGHT_LAYERS
+			#if !defined(POI_WORLD)
+			#pragma skip_variants _ADDITIONAL_LIGHT_SHADOWS _ADDITIONAL_LIGHTS_VERTEX LIGHTMAP_ON DYNAMICLIGHTMAP_ON LIGHTMAP_SHADOW_MIXING SHADOWS_SHADOWMASK DIRLIGHTMAP_COMBINED _MIXED_LIGHTING_SUBTRACTIVE
+			#endif
+			#pragma vertex vert
+			#pragma fragment frag
 			#if POI_PIPE == POI_URP
 			#pragma skip_variants FOG_LINEAR FOG_EXP FOG_EXP2
 			#define FOG_LINEAR 0
@@ -6637,14 +6655,6 @@ Shader "Hidden/Locked/.poiyomi/Poiyomi Toon URP/8b65420ea653adc42a88160eb3f236db
 			#pragma multi_compile_instancing
 			#pragma multi_compile_shadowcaster
 			#define POI_PASS_SHADOW
-			#pragma skip_variants LIGHTMAP_ON DYNAMICLIGHTMAP_ON LIGHTMAP_SHADOW_MIXING SHADOWS_SHADOWMASK DIRLIGHTMAP_COMBINED _MIXED_LIGHTING_SUBTRACTIVE
-			#pragma skip_variants DECALS_OFF DECALS_3RT DECALS_4RT DECAL_SURFACE_GRADIENT _DBUFFER_MRT1 _DBUFFER_MRT2 _DBUFFER_MRT3 _DECAL_NORMAL_BLEND_LOW _DECAL_NORMAL_BLEND_MEDIUM _DECAL_NORMAL_BLEND_HIGH _DECAL_LAYERS
-			#pragma skip_variants _ADDITIONAL_LIGHT_SHADOWS _ADDITIONAL_LIGHTS_VERTEX _MAIN_LIGHT_SHADOWS_SCREEN _SCREEN_SPACE_OCCLUSION _USE_FAST_SRGB_LINEAR_CONVERSION _LIGHT_LAYERS
-			#if POI_PIPE != POI_URP
-			#pragma skip_variants PROBE_VOLUMES_OFF PROBE_VOLUMES_L1 PROBE_VOLUMES_L2
-			#endif
-			#pragma vertex vert
-			#pragma fragment frag
 			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Shadows.hlsl"
 			CBUFFER_START(UnityPerMaterial)
 			float _GrabMode;
@@ -6938,6 +6948,9 @@ Shader "Hidden/Locked/.poiyomi/Poiyomi Toon URP/8b65420ea653adc42a88160eb3f236db
 				#if defined(LIGHTMAP_ON)
 				OUTPUT_LIGHTMAP_UV(v.uv1.xy, unity_LightmapST, o.lightmapUV.xy);
 				#endif
+				#ifdef DYNAMICLIGHTMAP_ON
+				OUTPUT_LIGHTMAP_UV(v.uv2.xy, unity_LightmapST, o.lightmapUV.zw);
+				#endif
 				o.localPos = v.vertex;
 				o.worldPos = mul(unity_ObjectToWorld, o.localPos);
 				float3 localOffset = float3(0, 0, 0);
@@ -6962,7 +6975,7 @@ Shader "Hidden/Locked/.poiyomi/Poiyomi Toon URP/8b65420ea653adc42a88160eb3f236db
 					applyReducedRenderClipDistance(o);
 				}
 				#ifdef POI_PASS_META
-				o.pos = UnityMetaVertexPosition(v.vertex, v.uv1.xy, v.uv2.xy, unity_LightmapST, unity_DynamicLightmapST);
+				o.pos = UnityMetaVertexPosition(v.vertex.xyz, v.uv1.xy, v.uv2.xy, unity_LightmapST, unity_DynamicLightmapST);
 				#endif
 				#ifdef POI_PASS_MOTION_VECTORS
 				#if defined(APPLICATION_SPACE_WARP_MOTION)
@@ -7218,7 +7231,7 @@ Shader "Hidden/Locked/.poiyomi/Poiyomi Toon URP/8b65420ea653adc42a88160eb3f236db
 				poiMesh.tangentSpaceNormal = UnpackNormal(float4(0.5, 0.5, 1, 1));
 				#endif
 				#ifdef VIGNETTE
-				#if !defined(POI_PASS_SHADOW) && !defined(POI_PASS_OUTLINE)
+				#if !defined(POI_PASS_SHADOW) && !defined(POI_PASS_OUTLINE) && !defined(POI_PASS_MOTION_VECTORS)
 				calculateRGBNormals(poiMesh, poiMods);
 				#endif
 				#endif
@@ -7406,11 +7419,10 @@ Shader "Hidden/Locked/.poiyomi/Poiyomi Toon URP/8b65420ea653adc42a88160eb3f236db
 			#define FOG_EXP2 0
 			#endif
 			#pragma multi_compile_instancing
-			#pragma skip_variants LIGHTMAP_ON DYNAMICLIGHTMAP_ON LIGHTMAP_SHADOW_MIXING SHADOWS_SHADOWMASK DIRLIGHTMAP_COMBINED _MIXED_LIGHTING_SUBTRACTIVE
 			#pragma skip_variants DECALS_OFF DECALS_3RT DECALS_4RT DECAL_SURFACE_GRADIENT _DBUFFER_MRT1 _DBUFFER_MRT2 _DBUFFER_MRT3 _DECAL_NORMAL_BLEND_LOW _DECAL_NORMAL_BLEND_MEDIUM _DECAL_NORMAL_BLEND_HIGH _DECAL_LAYERS
-			#pragma skip_variants _ADDITIONAL_LIGHT_SHADOWS _ADDITIONAL_LIGHTS_VERTEX _MAIN_LIGHT_SHADOWS_SCREEN _SCREEN_SPACE_OCCLUSION _USE_FAST_SRGB_LINEAR_CONVERSION _LIGHT_LAYERS
-			#if POI_PIPE != POI_URP
-			#pragma skip_variants PROBE_VOLUMES_OFF PROBE_VOLUMES_L1 PROBE_VOLUMES_L2
+			#pragma skip_variants _MAIN_LIGHT_SHADOWS_SCREEN _SCREEN_SPACE_OCCLUSION _USE_FAST_SRGB_LINEAR_CONVERSION _LIGHT_LAYERS
+			#if !defined(POI_WORLD)
+			#pragma skip_variants _ADDITIONAL_LIGHT_SHADOWS _ADDITIONAL_LIGHTS_VERTEX LIGHTMAP_ON DYNAMICLIGHTMAP_ON LIGHTMAP_SHADOW_MIXING SHADOWS_SHADOWMASK DIRLIGHTMAP_COMBINED _MIXED_LIGHTING_SUBTRACTIVE
 			#endif
 			#pragma vertex vert
 			#pragma fragment frag
@@ -7876,6 +7888,9 @@ Shader "Hidden/Locked/.poiyomi/Poiyomi Toon URP/8b65420ea653adc42a88160eb3f236db
 				#if defined(LIGHTMAP_ON)
 				OUTPUT_LIGHTMAP_UV(v.uv1.xy, unity_LightmapST, o.lightmapUV.xy);
 				#endif
+				#ifdef DYNAMICLIGHTMAP_ON
+				OUTPUT_LIGHTMAP_UV(v.uv2.xy, unity_LightmapST, o.lightmapUV.zw);
+				#endif
 				o.localPos = v.vertex;
 				o.worldPos = mul(unity_ObjectToWorld, o.localPos);
 				float3 localOffset = float3(0, 0, 0);
@@ -7900,7 +7915,7 @@ Shader "Hidden/Locked/.poiyomi/Poiyomi Toon URP/8b65420ea653adc42a88160eb3f236db
 					applyReducedRenderClipDistance(o);
 				}
 				#ifdef POI_PASS_META
-				o.pos = UnityMetaVertexPosition(v.vertex, v.uv1.xy, v.uv2.xy, unity_LightmapST, unity_DynamicLightmapST);
+				o.pos = UnityMetaVertexPosition(v.vertex.xyz, v.uv1.xy, v.uv2.xy, unity_LightmapST, unity_DynamicLightmapST);
 				#endif
 				#ifdef POI_PASS_MOTION_VECTORS
 				#if defined(APPLICATION_SPACE_WARP_MOTION)
@@ -8374,7 +8389,7 @@ Shader "Hidden/Locked/.poiyomi/Poiyomi Toon URP/8b65420ea653adc42a88160eb3f236db
 				poiMesh.tangentSpaceNormal = UnpackNormal(float4(0.5, 0.5, 1, 1));
 				#endif
 				#ifdef VIGNETTE
-				#if !defined(POI_PASS_SHADOW) && !defined(POI_PASS_OUTLINE)
+				#if !defined(POI_PASS_SHADOW) && !defined(POI_PASS_OUTLINE) && !defined(POI_PASS_MOTION_VECTORS)
 				calculateRGBNormals(poiMesh, poiMods);
 				#endif
 				#endif
@@ -8566,11 +8581,10 @@ Shader "Hidden/Locked/.poiyomi/Poiyomi Toon URP/8b65420ea653adc42a88160eb3f236db
 			#define FOG_EXP2 0
 			#endif
 			#pragma multi_compile_instancing
-			#pragma skip_variants LIGHTMAP_ON DYNAMICLIGHTMAP_ON LIGHTMAP_SHADOW_MIXING SHADOWS_SHADOWMASK DIRLIGHTMAP_COMBINED _MIXED_LIGHTING_SUBTRACTIVE
 			#pragma skip_variants DECALS_OFF DECALS_3RT DECALS_4RT DECAL_SURFACE_GRADIENT _DBUFFER_MRT1 _DBUFFER_MRT2 _DBUFFER_MRT3 _DECAL_NORMAL_BLEND_LOW _DECAL_NORMAL_BLEND_MEDIUM _DECAL_NORMAL_BLEND_HIGH _DECAL_LAYERS
-			#pragma skip_variants _ADDITIONAL_LIGHT_SHADOWS _ADDITIONAL_LIGHTS_VERTEX _MAIN_LIGHT_SHADOWS_SCREEN _SCREEN_SPACE_OCCLUSION _USE_FAST_SRGB_LINEAR_CONVERSION _LIGHT_LAYERS
-			#if POI_PIPE != POI_URP
-			#pragma skip_variants PROBE_VOLUMES_OFF PROBE_VOLUMES_L1 PROBE_VOLUMES_L2
+			#pragma skip_variants _MAIN_LIGHT_SHADOWS_SCREEN _SCREEN_SPACE_OCCLUSION _USE_FAST_SRGB_LINEAR_CONVERSION _LIGHT_LAYERS
+			#if !defined(POI_WORLD)
+			#pragma skip_variants _ADDITIONAL_LIGHT_SHADOWS _ADDITIONAL_LIGHTS_VERTEX LIGHTMAP_ON DYNAMICLIGHTMAP_ON LIGHTMAP_SHADOW_MIXING SHADOWS_SHADOWMASK DIRLIGHTMAP_COMBINED _MIXED_LIGHTING_SUBTRACTIVE
 			#endif
 			#pragma vertex vert
 			#pragma fragment frag
@@ -9036,6 +9050,9 @@ Shader "Hidden/Locked/.poiyomi/Poiyomi Toon URP/8b65420ea653adc42a88160eb3f236db
 				#if defined(LIGHTMAP_ON)
 				OUTPUT_LIGHTMAP_UV(v.uv1.xy, unity_LightmapST, o.lightmapUV.xy);
 				#endif
+				#ifdef DYNAMICLIGHTMAP_ON
+				OUTPUT_LIGHTMAP_UV(v.uv2.xy, unity_LightmapST, o.lightmapUV.zw);
+				#endif
 				o.localPos = v.vertex;
 				o.worldPos = mul(unity_ObjectToWorld, o.localPos);
 				float3 localOffset = float3(0, 0, 0);
@@ -9060,7 +9077,7 @@ Shader "Hidden/Locked/.poiyomi/Poiyomi Toon URP/8b65420ea653adc42a88160eb3f236db
 					applyReducedRenderClipDistance(o);
 				}
 				#ifdef POI_PASS_META
-				o.pos = UnityMetaVertexPosition(v.vertex, v.uv1.xy, v.uv2.xy, unity_LightmapST, unity_DynamicLightmapST);
+				o.pos = UnityMetaVertexPosition(v.vertex.xyz, v.uv1.xy, v.uv2.xy, unity_LightmapST, unity_DynamicLightmapST);
 				#endif
 				#ifdef POI_PASS_MOTION_VECTORS
 				#if defined(APPLICATION_SPACE_WARP_MOTION)
@@ -9536,7 +9553,7 @@ Shader "Hidden/Locked/.poiyomi/Poiyomi Toon URP/8b65420ea653adc42a88160eb3f236db
 				poiMesh.tangentSpaceNormal = UnpackNormal(float4(0.5, 0.5, 1, 1));
 				#endif
 				#ifdef VIGNETTE
-				#if !defined(POI_PASS_SHADOW) && !defined(POI_PASS_OUTLINE)
+				#if !defined(POI_PASS_SHADOW) && !defined(POI_PASS_OUTLINE) && !defined(POI_PASS_MOTION_VECTORS)
 				calculateRGBNormals(poiMesh, poiMods);
 				#endif
 				#endif
@@ -9720,6 +9737,13 @@ Shader "Hidden/Locked/.poiyomi/Poiyomi Toon URP/8b65420ea653adc42a88160eb3f236db
  #define PROP_GLITTERCOLORMAP 
  #define OPTIMIZER_ENABLED 
 			#pragma target 5.0
+			#pragma skip_variants DECALS_OFF DECALS_3RT DECALS_4RT DECAL_SURFACE_GRADIENT _DBUFFER_MRT1 _DBUFFER_MRT2 _DBUFFER_MRT3 _DECAL_NORMAL_BLEND_LOW _DECAL_NORMAL_BLEND_MEDIUM _DECAL_NORMAL_BLEND_HIGH _DECAL_LAYERS
+			#pragma skip_variants _MAIN_LIGHT_SHADOWS_SCREEN _SCREEN_SPACE_OCCLUSION _USE_FAST_SRGB_LINEAR_CONVERSION _LIGHT_LAYERS
+			#if !defined(POI_WORLD)
+			#pragma skip_variants _ADDITIONAL_LIGHT_SHADOWS _ADDITIONAL_LIGHTS_VERTEX LIGHTMAP_ON DYNAMICLIGHTMAP_ON LIGHTMAP_SHADOW_MIXING SHADOWS_SHADOWMASK DIRLIGHTMAP_COMBINED _MIXED_LIGHTING_SUBTRACTIVE
+			#endif
+			#pragma vertex vert
+			#pragma fragment frag
 			#pragma skip_variants FOG_LINEAR FOG_EXP FOG_EXP2
 			#if POI_PIPE == POI_URP
 			#define FOG_LINEAR 0
@@ -9728,14 +9752,6 @@ Shader "Hidden/Locked/.poiyomi/Poiyomi Toon URP/8b65420ea653adc42a88160eb3f236db
 			#endif
 			#pragma multi_compile_instancing
 			#define POI_PASS_MOTION_VECTORS
-			#pragma skip_variants LIGHTMAP_ON DYNAMICLIGHTMAP_ON LIGHTMAP_SHADOW_MIXING SHADOWS_SHADOWMASK DIRLIGHTMAP_COMBINED _MIXED_LIGHTING_SUBTRACTIVE
-			#pragma skip_variants DECALS_OFF DECALS_3RT DECALS_4RT DECAL_SURFACE_GRADIENT _DBUFFER_MRT1 _DBUFFER_MRT2 _DBUFFER_MRT3 _DECAL_NORMAL_BLEND_LOW _DECAL_NORMAL_BLEND_MEDIUM _DECAL_NORMAL_BLEND_HIGH _DECAL_LAYERS
-			#pragma skip_variants _ADDITIONAL_LIGHT_SHADOWS _ADDITIONAL_LIGHTS_VERTEX _MAIN_LIGHT_SHADOWS_SCREEN _SCREEN_SPACE_OCCLUSION _USE_FAST_SRGB_LINEAR_CONVERSION _LIGHT_LAYERS
-			#if POI_PIPE != POI_URP
-			#pragma skip_variants PROBE_VOLUMES_OFF PROBE_VOLUMES_L1 PROBE_VOLUMES_L2
-			#endif
-			#pragma vertex vert
-			#pragma fragment frag
 			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/MotionVectorsCommon.hlsl"
 			CBUFFER_START(UnityPerMaterial)
 			float _GrabMode;
@@ -10014,6 +10030,9 @@ Shader "Hidden/Locked/.poiyomi/Poiyomi Toon URP/8b65420ea653adc42a88160eb3f236db
 				#if defined(LIGHTMAP_ON)
 				OUTPUT_LIGHTMAP_UV(v.uv1.xy, unity_LightmapST, o.lightmapUV.xy);
 				#endif
+				#ifdef DYNAMICLIGHTMAP_ON
+				OUTPUT_LIGHTMAP_UV(v.uv2.xy, unity_LightmapST, o.lightmapUV.zw);
+				#endif
 				o.localPos = v.vertex;
 				o.worldPos = mul(unity_ObjectToWorld, o.localPos);
 				float3 localOffset = float3(0, 0, 0);
@@ -10038,7 +10057,7 @@ Shader "Hidden/Locked/.poiyomi/Poiyomi Toon URP/8b65420ea653adc42a88160eb3f236db
 					applyReducedRenderClipDistance(o);
 				}
 				#ifdef POI_PASS_META
-				o.pos = UnityMetaVertexPosition(v.vertex, v.uv1.xy, v.uv2.xy, unity_LightmapST, unity_DynamicLightmapST);
+				o.pos = UnityMetaVertexPosition(v.vertex.xyz, v.uv1.xy, v.uv2.xy, unity_LightmapST, unity_DynamicLightmapST);
 				#endif
 				#ifdef POI_PASS_MOTION_VECTORS
 				#if defined(APPLICATION_SPACE_WARP_MOTION)
@@ -10294,7 +10313,7 @@ Shader "Hidden/Locked/.poiyomi/Poiyomi Toon URP/8b65420ea653adc42a88160eb3f236db
 				poiMesh.tangentSpaceNormal = UnpackNormal(float4(0.5, 0.5, 1, 1));
 				#endif
 				#ifdef VIGNETTE
-				#if !defined(POI_PASS_SHADOW) && !defined(POI_PASS_OUTLINE)
+				#if !defined(POI_PASS_SHADOW) && !defined(POI_PASS_OUTLINE) && !defined(POI_PASS_MOTION_VECTORS)
 				calculateRGBNormals(poiMesh, poiMods);
 				#endif
 				#endif
@@ -10422,11 +10441,14 @@ Shader "Hidden/Locked/.poiyomi/Poiyomi Toon URP/8b65420ea653adc42a88160eb3f236db
 				poiFragData.alpha = _AlphaForceOpaque2 ? 1 : poiFragData.alpha;
 				#endif
 				clip(poiFragData.alpha - 0.0);
+				#if defined(POI_PASS_MOTION_VECTORS)
 				#if defined(APPLICATION_SPACE_WARP_MOTION)
 				return float4(CalcAswNdcMotionVectorFromCsPositions(i.positionCSNoJitter, i.previousPositionCSNoJitter), 1);
 				#else
 				return float4(CalcNdcMotionVectorFromCsPositions(i.positionCSNoJitter, i.previousPositionCSNoJitter), 0, 0);
 				#endif
+				#endif
+				return float4(0,0,0,0);
 			}
 			ENDHLSL
 		}

@@ -82,14 +82,16 @@ namespace Poi.Tools.ShaderTranslator
 #if UNITY_6000_2_OR_NEWER
                     case UnityEngine.Rendering.ShaderPropertyType.Int:
                         prop.defaultIntValue = shader.GetPropertyDefaultIntValue(i);
+                        break;
 #elif UNITY_2022_1_OR_NEWER
                     case MaterialProperty.PropType.Int:
                         prop.defaultIntValue = shader.GetPropertyDefaultIntValue(i);
+                        break;
 #elif UNITY_2021_1_OR_NEWER
                     case MaterialProperty.PropType.Int:
                         prop.defaultIntValue = Convert.ToInt32(shader.GetPropertyDefaultFloatValue(i));
-#endif
                         break;
+#endif
                     default:
                         break;
                 }

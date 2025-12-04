@@ -4097,7 +4097,7 @@ Shader ".poiyomi/Poiyomi Pro URP Geometric Dissolve"
 		[HideInInspector] m_modifierCategory ("Global Modifiers & Data", Float) = 0
 		[HideInInspector] m_start_PoiGlobalCategory ("Global Data and Masks", Float) = 0
 		//ifex _BlackLightMaskingEnabled==0
-		[HideInInspector] m_start_BlackLightMasking ("BlackLight Masking--{reference_property:_BlackLightMaskingEnabled, button_help:{text:Tutorial,action:{type:URL,data:https://www.poiyomi.com/modifiers/blacklight-masking},hover:Documentation}}", Float) = 0
+		[HideInInspector] m_start_BlackLightMasking (" BlackLight Masking--{reference_property:_BlackLightMaskingEnabled, button_help:{text:Tutorial,action:{type:URL,data:https://www.poiyomi.com/modifiers/blacklight-masking},hover:Documentation}}", Float) = 0
 		[HideInInspector][ThryToggle(POI_BLACKLIGHTMASKING)] _BlackLightMaskingEnabled ("BlackLight Masking Enabled", Float) = 0
 		
 		[ThryHeaderLabel(One, 13)]
@@ -5757,6 +5757,14 @@ Shader ".poiyomi/Poiyomi Pro URP Geometric Dissolve"
 			return dotToDegrees(dot(normalize(a), normalize(b)));
 		}
 		
+		// Fast approximation of arctangent function
+		// From Heitz et al. 2016, "Real-Time Polygonal-Light Shading with Linearly Transformed Cosines"
+		float poiFastAtan(float x)
+		{
+			return x * (abs(x) * (1.5707963 * abs(x) - 0.00507668) + 0.420691) /
+			(abs(x) * (abs(x) * (0.633387806 + abs(x)) + 0.671041944) + 0.215192627);
+		}
+		
 		// Set by VRChat (as of open beta 1245)
 		// _VRChatCameraMode: 0 => Normal, 1 => VR HandCam, 2 => Desktop Handcam, 3 => Screenshot/Photo
 		// _VRChatMirrorMode: 0 => Normal, 1 => Mirror (VR), 2 => Mirror (Deskie)
@@ -7245,7 +7253,7 @@ Shader ".poiyomi/Poiyomi Pro URP Geometric Dissolve"
 			unity_SpecCube0.GetDimensions(width, height);
 			hasReflection = !(width * height < 2);
 			
-			#if USE_FORWARD_PLUS
+			#if CLUSTER_HAS_REFLECTION_PROBES
 			urp_ReflProbes_Atlas.GetDimensions(width, height);
 			hasReflection = hasReflection | !(width * height < 2);
 			#endif
@@ -7356,32 +7364,6 @@ Shader ".poiyomi/Poiyomi Pro URP Geometric Dissolve"
 			#pragma shader_feature TPS_IsSkinnedMesh
 			//endex
 			
-			#if POI_PIPE == POI_URP
-			#pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE
-			#pragma multi_compile _ _ADDITIONAL_LIGHTS
-			#pragma multi_compile _ _CLUSTER_LIGHT_LOOP
-			
-			#pragma multi_compile_fragment _ _SHADOWS_SOFT
-			#pragma multi_compile_fragment _ _REFLECTION_PROBE_BLENDING
-			#pragma multi_compile_fragment _ _REFLECTION_PROBE_BOX_PROJECTION
-			#pragma multi_compile_fragment _ _FORWARD_PLUS
-			
-			#pragma multi_compile _ FOG_EXP2
-			
-			#pragma shader_feature_local LIGHTMAP_ON
-			#pragma shader_feature_local DYNAMICLIGHTMAP_ON
-			#endif
-			
-			#if POI_PIPE == POI_BIRP
-			#pragma multi_compile_fwdbase
-			#pragma multi_compile_vertex _ FOG_EXP2
-			#pragma multi_compile_fragment _ VERTEXLIGHT_ON
-			#endif
-			
-			#pragma multi_compile_instancing
-			
-			#define POI_PASS_BASE
-			
 			#pragma shader_feature_local _STOCHASTICMODE_DELIOT_HEITZ _STOCHASTICMODE_HEXTILE _STOCHASTICMODE_NONE
 			
 			#pragma shader_feature_local PROP_LIGHTINGAOMAPS
@@ -7396,12 +7378,16 @@ Shader ".poiyomi/Poiyomi Pro URP Geometric Dissolve"
 			
 			//#pragma shader_feature KEYWORD
 			
-			#pragma skip_variants LIGHTMAP_ON DYNAMICLIGHTMAP_ON LIGHTMAP_SHADOW_MIXING SHADOWS_SHADOWMASK DIRLIGHTMAP_COMBINED _MIXED_LIGHTING_SUBTRACTIVE
 			#pragma skip_variants DECALS_OFF DECALS_3RT DECALS_4RT DECAL_SURFACE_GRADIENT _DBUFFER_MRT1 _DBUFFER_MRT2 _DBUFFER_MRT3 _DECAL_NORMAL_BLEND_LOW _DECAL_NORMAL_BLEND_MEDIUM _DECAL_NORMAL_BLEND_HIGH _DECAL_LAYERS
-			#pragma skip_variants _ADDITIONAL_LIGHT_SHADOWS _ADDITIONAL_LIGHTS_VERTEX _MAIN_LIGHT_SHADOWS_SCREEN _SCREEN_SPACE_OCCLUSION _USE_FAST_SRGB_LINEAR_CONVERSION _LIGHT_LAYERS
-			#if POI_PIPE != POI_URP
-			#pragma skip_variants PROBE_VOLUMES_OFF PROBE_VOLUMES_L1 PROBE_VOLUMES_L2
+			#pragma skip_variants _MAIN_LIGHT_SHADOWS_SCREEN _SCREEN_SPACE_OCCLUSION _USE_FAST_SRGB_LINEAR_CONVERSION _LIGHT_LAYERS
+			
+			#if !defined(POI_WORLD)
+			#pragma skip_variants _ADDITIONAL_LIGHT_SHADOWS _ADDITIONAL_LIGHTS_VERTEX LIGHTMAP_ON DYNAMICLIGHTMAP_ON LIGHTMAP_SHADOW_MIXING SHADOWS_SHADOWMASK DIRLIGHTMAP_COMBINED _MIXED_LIGHTING_SUBTRACTIVE
 			#endif
+			
+			// #if POI_PIPE != POI_URP
+			//     #pragma skip_variants PROBE_VOLUMES_OFF PROBE_VOLUMES_L1 PROBE_VOLUMES_L2
+			// #endif
 			
 			//ifex _GlobalMaskTexturesEnable==0
 			#pragma shader_feature_local POI_GLOBALMASK_TEXTURES
@@ -7661,6 +7647,33 @@ Shader ".poiyomi/Poiyomi Pro URP Geometric Dissolve"
 			#pragma geometry geom
 			
 			#pragma fragment frag
+			
+			#if POI_PIPE == POI_URP
+			#pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE
+			#pragma multi_compile _ _ADDITIONAL_LIGHTS
+			#pragma multi_compile _ _CLUSTER_LIGHT_LOOP
+			
+			#pragma multi_compile_fragment _ _SHADOWS_SOFT
+			#pragma multi_compile_fragment _ _REFLECTION_PROBE_BLENDING
+			#pragma multi_compile_fragment _ _REFLECTION_PROBE_BOX_PROJECTION
+			
+			#pragma multi_compile _ FOG_EXP2
+			#endif
+			
+			#if POI_PIPE == POI_BIRP
+			#pragma multi_compile_fwdbase
+			#pragma multi_compile_vertex _ FOG_EXP2
+			#pragma multi_compile_fragment _ VERTEXLIGHT_ON
+			#endif
+			
+			#ifdef POI_WORLD
+			#pragma multi_compile _ LIGHTMAP_ON
+			#pragma multi_compile _ DYNAMICLIGHTMAP_ON
+			#endif
+			
+			#pragma multi_compile_instancing
+			
+			#define POI_PASS_BASE
 			
 			#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/CommonMaterial.hlsl"
 			#include "Packages/com.unity.render-pipelines.core/Runtime/Lighting/ProbeVolume/ProbeVolume.hlsl"
@@ -14339,7 +14352,7 @@ Shader ".poiyomi/Poiyomi Pro URP Geometric Dissolve"
 				}
 				
 				#ifdef POI_PASS_META
-				o.pos = UnityMetaVertexPosition(v.vertex, v.uv1.xy, v.uv2.xy, unity_LightmapST, unity_DynamicLightmapST);
+				o.pos = UnityMetaVertexPosition(v.vertex.xyz, v.uv1.xy, v.uv2.xy, unity_LightmapST, unity_DynamicLightmapST);
 				#endif
 				
 				#ifdef POI_PASS_MOTION_VECTORS
@@ -18867,19 +18880,25 @@ Shader ".poiyomi/Poiyomi Pro URP Geometric Dissolve"
 					float4 lightNormalWS = float4(poiMesh.normals[1], 1);
 					if (_LightingColorMode == 0)
 					lightNormalWS = float4(lerp(0, poiMesh.normals[1], _LightingIndirectUsesNormals), 1);
-					#if !defined(LIGHTMAP_ON) && (defined(PROBE_VOLUMES_L1) || defined(PROBE_VOLUMES_L2))
-					float3 poiGI = SAMPLE_GI(0,
+					
+					float3 poiGI = 0;
+					
+					#if defined(_SCREEN_SPACE_IRRADIANCE)
+					poiGI = SAMPLE_GI(_ScreenSpaceIrradiance, poiCam.clipPos.xy);
+					#elif defined(DYNAMICLIGHTMAP_ON)
+					poiGI = SAMPLE_GI(poiMesh.lightmapUV.xy, poiMesh.lightmapUV.zw, 0, lightNormalWS.xyz);
+					#elif !defined(LIGHTMAP_ON) && (defined(PROBE_VOLUMES_L1) || defined(PROBE_VOLUMES_L2))
+					poiGI = SAMPLE_GI(0,
 					GetAbsolutePositionWS(poiMesh.worldPos),
 					poiMesh.normals[1],
 					poiCam.viewDir,
 					poiCam.clipPos.xy,
 					poiLight.occlusion,
 					poiLight.shadowMask);
-					#elif defined(DYNAMICLIGHTMAP_ON)
-					float3 poiGI = SAMPLE_GI(poiMesh.lightmapUV.xy, poiMesh.lightmapUV.zw, 0, lightNormalWS.xyz);
 					#else
-					float3 poiGI = SAMPLE_GI(poiMesh.lightmapUV.xy, 0, lightNormalWS.xyz);
+					poiGI = SAMPLE_GI(poiMesh.lightmapUV.xy, 0, lightNormalWS.xyz);
 					#endif
+					
 					MixRealtimeAndBakedGI(poiLight.unityLight, poiMesh.normals[1], poiGI);
 					AmbientOcclusionFactor aoFactor = CreateAmbientOcclusionFactor(poiCam.screenUV, poiLight.occlusion);
 					poiGI = GlobalIllumination(poiLight.brdfData, poiLight.brdfDataClearCoat, 1,
@@ -23902,10 +23921,10 @@ Shader ".poiyomi/Poiyomi Pro URP Geometric Dissolve"
 					
 					if (_PathALChrono)
 					{
-						float4 chronoBands = float4(_PathChronoBandR, _PathChronoBandG, _PathChronoBandB, _PathChronoBandA);
-						float4 chronoTypes = float4(_PathChronoTypeR, _PathChronoTypeG, _PathChronoTypeB, _PathChronoTypeA);
-						float4 chronoSpeeds = float4(_PathChronoSpeedR, _PathChronoSpeedG, _PathChronoSpeedB, _PathChronoSpeedA);
-						alTimeOffsets += AudioLinkGetChronoTime(chronoTypes, chronoBands) * chronoSpeeds;
+						alTimeOffsets.x += AudioLinkGetChronoTime(_PathChronoTypeR, _PathChronoBandR) * _PathChronoSpeedR;
+						alTimeOffsets.y += AudioLinkGetChronoTime(_PathChronoTypeG, _PathChronoBandG) * _PathChronoSpeedG;
+						alTimeOffsets.z += AudioLinkGetChronoTime(_PathChronoTypeB, _PathChronoBandB) * _PathChronoSpeedB;
+						alTimeOffsets.w += AudioLinkGetChronoTime(_PathChronoTypeA, _PathChronoBandA) * _PathChronoSpeedA;
 					}
 					
 					if (_PathALWidthOffset)
@@ -26189,7 +26208,7 @@ Shader ".poiyomi/Poiyomi Pro URP Geometric Dissolve"
 				
 				//ifex _RGBMaskEnabled==0
 				#ifdef VIGNETTE
-				#if !defined(POI_PASS_SHADOW) && !defined(POI_PASS_OUTLINE)
+				#if !defined(POI_PASS_SHADOW) && !defined(POI_PASS_OUTLINE) && !defined(POI_PASS_MOTION_VECTORS)
 				calculateRGBNormals(poiMesh, poiMods);
 				#endif
 				#endif
@@ -26812,6 +26831,7 @@ Shader ".poiyomi/Poiyomi Pro URP Geometric Dissolve"
 					#if USE_CLUSTER_LIGHT_LOOP
 					UNITY_LOOP for (uint lightIndex = 0; lightIndex < min(URP_FP_DIRECTIONAL_LIGHTS_COUNT, POI_MAX_VISIBLE_LIGHTS); lightIndex++)
 					{
+						CLUSTER_LIGHT_LOOP_SUBTRACTIVE_LIGHT_CHECK
 						Light additionalLight = GetAdditionalLight(lightIndex, poiMesh.worldPos, poiLight.shadowMask);
 						PoiLight poiLightAdd;
 						PoiAdditionalLightCopy(poiLightAdd, poiLight, additionalLight, POI_DIRECTIONAL, poiDetailShadowMain);
@@ -27137,22 +27157,6 @@ Shader ".poiyomi/Poiyomi Pro URP Geometric Dissolve"
 			#pragma shader_feature TPS_IsSkinnedMesh
 			//endex
 			
-			#if POI_PIPE == POI_URP
-			#pragma skip_variants FOG_LINEAR FOG_EXP FOG_EXP2
-			// https://issuetracker.unity3d.com/issues/number-pragma-skip-variants-fog-linear-does-not-remove-fog-linear-keyword-declared-keyword
-			// Skip variants not working for fog in URP
-			#define FOG_LINEAR 0
-			#define FOG_EXP 0
-			#define FOG_EXP2 0
-			#pragma multi_compile_vertex _ _CASTING_PUNCTUAL_LIGHT_SHADOW
-			#else
-			#pragma multi_compile_vertex _ FOG_EXP2
-			#pragma multi_compile_fwdbase
-			#pragma multi_compile_fragment _ VERTEXLIGHT_ON
-			#endif
-			#pragma multi_compile_instancing
-			#define POI_PASS_OUTLINE
-			
 			#pragma shader_feature_local _STOCHASTICMODE_DELIOT_HEITZ _STOCHASTICMODE_HEXTILE _STOCHASTICMODE_NONE
 			
 			#pragma shader_feature_local PROP_LIGHTINGAOMAPS
@@ -27167,12 +27171,16 @@ Shader ".poiyomi/Poiyomi Pro URP Geometric Dissolve"
 			
 			//#pragma shader_feature KEYWORD
 			
-			#pragma skip_variants LIGHTMAP_ON DYNAMICLIGHTMAP_ON LIGHTMAP_SHADOW_MIXING SHADOWS_SHADOWMASK DIRLIGHTMAP_COMBINED _MIXED_LIGHTING_SUBTRACTIVE
 			#pragma skip_variants DECALS_OFF DECALS_3RT DECALS_4RT DECAL_SURFACE_GRADIENT _DBUFFER_MRT1 _DBUFFER_MRT2 _DBUFFER_MRT3 _DECAL_NORMAL_BLEND_LOW _DECAL_NORMAL_BLEND_MEDIUM _DECAL_NORMAL_BLEND_HIGH _DECAL_LAYERS
-			#pragma skip_variants _ADDITIONAL_LIGHT_SHADOWS _ADDITIONAL_LIGHTS_VERTEX _MAIN_LIGHT_SHADOWS_SCREEN _SCREEN_SPACE_OCCLUSION _USE_FAST_SRGB_LINEAR_CONVERSION _LIGHT_LAYERS
-			#if POI_PIPE != POI_URP
-			#pragma skip_variants PROBE_VOLUMES_OFF PROBE_VOLUMES_L1 PROBE_VOLUMES_L2
+			#pragma skip_variants _MAIN_LIGHT_SHADOWS_SCREEN _SCREEN_SPACE_OCCLUSION _USE_FAST_SRGB_LINEAR_CONVERSION _LIGHT_LAYERS
+			
+			#if !defined(POI_WORLD)
+			#pragma skip_variants _ADDITIONAL_LIGHT_SHADOWS _ADDITIONAL_LIGHTS_VERTEX LIGHTMAP_ON DYNAMICLIGHTMAP_ON LIGHTMAP_SHADOW_MIXING SHADOWS_SHADOWMASK DIRLIGHTMAP_COMBINED _MIXED_LIGHTING_SUBTRACTIVE
 			#endif
+			
+			// #if POI_PIPE != POI_URP
+			//     #pragma skip_variants PROBE_VOLUMES_OFF PROBE_VOLUMES_L1 PROBE_VOLUMES_L2
+			// #endif
 			
 			//ifex _GlobalMaskTexturesEnable==0
 			#pragma shader_feature_local POI_GLOBALMASK_TEXTURES
@@ -27315,6 +27323,22 @@ Shader ".poiyomi/Poiyomi Pro URP Geometric Dissolve"
 			#pragma geometry geom
 			
 			#pragma fragment frag
+			
+			#if POI_PIPE == POI_URP
+			#pragma skip_variants FOG_LINEAR FOG_EXP FOG_EXP2
+			// https://issuetracker.unity3d.com/issues/number-pragma-skip-variants-fog-linear-does-not-remove-fog-linear-keyword-declared-keyword
+			// Skip variants not working for fog in URP
+			#define FOG_LINEAR 0
+			#define FOG_EXP 0
+			#define FOG_EXP2 0
+			#pragma multi_compile_vertex _ _CASTING_PUNCTUAL_LIGHT_SHADOW
+			#else
+			#pragma multi_compile_vertex _ FOG_EXP2
+			#pragma multi_compile_fwdbase
+			#pragma multi_compile_fragment _ VERTEXLIGHT_ON
+			#endif
+			#pragma multi_compile_instancing
+			#define POI_PASS_OUTLINE
 			
 			//ifex _EnableAudioLink==0
 			#ifdef POI_AUDIOLINK
@@ -31310,7 +31334,7 @@ Shader ".poiyomi/Poiyomi Pro URP Geometric Dissolve"
 				}
 				
 				#ifdef POI_PASS_META
-				o.pos = UnityMetaVertexPosition(v.vertex, v.uv1.xy, v.uv2.xy, unity_LightmapST, unity_DynamicLightmapST);
+				o.pos = UnityMetaVertexPosition(v.vertex.xyz, v.uv1.xy, v.uv2.xy, unity_LightmapST, unity_DynamicLightmapST);
 				#endif
 				
 				#ifdef POI_PASS_MOTION_VECTORS
@@ -34037,19 +34061,25 @@ Shader ".poiyomi/Poiyomi Pro URP Geometric Dissolve"
 					float4 lightNormalWS = float4(poiMesh.normals[1], 1);
 					if (_LightingColorMode == 0)
 					lightNormalWS = float4(lerp(0, poiMesh.normals[1], _LightingIndirectUsesNormals), 1);
-					#if !defined(LIGHTMAP_ON) && (defined(PROBE_VOLUMES_L1) || defined(PROBE_VOLUMES_L2))
-					float3 poiGI = SAMPLE_GI(0,
+					
+					float3 poiGI = 0;
+					
+					#if defined(_SCREEN_SPACE_IRRADIANCE)
+					poiGI = SAMPLE_GI(_ScreenSpaceIrradiance, poiCam.clipPos.xy);
+					#elif defined(DYNAMICLIGHTMAP_ON)
+					poiGI = SAMPLE_GI(poiMesh.lightmapUV.xy, poiMesh.lightmapUV.zw, 0, lightNormalWS.xyz);
+					#elif !defined(LIGHTMAP_ON) && (defined(PROBE_VOLUMES_L1) || defined(PROBE_VOLUMES_L2))
+					poiGI = SAMPLE_GI(0,
 					GetAbsolutePositionWS(poiMesh.worldPos),
 					poiMesh.normals[1],
 					poiCam.viewDir,
 					poiCam.clipPos.xy,
 					poiLight.occlusion,
 					poiLight.shadowMask);
-					#elif defined(DYNAMICLIGHTMAP_ON)
-					float3 poiGI = SAMPLE_GI(poiMesh.lightmapUV.xy, poiMesh.lightmapUV.zw, 0, lightNormalWS.xyz);
 					#else
-					float3 poiGI = SAMPLE_GI(poiMesh.lightmapUV.xy, 0, lightNormalWS.xyz);
+					poiGI = SAMPLE_GI(poiMesh.lightmapUV.xy, 0, lightNormalWS.xyz);
 					#endif
+					
 					MixRealtimeAndBakedGI(poiLight.unityLight, poiMesh.normals[1], poiGI);
 					AmbientOcclusionFactor aoFactor = CreateAmbientOcclusionFactor(poiCam.screenUV, poiLight.occlusion);
 					poiGI = GlobalIllumination(poiLight.brdfData, poiLight.brdfDataClearCoat, 1,
@@ -35676,7 +35706,7 @@ Shader ".poiyomi/Poiyomi Pro URP Geometric Dissolve"
 				
 				//ifex _RGBMaskEnabled==0
 				#ifdef VIGNETTE
-				#if !defined(POI_PASS_SHADOW) && !defined(POI_PASS_OUTLINE)
+				#if !defined(POI_PASS_SHADOW) && !defined(POI_PASS_OUTLINE) && !defined(POI_PASS_MOTION_VECTORS)
 				calculateRGBNormals(poiMesh, poiMods);
 				#endif
 				#endif
@@ -36065,6 +36095,7 @@ Shader ".poiyomi/Poiyomi Pro URP Geometric Dissolve"
 					#if USE_CLUSTER_LIGHT_LOOP
 					UNITY_LOOP for (uint lightIndex = 0; lightIndex < min(URP_FP_DIRECTIONAL_LIGHTS_COUNT, POI_MAX_VISIBLE_LIGHTS); lightIndex++)
 					{
+						CLUSTER_LIGHT_LOOP_SUBTRACTIVE_LIGHT_CHECK
 						Light additionalLight = GetAdditionalLight(lightIndex, poiMesh.worldPos, poiLight.shadowMask);
 						PoiLight poiLightAdd;
 						PoiAdditionalLightCopy(poiLightAdd, poiLight, additionalLight, POI_DIRECTIONAL, poiDetailShadowMain);
@@ -36267,21 +36298,6 @@ Shader ".poiyomi/Poiyomi Pro URP Geometric Dissolve"
 			#pragma shader_feature TPS_IsSkinnedMesh
 			//endex
 			
-			#if POI_PIPE == POI_URP
-			#pragma skip_variants FOG_LINEAR FOG_EXP FOG_EXP2
-			// https://issuetracker.unity3d.com/issues/number-pragma-skip-variants-fog-linear-does-not-remove-fog-linear-keyword-declared-keyword
-			// Skip variants not working for fog in URP
-			#define FOG_LINEAR 0
-			#define FOG_EXP 0
-			#define FOG_EXP2 0
-			#pragma multi_compile_vertex _ _CASTING_PUNCTUAL_LIGHT_SHADOW
-			#else
-			#pragma multi_compile_vertex _ FOG_EXP2
-			#endif
-			#pragma multi_compile_instancing
-			#pragma multi_compile_shadowcaster
-			#define POI_PASS_SHADOW
-			
 			#pragma shader_feature_local _STOCHASTICMODE_DELIOT_HEITZ _STOCHASTICMODE_HEXTILE _STOCHASTICMODE_NONE
 			
 			#pragma shader_feature_local PROP_LIGHTINGAOMAPS
@@ -36296,12 +36312,16 @@ Shader ".poiyomi/Poiyomi Pro URP Geometric Dissolve"
 			
 			//#pragma shader_feature KEYWORD
 			
-			#pragma skip_variants LIGHTMAP_ON DYNAMICLIGHTMAP_ON LIGHTMAP_SHADOW_MIXING SHADOWS_SHADOWMASK DIRLIGHTMAP_COMBINED _MIXED_LIGHTING_SUBTRACTIVE
 			#pragma skip_variants DECALS_OFF DECALS_3RT DECALS_4RT DECAL_SURFACE_GRADIENT _DBUFFER_MRT1 _DBUFFER_MRT2 _DBUFFER_MRT3 _DECAL_NORMAL_BLEND_LOW _DECAL_NORMAL_BLEND_MEDIUM _DECAL_NORMAL_BLEND_HIGH _DECAL_LAYERS
-			#pragma skip_variants _ADDITIONAL_LIGHT_SHADOWS _ADDITIONAL_LIGHTS_VERTEX _MAIN_LIGHT_SHADOWS_SCREEN _SCREEN_SPACE_OCCLUSION _USE_FAST_SRGB_LINEAR_CONVERSION _LIGHT_LAYERS
-			#if POI_PIPE != POI_URP
-			#pragma skip_variants PROBE_VOLUMES_OFF PROBE_VOLUMES_L1 PROBE_VOLUMES_L2
+			#pragma skip_variants _MAIN_LIGHT_SHADOWS_SCREEN _SCREEN_SPACE_OCCLUSION _USE_FAST_SRGB_LINEAR_CONVERSION _LIGHT_LAYERS
+			
+			#if !defined(POI_WORLD)
+			#pragma skip_variants _ADDITIONAL_LIGHT_SHADOWS _ADDITIONAL_LIGHTS_VERTEX LIGHTMAP_ON DYNAMICLIGHTMAP_ON LIGHTMAP_SHADOW_MIXING SHADOWS_SHADOWMASK DIRLIGHTMAP_COMBINED _MIXED_LIGHTING_SUBTRACTIVE
 			#endif
+			
+			// #if POI_PIPE != POI_URP
+			//     #pragma skip_variants PROBE_VOLUMES_OFF PROBE_VOLUMES_L1 PROBE_VOLUMES_L2
+			// #endif
 			
 			//ifex _GlobalMaskTexturesEnable==0
 			#pragma shader_feature_local POI_GLOBALMASK_TEXTURES
@@ -36453,6 +36473,21 @@ Shader ".poiyomi/Poiyomi Pro URP Geometric Dissolve"
 			#pragma geometry geom
 			
 			#pragma fragment frag
+			
+			#if POI_PIPE == POI_URP
+			#pragma skip_variants FOG_LINEAR FOG_EXP FOG_EXP2
+			// https://issuetracker.unity3d.com/issues/number-pragma-skip-variants-fog-linear-does-not-remove-fog-linear-keyword-declared-keyword
+			// Skip variants not working for fog in URP
+			#define FOG_LINEAR 0
+			#define FOG_EXP 0
+			#define FOG_EXP2 0
+			#pragma multi_compile_vertex _ _CASTING_PUNCTUAL_LIGHT_SHADOW
+			#else
+			#pragma multi_compile_vertex _ FOG_EXP2
+			#endif
+			#pragma multi_compile_instancing
+			#pragma multi_compile_shadowcaster
+			#define POI_PASS_SHADOW
 			
 			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Shadows.hlsl"
 			
@@ -40179,7 +40214,7 @@ Shader ".poiyomi/Poiyomi Pro URP Geometric Dissolve"
 				}
 				
 				#ifdef POI_PASS_META
-				o.pos = UnityMetaVertexPosition(v.vertex, v.uv1.xy, v.uv2.xy, unity_LightmapST, unity_DynamicLightmapST);
+				o.pos = UnityMetaVertexPosition(v.vertex.xyz, v.uv1.xy, v.uv2.xy, unity_LightmapST, unity_DynamicLightmapST);
 				#endif
 				
 				#ifdef POI_PASS_MOTION_VECTORS
@@ -43209,7 +43244,7 @@ Shader ".poiyomi/Poiyomi Pro URP Geometric Dissolve"
 				
 				//ifex _RGBMaskEnabled==0
 				#ifdef VIGNETTE
-				#if !defined(POI_PASS_SHADOW) && !defined(POI_PASS_OUTLINE)
+				#if !defined(POI_PASS_SHADOW) && !defined(POI_PASS_OUTLINE) && !defined(POI_PASS_MOTION_VECTORS)
 				calculateRGBNormals(poiMesh, poiMods);
 				#endif
 				#endif
@@ -43555,12 +43590,16 @@ Shader ".poiyomi/Poiyomi Pro URP Geometric Dissolve"
 			
 			//#pragma shader_feature KEYWORD
 			
-			#pragma skip_variants LIGHTMAP_ON DYNAMICLIGHTMAP_ON LIGHTMAP_SHADOW_MIXING SHADOWS_SHADOWMASK DIRLIGHTMAP_COMBINED _MIXED_LIGHTING_SUBTRACTIVE
 			#pragma skip_variants DECALS_OFF DECALS_3RT DECALS_4RT DECAL_SURFACE_GRADIENT _DBUFFER_MRT1 _DBUFFER_MRT2 _DBUFFER_MRT3 _DECAL_NORMAL_BLEND_LOW _DECAL_NORMAL_BLEND_MEDIUM _DECAL_NORMAL_BLEND_HIGH _DECAL_LAYERS
-			#pragma skip_variants _ADDITIONAL_LIGHT_SHADOWS _ADDITIONAL_LIGHTS_VERTEX _MAIN_LIGHT_SHADOWS_SCREEN _SCREEN_SPACE_OCCLUSION _USE_FAST_SRGB_LINEAR_CONVERSION _LIGHT_LAYERS
-			#if POI_PIPE != POI_URP
-			#pragma skip_variants PROBE_VOLUMES_OFF PROBE_VOLUMES_L1 PROBE_VOLUMES_L2
+			#pragma skip_variants _MAIN_LIGHT_SHADOWS_SCREEN _SCREEN_SPACE_OCCLUSION _USE_FAST_SRGB_LINEAR_CONVERSION _LIGHT_LAYERS
+			
+			#if !defined(POI_WORLD)
+			#pragma skip_variants _ADDITIONAL_LIGHT_SHADOWS _ADDITIONAL_LIGHTS_VERTEX LIGHTMAP_ON DYNAMICLIGHTMAP_ON LIGHTMAP_SHADOW_MIXING SHADOWS_SHADOWMASK DIRLIGHTMAP_COMBINED _MIXED_LIGHTING_SUBTRACTIVE
 			#endif
+			
+			// #if POI_PIPE != POI_URP
+			//     #pragma skip_variants PROBE_VOLUMES_OFF PROBE_VOLUMES_L1 PROBE_VOLUMES_L2
+			// #endif
 			
 			//ifex _GlobalMaskTexturesEnable==0
 			#pragma shader_feature_local POI_GLOBALMASK_TEXTURES
@@ -47470,7 +47509,7 @@ Shader ".poiyomi/Poiyomi Pro URP Geometric Dissolve"
 				}
 				
 				#ifdef POI_PASS_META
-				o.pos = UnityMetaVertexPosition(v.vertex, v.uv1.xy, v.uv2.xy, unity_LightmapST, unity_DynamicLightmapST);
+				o.pos = UnityMetaVertexPosition(v.vertex.xyz, v.uv1.xy, v.uv2.xy, unity_LightmapST, unity_DynamicLightmapST);
 				#endif
 				
 				#ifdef POI_PASS_MOTION_VECTORS
@@ -50141,7 +50180,7 @@ Shader ".poiyomi/Poiyomi Pro URP Geometric Dissolve"
 				
 				//ifex _RGBMaskEnabled==0
 				#ifdef VIGNETTE
-				#if !defined(POI_PASS_SHADOW) && !defined(POI_PASS_OUTLINE)
+				#if !defined(POI_PASS_SHADOW) && !defined(POI_PASS_OUTLINE) && !defined(POI_PASS_MOTION_VECTORS)
 				calculateRGBNormals(poiMesh, poiMods);
 				#endif
 				#endif
@@ -50481,12 +50520,16 @@ Shader ".poiyomi/Poiyomi Pro URP Geometric Dissolve"
 			
 			//#pragma shader_feature KEYWORD
 			
-			#pragma skip_variants LIGHTMAP_ON DYNAMICLIGHTMAP_ON LIGHTMAP_SHADOW_MIXING SHADOWS_SHADOWMASK DIRLIGHTMAP_COMBINED _MIXED_LIGHTING_SUBTRACTIVE
 			#pragma skip_variants DECALS_OFF DECALS_3RT DECALS_4RT DECAL_SURFACE_GRADIENT _DBUFFER_MRT1 _DBUFFER_MRT2 _DBUFFER_MRT3 _DECAL_NORMAL_BLEND_LOW _DECAL_NORMAL_BLEND_MEDIUM _DECAL_NORMAL_BLEND_HIGH _DECAL_LAYERS
-			#pragma skip_variants _ADDITIONAL_LIGHT_SHADOWS _ADDITIONAL_LIGHTS_VERTEX _MAIN_LIGHT_SHADOWS_SCREEN _SCREEN_SPACE_OCCLUSION _USE_FAST_SRGB_LINEAR_CONVERSION _LIGHT_LAYERS
-			#if POI_PIPE != POI_URP
-			#pragma skip_variants PROBE_VOLUMES_OFF PROBE_VOLUMES_L1 PROBE_VOLUMES_L2
+			#pragma skip_variants _MAIN_LIGHT_SHADOWS_SCREEN _SCREEN_SPACE_OCCLUSION _USE_FAST_SRGB_LINEAR_CONVERSION _LIGHT_LAYERS
+			
+			#if !defined(POI_WORLD)
+			#pragma skip_variants _ADDITIONAL_LIGHT_SHADOWS _ADDITIONAL_LIGHTS_VERTEX LIGHTMAP_ON DYNAMICLIGHTMAP_ON LIGHTMAP_SHADOW_MIXING SHADOWS_SHADOWMASK DIRLIGHTMAP_COMBINED _MIXED_LIGHTING_SUBTRACTIVE
 			#endif
+			
+			// #if POI_PIPE != POI_URP
+			//     #pragma skip_variants PROBE_VOLUMES_OFF PROBE_VOLUMES_L1 PROBE_VOLUMES_L2
+			// #endif
 			
 			//ifex _GlobalMaskTexturesEnable==0
 			#pragma shader_feature_local POI_GLOBALMASK_TEXTURES
@@ -54396,7 +54439,7 @@ Shader ".poiyomi/Poiyomi Pro URP Geometric Dissolve"
 				}
 				
 				#ifdef POI_PASS_META
-				o.pos = UnityMetaVertexPosition(v.vertex, v.uv1.xy, v.uv2.xy, unity_LightmapST, unity_DynamicLightmapST);
+				o.pos = UnityMetaVertexPosition(v.vertex.xyz, v.uv1.xy, v.uv2.xy, unity_LightmapST, unity_DynamicLightmapST);
 				#endif
 				
 				#ifdef POI_PASS_MOTION_VECTORS
@@ -57069,7 +57112,7 @@ Shader ".poiyomi/Poiyomi Pro URP Geometric Dissolve"
 				
 				//ifex _RGBMaskEnabled==0
 				#ifdef VIGNETTE
-				#if !defined(POI_PASS_SHADOW) && !defined(POI_PASS_OUTLINE)
+				#if !defined(POI_PASS_SHADOW) && !defined(POI_PASS_OUTLINE) && !defined(POI_PASS_MOTION_VECTORS)
 				calculateRGBNormals(poiMesh, poiMods);
 				#endif
 				#endif
