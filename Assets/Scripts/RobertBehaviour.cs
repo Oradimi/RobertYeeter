@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class RobertBehaviour : MonoBehaviour
 {
-    [SceneLabel(SceneLabelID.EnemyName)]
+    [SceneLabel(SceneLabelID.EnemyName, fontSize: 12)]
 #pragma warning disable 0414
     [SerializeField] private string robertName = "Robert";
 #pragma warning restore 0414

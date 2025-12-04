@@ -1119,8 +1119,7 @@ AnimationClip:
         time: 0
         value: {x: -0.00020687122, y: 0.00000014119972, z: -0.00063829945, w: 0.9999998}
         inSlope: {x: 0, y: 0, z: 0, w: 0}
-        outSlope: {x: -0.0000017462297, y: -0.00000025067948, z: -0.0000034924594,
-          w: 0}
+        outSlope: {x: -0.0000017462297, y: -0.00000025067948, z: -0.0000034924594, w: 0}
         tangentMode: 0
         weightedMode: 0
         inWeight: {x: 0.33333334, y: 0.33333334, z: 0.33333334, w: 0.33333334}
@@ -1128,8 +1127,7 @@ AnimationClip:
       - serializedVersion: 3
         time: 0.016666668
         value: {x: -0.00020687122, y: 0.00000014119972, z: -0.00063829945, w: 0.9999998}
-        inSlope: {x: -0.0000017462297, y: -0.00000025238478, z: -0.0000034924594,
-          w: 0}
+        inSlope: {x: -0.0000017462297, y: -0.00000025238478, z: -0.0000034924594, w: 0}
         outSlope: {x: 0, y: 0, z: 0, w: 0}
         tangentMode: 0
         weightedMode: 0
@@ -1346,8 +1344,7 @@ AnimationClip:
         time: 0
         value: {x: -0.00020708173, y: -0.00000014123948, z: 0.0006385497, w: 0.9999998}
         inSlope: {x: 0, y: 0, z: 0, w: 0}
-        outSlope: {x: 0.00000087311486, y: 0.00000025579538, z: -0.0000034924594,
-          w: 0}
+        outSlope: {x: 0.00000087311486, y: 0.00000025579538, z: -0.0000034924594, w: 0}
         tangentMode: 0
         weightedMode: 0
         inWeight: {x: 0.33333334, y: 0.33333334, z: 0.33333334, w: 0.33333334}
@@ -5960,6 +5957,126 @@ AnimationClip:
     classID: 137
     script: {fileID: 0}
     flags: 16
+  - serializedVersion: 2
+    curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 100
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 136
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 0.016666668
+        value: 100
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 136
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    attribute: blendShape.Jaded
+    path: Body
+    classID: 137
+    script: {fileID: 0}
+    flags: 0
+  - serializedVersion: 2
+    curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 100
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 136
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 0.016666668
+        value: 100
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 136
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    attribute: "blendShape.\u2227"
+    path: Body
+    classID: 137
+    script: {fileID: 0}
+    flags: 0
+  - serializedVersion: 2
+    curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 100
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 136
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 0.016666668
+        value: 100
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 136
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    attribute: blendShape.Loose_01
+    path: Hair_bun
+    classID: 137
+    script: {fileID: 0}
+    flags: 0
+  - serializedVersion: 2
+    curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 100
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 136
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 0.016666668
+        value: 100
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 136
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    attribute: blendShape.Loose_02
+    path: Hair_bun
+    classID: 137
+    script: {fileID: 0}
+    flags: 0
   m_PPtrCurves: []
   m_SampleRate: 60
   m_WrapMode: 0
@@ -6023,7 +6140,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 2549298212
+      path: 3470240575
       attribute: 2
       script: {fileID: 0}
       typeID: 4
@@ -6032,7 +6149,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 2533607705
+      path: 2505087814
       attribute: 2
       script: {fileID: 0}
       typeID: 4
@@ -6041,7 +6158,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 2480029752
+      path: 2551352404
       attribute: 2
       script: {fileID: 0}
       typeID: 4
@@ -6050,7 +6167,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 2445296177
+      path: 3274706470
       attribute: 2
       script: {fileID: 0}
       typeID: 4
@@ -6059,7 +6176,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 2495689196
+      path: 1244912530
       attribute: 2
       script: {fileID: 0}
       typeID: 4
@@ -6068,7 +6185,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 3415531829
+      path: 2461040174
       attribute: 2
       script: {fileID: 0}
       typeID: 4
@@ -6077,7 +6194,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 202392177
+      path: 239276078
       attribute: 2
       script: {fileID: 0}
       typeID: 4
@@ -6086,7 +6203,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 3478117115
+      path: 2646578924
       attribute: 2
       script: {fileID: 0}
       typeID: 4
@@ -6095,7 +6212,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 2051014999
+      path: 978793818
       attribute: 2
       script: {fileID: 0}
       typeID: 4
@@ -6104,7 +6221,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 127901704
+      path: 3647818358
       attribute: 2
       script: {fileID: 0}
       typeID: 4
@@ -6113,7 +6230,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 496144195
+      path: 2190713607
       attribute: 2
       script: {fileID: 0}
       typeID: 4
@@ -6122,7 +6239,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 3885871648
+      path: 2023530084
       attribute: 2
       script: {fileID: 0}
       typeID: 4
@@ -6131,7 +6248,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 254222509
+      path: 2418412777
       attribute: 2
       script: {fileID: 0}
       typeID: 4
@@ -6464,7 +6581,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 2224983966
+      path: 2034654307
       attribute: 1
       script: {fileID: 0}
       typeID: 4
@@ -6473,7 +6590,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 2859057800
+      path: 2017655205
       attribute: 1
       script: {fileID: 0}
       typeID: 4
@@ -6482,7 +6599,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 671177108
+      path: 2361339159
       attribute: 1
       script: {fileID: 0}
       typeID: 4
@@ -6491,7 +6608,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 2549298212
+      path: 3470240575
       attribute: 1
       script: {fileID: 0}
       typeID: 4
@@ -6500,7 +6617,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 2533607705
+      path: 2505087814
       attribute: 1
       script: {fileID: 0}
       typeID: 4
@@ -6509,7 +6626,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 2480029752
+      path: 2551352404
       attribute: 1
       script: {fileID: 0}
       typeID: 4
@@ -6518,7 +6635,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 2445296177
+      path: 3274706470
       attribute: 1
       script: {fileID: 0}
       typeID: 4
@@ -6527,7 +6644,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 3863455919
+      path: 2790300834
       attribute: 1
       script: {fileID: 0}
       typeID: 4
@@ -6536,7 +6653,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 2495689196
+      path: 1244912530
       attribute: 1
       script: {fileID: 0}
       typeID: 4
@@ -6545,7 +6662,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 2123477757
+      path: 2202624256
       attribute: 1
       script: {fileID: 0}
       typeID: 4
@@ -6554,7 +6671,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 4185356497
+      path: 727467004
       attribute: 1
       script: {fileID: 0}
       typeID: 4
@@ -6563,7 +6680,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 3261758451
+      path: 1725173616
       attribute: 1
       script: {fileID: 0}
       typeID: 4
@@ -6572,7 +6689,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 3415531829
+      path: 2461040174
       attribute: 1
       script: {fileID: 0}
       typeID: 4
@@ -6581,7 +6698,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 202392177
+      path: 239276078
       attribute: 1
       script: {fileID: 0}
       typeID: 4
@@ -6590,7 +6707,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 273301484
+      path: 462091136
       attribute: 1
       script: {fileID: 0}
       typeID: 4
@@ -6599,7 +6716,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 3478117115
+      path: 2646578924
       attribute: 1
       script: {fileID: 0}
       typeID: 4
@@ -6608,7 +6725,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 2051014999
+      path: 978793818
       attribute: 1
       script: {fileID: 0}
       typeID: 4
@@ -6617,7 +6734,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 127901704
+      path: 3647818358
       attribute: 1
       script: {fileID: 0}
       typeID: 4
@@ -6626,7 +6743,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 496144195
+      path: 2190713607
       attribute: 1
       script: {fileID: 0}
       typeID: 4
@@ -6635,7 +6752,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 1542965545
+      path: 3264893856
       attribute: 1
       script: {fileID: 0}
       typeID: 4
@@ -6644,7 +6761,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 1792054280
+      path: 778245015
       attribute: 1
       script: {fileID: 0}
       typeID: 4
@@ -6653,7 +6770,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 3885871648
+      path: 2023530084
       attribute: 1
       script: {fileID: 0}
       typeID: 4
@@ -6662,7 +6779,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 4153251233
+      path: 1860177704
       attribute: 1
       script: {fileID: 0}
       typeID: 4
@@ -6671,7 +6788,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 3316328641
+      path: 2165878622
       attribute: 1
       script: {fileID: 0}
       typeID: 4
@@ -6680,7 +6797,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 254222509
+      path: 2418412777
       attribute: 1
       script: {fileID: 0}
       typeID: 4
@@ -6689,7 +6806,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 3874171661
+      path: 2139533700
       attribute: 1
       script: {fileID: 0}
       typeID: 4
@@ -6698,7 +6815,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 4113046990
+      path: 1781084554
       attribute: 1
       script: {fileID: 0}
       typeID: 4
@@ -6707,7 +6824,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 1251047301
+      path: 3556568332
       attribute: 1
       script: {fileID: 0}
       typeID: 4
@@ -6716,7 +6833,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 3080406984
+      path: 681208716
       attribute: 1
       script: {fileID: 0}
       typeID: 4
@@ -6725,7 +6842,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 993031982
+      path: 2724064679
       attribute: 1
       script: {fileID: 0}
       typeID: 4
@@ -6734,7 +6851,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 1301576363
+      path: 3533002479
       attribute: 1
       script: {fileID: 0}
       typeID: 4
@@ -6743,7 +6860,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 2538220454
+      path: 237482287
       attribute: 1
       script: {fileID: 0}
       typeID: 4
@@ -6752,7 +6869,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 3574135727
+      path: 491701742
       attribute: 1
       script: {fileID: 0}
       typeID: 4
@@ -6761,7 +6878,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 3591969005
+      path: 509552300
       attribute: 1
       script: {fileID: 0}
       typeID: 4
@@ -7040,7 +7157,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 2224983966
+      path: 2034654307
       attribute: 2
       script: {fileID: 0}
       typeID: 4
@@ -7049,7 +7166,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 2859057800
+      path: 2017655205
       attribute: 2
       script: {fileID: 0}
       typeID: 4
@@ -7058,7 +7175,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 671177108
+      path: 2361339159
       attribute: 2
       script: {fileID: 0}
       typeID: 4
@@ -7067,7 +7184,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 3863455919
+      path: 2790300834
       attribute: 2
       script: {fileID: 0}
       typeID: 4
@@ -7076,7 +7193,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 2123477757
+      path: 2202624256
       attribute: 2
       script: {fileID: 0}
       typeID: 4
@@ -7085,7 +7202,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 4185356497
+      path: 727467004
       attribute: 2
       script: {fileID: 0}
       typeID: 4
@@ -7094,7 +7211,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 3261758451
+      path: 1725173616
       attribute: 2
       script: {fileID: 0}
       typeID: 4
@@ -7103,7 +7220,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 273301484
+      path: 462091136
       attribute: 2
       script: {fileID: 0}
       typeID: 4
@@ -7112,7 +7229,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 1542965545
+      path: 3264893856
       attribute: 2
       script: {fileID: 0}
       typeID: 4
@@ -7121,7 +7238,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 1792054280
+      path: 778245015
       attribute: 2
       script: {fileID: 0}
       typeID: 4
@@ -7130,7 +7247,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 4153251233
+      path: 1860177704
       attribute: 2
       script: {fileID: 0}
       typeID: 4
@@ -7139,7 +7256,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 3316328641
+      path: 2165878622
       attribute: 2
       script: {fileID: 0}
       typeID: 4
@@ -7148,7 +7265,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 3874171661
+      path: 2139533700
       attribute: 2
       script: {fileID: 0}
       typeID: 4
@@ -7157,7 +7274,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 4113046990
+      path: 1781084554
       attribute: 2
       script: {fileID: 0}
       typeID: 4
@@ -7166,7 +7283,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 1251047301
+      path: 3556568332
       attribute: 2
       script: {fileID: 0}
       typeID: 4
@@ -7175,7 +7292,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 3080406984
+      path: 681208716
       attribute: 2
       script: {fileID: 0}
       typeID: 4
@@ -7184,7 +7301,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 993031982
+      path: 2724064679
       attribute: 2
       script: {fileID: 0}
       typeID: 4
@@ -7193,7 +7310,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 1301576363
+      path: 3533002479
       attribute: 2
       script: {fileID: 0}
       typeID: 4
@@ -7202,7 +7319,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 2538220454
+      path: 237482287
       attribute: 2
       script: {fileID: 0}
       typeID: 4
@@ -7211,7 +7328,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 3574135727
+      path: 491701742
       attribute: 4
       script: {fileID: 0}
       typeID: 4
@@ -7220,7 +7337,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 3591969005
+      path: 509552300
       attribute: 4
       script: {fileID: 0}
       typeID: 4
@@ -7553,7 +7670,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 2224983966
+      path: 2034654307
       attribute: 3
       script: {fileID: 0}
       typeID: 4
@@ -7562,7 +7679,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 2859057800
+      path: 2017655205
       attribute: 3
       script: {fileID: 0}
       typeID: 4
@@ -7571,7 +7688,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 671177108
+      path: 2361339159
       attribute: 3
       script: {fileID: 0}
       typeID: 4
@@ -7580,7 +7697,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 2549298212
+      path: 3470240575
       attribute: 3
       script: {fileID: 0}
       typeID: 4
@@ -7589,7 +7706,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 2533607705
+      path: 2505087814
       attribute: 3
       script: {fileID: 0}
       typeID: 4
@@ -7598,7 +7715,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 2480029752
+      path: 2551352404
       attribute: 3
       script: {fileID: 0}
       typeID: 4
@@ -7607,7 +7724,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 2445296177
+      path: 3274706470
       attribute: 3
       script: {fileID: 0}
       typeID: 4
@@ -7616,7 +7733,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 3863455919
+      path: 2790300834
       attribute: 3
       script: {fileID: 0}
       typeID: 4
@@ -7625,7 +7742,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 2495689196
+      path: 1244912530
       attribute: 3
       script: {fileID: 0}
       typeID: 4
@@ -7634,7 +7751,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 2123477757
+      path: 2202624256
       attribute: 3
       script: {fileID: 0}
       typeID: 4
@@ -7643,7 +7760,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 4185356497
+      path: 727467004
       attribute: 3
       script: {fileID: 0}
       typeID: 4
@@ -7652,7 +7769,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 3261758451
+      path: 1725173616
       attribute: 3
       script: {fileID: 0}
       typeID: 4
@@ -7661,7 +7778,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 3415531829
+      path: 2461040174
       attribute: 3
       script: {fileID: 0}
       typeID: 4
@@ -7670,7 +7787,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 202392177
+      path: 239276078
       attribute: 3
       script: {fileID: 0}
       typeID: 4
@@ -7679,7 +7796,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 273301484
+      path: 462091136
       attribute: 3
       script: {fileID: 0}
       typeID: 4
@@ -7688,7 +7805,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 3478117115
+      path: 2646578924
       attribute: 3
       script: {fileID: 0}
       typeID: 4
@@ -7697,7 +7814,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 2051014999
+      path: 978793818
       attribute: 3
       script: {fileID: 0}
       typeID: 4
@@ -7706,7 +7823,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 127901704
+      path: 3647818358
       attribute: 3
       script: {fileID: 0}
       typeID: 4
@@ -7715,7 +7832,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 496144195
+      path: 2190713607
       attribute: 3
       script: {fileID: 0}
       typeID: 4
@@ -7724,7 +7841,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 1542965545
+      path: 3264893856
       attribute: 3
       script: {fileID: 0}
       typeID: 4
@@ -7733,7 +7850,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 1792054280
+      path: 778245015
       attribute: 3
       script: {fileID: 0}
       typeID: 4
@@ -7742,7 +7859,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 3885871648
+      path: 2023530084
       attribute: 3
       script: {fileID: 0}
       typeID: 4
@@ -7751,7 +7868,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 4153251233
+      path: 1860177704
       attribute: 3
       script: {fileID: 0}
       typeID: 4
@@ -7760,7 +7877,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 3316328641
+      path: 2165878622
       attribute: 3
       script: {fileID: 0}
       typeID: 4
@@ -7769,7 +7886,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 254222509
+      path: 2418412777
       attribute: 3
       script: {fileID: 0}
       typeID: 4
@@ -7778,7 +7895,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 3874171661
+      path: 2139533700
       attribute: 3
       script: {fileID: 0}
       typeID: 4
@@ -7787,7 +7904,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 4113046990
+      path: 1781084554
       attribute: 3
       script: {fileID: 0}
       typeID: 4
@@ -7796,7 +7913,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 1251047301
+      path: 3556568332
       attribute: 3
       script: {fileID: 0}
       typeID: 4
@@ -7805,7 +7922,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 3080406984
+      path: 681208716
       attribute: 3
       script: {fileID: 0}
       typeID: 4
@@ -7814,7 +7931,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 993031982
+      path: 2724064679
       attribute: 3
       script: {fileID: 0}
       typeID: 4
@@ -7823,7 +7940,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 1301576363
+      path: 3533002479
       attribute: 3
       script: {fileID: 0}
       typeID: 4
@@ -7832,7 +7949,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 2538220454
+      path: 237482287
       attribute: 3
       script: {fileID: 0}
       typeID: 4
@@ -7841,7 +7958,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 3574135727
+      path: 491701742
       attribute: 3
       script: {fileID: 0}
       typeID: 4
@@ -7850,7 +7967,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 3591969005
+      path: 509552300
       attribute: 3
       script: {fileID: 0}
       typeID: 4
@@ -7895,7 +8012,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 1760715628
+      path: 2265805026
       attribute: 2500713699
       script: {fileID: 1661641543, guid: 2a2c05204084d904aa4945ccff20d8e5, type: 3}
       typeID: 114
@@ -7904,7 +8021,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 1760715628
+      path: 2265805026
       attribute: 2302119936
       script: {fileID: 1661641543, guid: 2a2c05204084d904aa4945ccff20d8e5, type: 3}
       typeID: 114
@@ -7913,7 +8030,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 3314060664
+      path: 712482550
       attribute: 2302119936
       script: {fileID: 1661641543, guid: 2a2c05204084d904aa4945ccff20d8e5, type: 3}
       typeID: 114
@@ -7922,7 +8039,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 3314060664
+      path: 712482550
       attribute: 2500713699
       script: {fileID: 1661641543, guid: 2a2c05204084d904aa4945ccff20d8e5, type: 3}
       typeID: 114
@@ -7931,7 +8048,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 3314060664
+      path: 712482550
       attribute: 1769853172
       script: {fileID: 1661641543, guid: 2a2c05204084d904aa4945ccff20d8e5, type: 3}
       typeID: 114
@@ -7949,7 +8066,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 1658710202
+      path: 1222528249
       attribute: 2500713699
       script: {fileID: 1661641543, guid: 2a2c05204084d904aa4945ccff20d8e5, type: 3}
       typeID: 114
@@ -7958,7 +8075,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 1658710202
+      path: 1222528249
       attribute: 2302119936
       script: {fileID: 1661641543, guid: 2a2c05204084d904aa4945ccff20d8e5, type: 3}
       typeID: 114
@@ -7967,7 +8084,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 1658710202
+      path: 1222528249
       attribute: 1769853172
       script: {fileID: 1661641543, guid: 2a2c05204084d904aa4945ccff20d8e5, type: 3}
       typeID: 114
@@ -8062,6 +8179,42 @@ AnimationClip:
       script: {fileID: 0}
       typeID: 137
       customType: 22
+      isPPtrCurve: 0
+      isIntCurve: 0
+      isSerializeReferenceCurve: 0
+    - serializedVersion: 2
+      path: 2073732236
+      attribute: 1248886476
+      script: {fileID: 0}
+      typeID: 137
+      customType: 20
+      isPPtrCurve: 0
+      isIntCurve: 0
+      isSerializeReferenceCurve: 0
+    - serializedVersion: 2
+      path: 2073732236
+      attribute: 4006607316
+      script: {fileID: 0}
+      typeID: 137
+      customType: 20
+      isPPtrCurve: 0
+      isIntCurve: 0
+      isSerializeReferenceCurve: 0
+    - serializedVersion: 2
+      path: 1041067275
+      attribute: 3300805410
+      script: {fileID: 0}
+      typeID: 137
+      customType: 20
+      isPPtrCurve: 0
+      isIntCurve: 0
+      isSerializeReferenceCurve: 0
+    - serializedVersion: 2
+      path: 1041067275
+      attribute: 1572280984
+      script: {fileID: 0}
+      typeID: 137
+      customType: 20
       isPPtrCurve: 0
       isIntCurve: 0
       isSerializeReferenceCurve: 0
@@ -29717,6 +29870,126 @@ AnimationClip:
     classID: 137
     script: {fileID: 0}
     flags: 16
+  - serializedVersion: 2
+    curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 100
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 136
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 0.016666668
+        value: 100
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 136
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    attribute: blendShape.Jaded
+    path: Body
+    classID: 137
+    script: {fileID: 0}
+    flags: 0
+  - serializedVersion: 2
+    curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 100
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 136
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 0.016666668
+        value: 100
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 136
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    attribute: "blendShape.\u2227"
+    path: Body
+    classID: 137
+    script: {fileID: 0}
+    flags: 0
+  - serializedVersion: 2
+    curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 100
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 136
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 0.016666668
+        value: 100
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 136
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    attribute: blendShape.Loose_01
+    path: Hair_bun
+    classID: 137
+    script: {fileID: 0}
+    flags: 0
+  - serializedVersion: 2
+    curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 100
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 136
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 0.016666668
+        value: 100
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 136
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    attribute: blendShape.Loose_02
+    path: Hair_bun
+    classID: 137
+    script: {fileID: 0}
+    flags: 0
   m_EulerEditorCurves:
   - serializedVersion: 2
     curve:

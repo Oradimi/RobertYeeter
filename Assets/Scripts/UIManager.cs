@@ -41,6 +41,11 @@ public class UIManager : MonoBehaviour
     [Header("Credits Menus")]
     [SerializeField] private RectTransform creditsMenu;
     
+    [Header("In-game UI")]
+    [SerializeField] private RectTransform inGameUI;
+    [SerializeField] private Slider staminaBar;
+    [SerializeField] private Image staminaBarImage;
+    
     [Header("Sound Effects")]
     [SerializeField] private AudioClip openMenu;
     [SerializeField] private AudioClip closeMenu;
@@ -53,6 +58,8 @@ public class UIManager : MonoBehaviour
     [SerializeField] private Color selectedColor;
     [SerializeField] private Color normalTextColor;
     [SerializeField] private Color selectedTextColor;
+    [SerializeField] private Color staminaBarNormalColor;
+    [SerializeField] private Color staminaBarRechargeColor;
     
     private void Awake()
     {
@@ -73,6 +80,7 @@ public class UIManager : MonoBehaviour
     public static void DisplayMenu(bool value, bool gameOver = false)
     {
         _instance.ui.gameObject.SetActive(value);
+        _instance.inGameUI.gameObject.SetActive(!value);
         
         if (value)
         {
@@ -263,6 +271,17 @@ public class UIManager : MonoBehaviour
     public static void OpenExternalLink(string url)
     {
         Application.OpenURL(url);
+    }
+
+    public static void UpdateStaminaBar(float value)
+    {
+        _instance.staminaBarImage.color = _instance.staminaBar.value > value
+            ? _instance.staminaBarNormalColor
+            : _instance.staminaBarRechargeColor;
+        _instance.staminaBar.value = value;
+        _instance.staminaBar.gameObject.SetActive(value < 1f);
+        _instance.staminaBar.transform.position = FloorManager.WorldToScreenPoint(
+            GameManager.GetPlayer().transform.position + Vector3.forward * 0.8f);
     }
 
     public static void ChangeMusicVolume(float value)

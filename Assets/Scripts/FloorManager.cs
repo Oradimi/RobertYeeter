@@ -227,7 +227,9 @@ public class FloorManager : MonoBehaviour
     {
         var randomPosition = new Vector3(x, 0f, z);
         var ray = new Ray(randomPosition + Vector3.up * 4f, Vector3.down);
-        if (Physics.Raycast(ray, out var hit) && hit.point.y > -0.1f)
+        var rayFront = new Ray(randomPosition + Vector3.up * 4f + Vector3.forward * 5f, Vector3.down);
+        Physics.Raycast(rayFront, out var hitFront);
+        if (Physics.Raycast(ray, out var hit) && hit.point.y > -0.1f && hitFront.point.y - hit.point.y <= 0.1f)
         {
             randomPosition += Vector3.up * hit.point.y;
             pattern(randomPosition);
@@ -407,6 +409,11 @@ public class FloorManager : MonoBehaviour
             GameManager.GlobalSpeed = GameManager.GlobalSpeedStored;
             GameManager.AffectsAnimations = GameManager.AffectsAnimationsStored;
         }
+    }
+
+    public static Vector3 WorldToScreenPoint(Vector3 position)
+    {
+        return _instance._camera.WorldToScreenPoint(position);
     }
 
     private void UpdateCamera()

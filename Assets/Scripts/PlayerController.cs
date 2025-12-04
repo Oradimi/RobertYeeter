@@ -12,6 +12,9 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private AudioClip punchSound;
     [SerializeField] private AudioClip splashSound;
     [SerializeField] private AudioClip cantMoveSound;
+    
+    [SerializeField] private AnimationClip[] idleAnimations;
+    [SerializeField] private AnimationClip[] happyIdleAnimations;
 
     [SceneLabel(fontSize: 32)]
 #pragma warning disable CS0414 // Field is assigned but its value is never used
@@ -27,15 +30,20 @@ public class PlayerController : MonoBehaviour
     private static readonly int DrownTrigger = Animator.StringToHash("Drown");
     private static readonly int CaughtTrigger = Animator.StringToHash("Caught");
     private static readonly int WetBool = Animator.StringToHash("Wet");
-    
+    private static readonly int BlinkFloat = Animator.StringToHash("Blink");
+
     private AudioSource _audioSource;
     private PlayerControls _controls;
     
     private Vector3 _targetPosition;
     private Vector3 _chargePosition;
-    [SceneLabel(SceneLabelID.Cooldown)]
     private float _chargeCooldown;
     private float _initialChargeBreak;
+
+    private float _idleCooldown;
+    private float _blinkTimer;
+    private float _blinkTarget;
+    private bool _isBlinking;
     
     private bool _isCharging;
     private bool _isJumping;
@@ -58,11 +66,16 @@ public class PlayerController : MonoBehaviour
 
     private void OnEnable()
     {
-        _audioSource.volume = GameManager.SoundEffectsVolume;
-        SceneLabelOverlay.OnSetSpecialAttribute += PlayerControllerLabelEffect;
+        _animator.Play("Idle_0");
+        _idleCooldown = idleAnimations[0].length;
         _animator.SetBool(WetBool, false);
-        _controls.Enable();
+        
+        _audioSource.volume = GameManager.SoundEffectsVolume;
+        _blinkTimer = 5f;
+        GetComponentInChildren<SkinnedMeshRenderer>().SetBlendShapeWeight(25, -80f);
         GameManager.ApplySkin();
+        
+        _controls.Enable();
         EnableActionMap();
         _controls.UI.Fullscreen.performed += OnFullscreen;
     }
@@ -73,12 +86,19 @@ public class PlayerController : MonoBehaviour
         DisableUIMap();
         _controls.UI.Fullscreen.performed -= OnFullscreen;
         _controls.Disable();
-        SceneLabelOverlay.OnSetSpecialAttribute -= PlayerControllerLabelEffect;
     }
 
     private void FixedUpdate()
     {
         _animator.speed = GameManager.AffectsAnimations ? GameManager.GlobalSpeed : 1f;
+        
+        ProcessBlinking();
+        
+        if (!FloorManager.IsStarted())
+        {
+            ProcessRandomIdle();
+            return;
+        }
 
         if (FloorManager.IsPaused())
             return;
@@ -88,9 +108,10 @@ public class PlayerController : MonoBehaviour
         
         CheckForJumpPrompt();
         CheckCollision();
+        UIManager.UpdateStaminaBar(Mathf.Abs(_chargeCooldown - 1f));
 
         _chargePosition *= chargeBreak + (1f - chargeBreak) * (1f - GameManager.GlobalSpeed);
-        _isCharging = _chargePosition.z < -0.2f;
+        _isCharging = _chargeCooldown >= 1f;
         
         if (FloorManager.IsGameOver())
             return;
@@ -206,6 +227,70 @@ public class PlayerController : MonoBehaviour
     {
         return speed * (GameManager.AffectsAnimations ? GameManager.GlobalSpeed : 1f);
     }
+    
+    private void ProcessBlinking()
+    {
+        _blinkTimer -= Time.fixedDeltaTime;
+        _animator.SetFloat(BlinkFloat, _blinkTarget, 0.1f - 0.05f * _blinkTarget, Time.fixedDeltaTime);
+
+        if (!_isBlinking && _blinkTimer < 0f)
+        {
+            _isBlinking = true;
+            CloseEyes();
+        }
+        else if (_isBlinking && _blinkTimer < 0f)
+        {
+            _isBlinking = false;
+            OpenEyes();
+        }
+    }
+
+    private void OpenEyes()
+    {
+        _blinkTarget = 0f;
+        var quickBlinkMultiplier = Random.Range(0, 4) == 0 ? 0.5f : 1f;
+        _blinkTimer = Random.Range(3f, 5f) * quickBlinkMultiplier;
+    }
+
+    private void CloseEyes()
+    {
+        _blinkTarget = _animator.GetBool(WetBool) ? 0.5f : 1f;
+        _blinkTimer = Random.Range(0.20f, 0.25f);
+    }
+
+    private void ProcessRandomIdle()
+    {
+        _idleCooldown -= Time.fixedDeltaTime;
+
+        while (_idleCooldown <= 0f)
+        {
+            int newIdleIndex;
+            string newIdle;
+            float newIdleCooldown;
+            var happyIdle = Random.Range(0, 4) == 0;
+            if (happyIdle)
+            {
+                OpenEyes();
+                _blinkTimer += happyIdleAnimations.Length;
+                newIdleIndex = Random.Range(0, happyIdleAnimations.Length);
+                newIdle = "HappyIdle_" + newIdleIndex;
+                newIdleCooldown = happyIdleAnimations[newIdleIndex].length;
+            }
+            else
+            {
+                newIdleIndex = Random.Range(0, idleAnimations.Length);
+                newIdle = "Idle_" + newIdleIndex;
+                newIdleCooldown = idleAnimations[newIdleIndex].length;
+            }
+
+            if (_animator.GetCurrentAnimatorClipInfo(0)[0].clip.name == newIdle)
+                continue;
+
+            _animator.CrossFadeInFixedTime(newIdle, 0.3f, 0);
+            _idleCooldown = newIdleCooldown;
+            break;
+        }
+    }
 
     private void CheckForJumpPrompt()
     {
@@ -236,6 +321,9 @@ public class PlayerController : MonoBehaviour
     
     private void OnMove(InputAction.CallbackContext ctx)
     {
+        if (!FloorManager.IsStarted())
+            return;
+        
         var input = ctx.ReadValue<Vector2>();
         var newDirection = Mathf.Round(-input.x);
 
@@ -275,7 +363,7 @@ public class PlayerController : MonoBehaviour
 
     private void OnCharge(InputAction.CallbackContext ctx)
     {
-        if (IsMouseOverUi())
+        if (IsMouseOverUi() || !FloorManager.IsStarted())
             return;
         
         if (_isCharging || _chargeCooldown > 0f || _chargePosition.z > 0.01f)
@@ -284,13 +372,16 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        PerformCharging();
+        _isCharging = true;
+        _animator.SetTrigger(ChargeTrigger);
+        _chargePosition += new Vector3(0, 0, -2);
+        _chargeCooldown = 2f;
     }
 
     public void PerformCharging()
     {
         _isCharging = true;
-        _animator.SetTrigger(ChargeTrigger);
+        _animator.CrossFadeInFixedTime("Run", 0.1f);
         _chargePosition += new Vector3(0, 0, -2);
         _chargeCooldown = 2f;
     }
@@ -315,22 +406,6 @@ public class PlayerController : MonoBehaviour
     private void OnFullscreen(InputAction.CallbackContext ctx)
     {
         Screen.fullScreen = !Screen.fullScreen;
-    }
-
-    private void PlayerControllerLabelEffect(SceneLabelAttribute attr, SceneLabelOverlay.SceneLabelOverlayData data)
-    {
-        if (attr.ID != SceneLabelID.Cooldown)
-            return;
-
-        if (FloorManager.IsGameOver() || !FloorManager.IsStarted())
-        {
-            attr.Value = "";
-            attr.RichValue = null;
-            return;
-        }
-        
-        attr.Value = _chargeCooldown > 0 ? $"{_chargeCooldown:F2}" : "";
-        attr.RichValue = !_isCharging && _chargeCooldown > 0 ? $"<color=red>{_chargeCooldown:F2}</color>" : null;
     }
 
     private float DirectionCeil(float value)
