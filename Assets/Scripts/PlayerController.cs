@@ -1,3 +1,4 @@
+using MagicaCloth2;
 using SceneLabel;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -15,6 +16,9 @@ public class PlayerController : MonoBehaviour
     
     [SerializeField] private AnimationClip[] idleAnimations;
     [SerializeField] private AnimationClip[] happyIdleAnimations;
+
+    [SerializeField] private MagicaCloth bunCloth;
+    [SerializeField] private float looseningMultiplier = 2f;
 
     [SceneLabel(fontSize: 32)]
 #pragma warning disable CS0414 // Field is assigned but its value is never used
@@ -34,7 +38,8 @@ public class PlayerController : MonoBehaviour
 
     private AudioSource _audioSource;
     private PlayerControls _controls;
-    
+
+    private Vector3 _parentPosition;
     private Vector3 _targetPosition;
     private Vector3 _chargePosition;
     private float _chargeCooldown;
@@ -58,6 +63,7 @@ public class PlayerController : MonoBehaviour
         _prompt = "";
         _promptTime = 1f;
         _controls = new PlayerControls();
+        _parentPosition = Vector3.zero;
         _targetPosition = Vector3.right;
         _chargePosition = Vector3.zero;
         _initialChargeBreak = chargeBreak;
@@ -93,6 +99,7 @@ public class PlayerController : MonoBehaviour
         _animator.speed = GameManager.AffectsAnimations ? GameManager.GlobalSpeed : 1f;
         
         ProcessBlinking();
+        ProcessMagica();
         
         if (!FloorManager.IsStarted())
         {
@@ -103,18 +110,23 @@ public class PlayerController : MonoBehaviour
         if (FloorManager.IsPaused())
             return;
 
-        transform.position = Vector3.MoveTowards(transform.position, _targetPosition + _chargePosition, 
+        if (transform.parent)
+            _parentPosition += Vector3.forward * (Time.fixedDeltaTime * 0.5f);
+
+        transform.position = Vector3.MoveTowards(transform.position, _targetPosition + _chargePosition + _parentPosition, 
             Speed() * Time.fixedDeltaTime);
         
-        CheckForJumpPrompt();
-        CheckCollision();
         UIManager.UpdateStaminaBar(Mathf.Abs(_chargeCooldown - 1f));
 
         _chargePosition *= chargeBreak + (1f - chargeBreak) * (1f - GameManager.GlobalSpeed);
         _isCharging = _chargeCooldown >= 1f;
         
+        CheckForJumpPrompt();
+        
         if (FloorManager.IsGameOver())
             return;
+        
+        CheckCollision();
         
         _jumpTime -= Time.fixedDeltaTime * GameManager.GlobalSpeed;
         _chargeCooldown -= Time.fixedDeltaTime * GameManager.GlobalSpeed;
@@ -292,12 +304,27 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    private void ProcessMagica()
+    {
+        var bunClothData = bunCloth.SerializeData;
+        bunClothData.angleRestorationConstraint.stiffness =
+            new CurveSerializeData(Mathf.Exp(-0.001f * looseningMultiplier * GameManager.GetDistanceTraveled()));
+        bunCloth.SetParameterChange();
+    }
+
     private void CheckForJumpPrompt()
     {
+        if (FloorManager.IsGameOver())
+        {
+            _promptTime = 1f;
+            _prompt = "";
+            return;
+        }
+        
         if (!TargetingWater() || _inWater || _isJumping)
         {
             GameManager.GlobalSpeed = 1f;
-            GameManager.AffectsAnimations = true;
+            GameManager.AffectsAnimations = false;
             _promptTime = 1f;
             _prompt = "";
             return;
@@ -315,6 +342,7 @@ public class PlayerController : MonoBehaviour
             _animator.SetBool(WetBool, true);
             _animator.SetTrigger(DrownTrigger);
             _audioSource.PlayOneShot(splashSound);
+            transform.SetParent(FloorManager.GetCurrentFloor());
             GameManager.GameOver(GameManager.GameOverCase.Drowned);
         }
     }

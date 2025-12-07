@@ -20,7 +20,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: UI_Buttons
+  m_Name: UI_ButtonsGameOver
   m_Shader: {fileID: 4800000, guid: 09bb633eb9e99874499d9143e12d14f3, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
@@ -60,28 +60,19 @@ Material:
     m_Floats:
     - _AlphaShift: 0
     - _CellDensity: 12
-    - _ColorMask: 15
     - _HasTransition: 1
-    - _IsVertical: 0
+    - _IsVertical: 1
     - _QueueControl: 0
     - _QueueOffset: 0
     - _Scale: 12
-    - _ScreenDependant: 1
-    - _Shift: -0.5
+    - _ScreenDependant: 0
+    - _Shift: 0.21
     - _Speed: 0.1
-    - _Stencil: 0
-    - _StencilComp: 8
-    - _StencilOp: 0
-    - _StencilReadMask: 255
-    - _StencilWriteMask: 255
-    - _Transition: -2.6
-    - _UIMaskSoftnessX: 1
-    - _UIMaskSoftnessY: 1
+    - _Transition: -6
     - _Vertical: 0
     - _VoronoiWeight: 0
     m_Colors:
     - White: {r: 1, g: 1, b: 1, a: 1}
-    - _ClipRect: {r: 0, g: 0, b: 0, a: 0}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _ScrollDirection: {r: -1, g: -1, b: 0, a: 0}
   m_BuildTextureStacks: []

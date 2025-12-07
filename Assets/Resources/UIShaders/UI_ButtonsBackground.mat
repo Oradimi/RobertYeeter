@@ -20,7 +20,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: UI_BackgroundButton
+  m_Name: UI_ButtonsBackground
   m_Shader: {fileID: 4800000, guid: 09bb633eb9e99874499d9143e12d14f3, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
@@ -58,18 +58,22 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _CellDensity: 32
+    - _AlphaShift: 0
+    - _CellDensity: 12
     - _HasTransition: 1
     - _IsVertical: 1
     - _QueueControl: 0
     - _QueueOffset: 0
     - _Scale: 8
-    - _Shift: -0.3
-    - _Speed: 0.1
-    - _Transition: 1.88
+    - _ScreenDependant: 0
+    - _Shift: -0.04
+    - _Speed: 0.05
+    - _Transition: 1.5
     - _Vertical: 0
+    - _VoronoiWeight: 0.8
     - _wesh: 0
     m_Colors:
+    - White: {r: 1, g: 1, b: 1, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _ScrollDirection: {r: -1, g: -1, b: 0, a: 0}
   m_BuildTextureStacks: []

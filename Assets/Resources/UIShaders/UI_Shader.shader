@@ -6,11 +6,14 @@ Shader "Shader Graphs/UI_Shader"
         _Shift("Shift", Float) = 0
         [ToggleUI]_HasTransition("HasTransition", Float) = 0
         _Transition("Transition", Float) = 0
+        _AlphaShift("AlphaShift", Float) = 0.01
+        _VoronoiWeight("VoronoiWeight", Float) = 1
         [ToggleUI]_IsVertical("IsVertical", Float) = 0
         _CellDensity("CellDensity", Float) = 8
         _Scale("Scale", Float) = 8
         _Speed("Speed", Float) = 0.1
         _ScrollDirection("ScrollDirection", Vector, 2) = (1, 1, 0, 0)
+        [ToggleUI]_ScreenDependant("ScreenDependant", Float) = 1
         [HideInInspector]_QueueOffset("_QueueOffset", Float) = 0
         [HideInInspector]_QueueControl("_QueueControl", Float) = -1
         [HideInInspector][NoScaleOffset]unity_Lightmaps("unity_Lightmaps", 2DArray) = "" {}
@@ -63,7 +66,6 @@ Shader "Shader Graphs/UI_Shader"
         #pragma multi_compile _ DIRLIGHTMAP_COMBINED
         #pragma multi_compile _ USE_LEGACY_LIGHTMAPS
         #pragma multi_compile _ LIGHTMAP_BICUBIC_SAMPLING
-        #pragma shader_feature _ _SAMPLE_GI
         #pragma multi_compile_fragment _ _DBUFFER_MRT1 _DBUFFER_MRT2 _DBUFFER_MRT3
         #pragma multi_compile_fragment _ DEBUG_DISPLAY
         #pragma multi_compile_fragment _ _SCREEN_SPACE_OCCLUSION
@@ -74,18 +76,22 @@ Shader "Shader Graphs/UI_Shader"
         #define ATTRIBUTES_NEED_NORMAL
         #define ATTRIBUTES_NEED_TANGENT
         #define ATTRIBUTES_NEED_TEXCOORD0
+        #define ATTRIBUTES_NEED_TEXCOORD1
         #define ATTRIBUTES_NEED_COLOR
         #define FEATURES_GRAPH_VERTEX_NORMAL_OUTPUT
         #define FEATURES_GRAPH_VERTEX_TANGENT_OUTPUT
         #define VARYINGS_NEED_POSITION_WS
         #define VARYINGS_NEED_NORMAL_WS
         #define VARYINGS_NEED_TEXCOORD0
+        #define VARYINGS_NEED_TEXCOORD1
         #define VARYINGS_NEED_COLOR
         #define FEATURES_GRAPH_VERTEX
         /* WARNING: $splice Could not find named fragment 'PassInstancing' */
         #define SHADERPASS SHADERPASS_UNLIT
         #define _FOG_FRAGMENT 1
         #define _SURFACE_TYPE_TRANSPARENT 1
+        #define UNLIT_DEFAULT_DECAL_BLENDING 1
+        #define UNLIT_DEFAULT_SSAO 1
         
         
         // custom interpolator pre-include
@@ -120,6 +126,7 @@ Shader "Shader Graphs/UI_Shader"
              float3 normalOS : NORMAL;
              float4 tangentOS : TANGENT;
              float4 uv0 : TEXCOORD0;
+             float4 uv1 : TEXCOORD1;
              float4 color : COLOR;
             #if UNITY_ANY_INSTANCING_ENABLED || defined(ATTRIBUTES_NEED_INSTANCEID)
              uint instanceID : INSTANCEID_SEMANTIC;
@@ -131,6 +138,7 @@ Shader "Shader Graphs/UI_Shader"
              float3 positionWS;
              float3 normalWS;
              float4 texCoord0;
+             float4 texCoord1;
              float4 color;
             #if UNITY_ANY_INSTANCING_ENABLED || defined(VARYINGS_NEED_INSTANCEID)
              uint instanceID : CUSTOM_INSTANCE_ID;
@@ -150,6 +158,7 @@ Shader "Shader Graphs/UI_Shader"
              float2 NDCPosition;
              float2 PixelPosition;
              float4 uv0;
+             float4 uv1;
              float4 VertexColor;
              float3 TimeParameters;
         };
@@ -163,9 +172,10 @@ Shader "Shader Graphs/UI_Shader"
         {
              float4 positionCS : SV_POSITION;
              float4 texCoord0 : INTERP0;
-             float4 color : INTERP1;
-             float3 positionWS : INTERP2;
-             float3 normalWS : INTERP3;
+             float4 texCoord1 : INTERP1;
+             float4 color : INTERP2;
+             float3 positionWS : INTERP3;
+             float3 normalWS : INTERP4;
             #if UNITY_ANY_INSTANCING_ENABLED || defined(VARYINGS_NEED_INSTANCEID)
              uint instanceID : CUSTOM_INSTANCE_ID;
             #endif
@@ -186,6 +196,7 @@ Shader "Shader Graphs/UI_Shader"
             ZERO_INITIALIZE(PackedVaryings, output);
             output.positionCS = input.positionCS;
             output.texCoord0.xyzw = input.texCoord0;
+            output.texCoord1.xyzw = input.texCoord1;
             output.color.xyzw = input.color;
             output.positionWS.xyz = input.positionWS;
             output.normalWS.xyz = input.normalWS;
@@ -209,6 +220,7 @@ Shader "Shader Graphs/UI_Shader"
             Varyings output;
             output.positionCS = input.positionCS;
             output.texCoord0 = input.texCoord0.xyzw;
+            output.texCoord1 = input.texCoord1.xyzw;
             output.color = input.color.xyzw;
             output.positionWS = input.positionWS.xyz;
             output.normalWS = input.normalWS.xyz;
@@ -242,6 +254,9 @@ Shader "Shader Graphs/UI_Shader"
         float _Speed;
         float2 _ScrollDirection;
         float _HasTransition;
+        float _AlphaShift;
+        float _VoronoiWeight;
+        float _ScreenDependant;
         UNITY_TEXTURE_STREAMING_DEBUG_VARS;
         CBUFFER_END
         
@@ -311,7 +326,17 @@ Shader "Shader Graphs/UI_Shader"
             Out = A / B;
         }
         
+        void Unity_Branch_float2(float Predicate, float2 True, float2 False, out float2 Out)
+        {
+            Out = Predicate ? True : False;
+        }
+        
         void Unity_Add_float(float A, float B, out float Out)
+        {
+            Out = A + B;
+        }
+        
+        void Unity_Add_float2(float2 A, float2 B, out float2 Out)
         {
             Out = A + B;
         }
@@ -348,6 +373,16 @@ Shader "Shader Graphs/UI_Shader"
                     }
                 }
             }
+        }
+        
+        void Unity_OneMinus_float(float In, out float Out)
+        {
+            Out = 1 - In;
+        }
+        
+        void Unity_Lerp_float(float A, float B, float T, out float Out)
+        {
+            Out = lerp(A, B, T);
         }
         
         float Unity_SimpleNoise_ValueNoise_Deterministic_float (float2 uv)
@@ -395,9 +430,9 @@ Shader "Shader Graphs/UI_Shader"
             Out = A - B;
         }
         
-        void Unity_Lerp_float(float A, float B, float T, out float Out)
+        void Unity_Saturate_float(float In, out float Out)
         {
-            Out = lerp(A, B, T);
+            Out = saturate(In);
         }
         
         // Custom interpolators pre vertex
@@ -451,6 +486,7 @@ Shader "Shader Graphs/UI_Shader"
             float4 _Multiply_48bcc08000674b7691cdbf00d60537a2_Out_2_Vector4;
             Unity_Multiply_float4_float4(_SampleTexture2D_03fd211ba60c4f09bb31c6e560f381ae_RGBA_0_Vector4, _GammaToLinear_a1fae8ea6db84d5db407dcc05882e9b9_Vector4_1_Vector4, _Multiply_48bcc08000674b7691cdbf00d60537a2_Out_2_Vector4);
             float _Property_49f28783e83742099b1dc228a2a37b62_Out_0_Boolean = _HasTransition;
+            float _Property_251abeb861fd476694e8fccbab6c56cc_Out_0_Boolean = _ScreenDependant;
             float4 _ScreenPosition_1135ca87c6f34ab389150df723ce7adc_Out_0_Vector4 = float4(IN.NDCPosition.xy * 2 - 1, 0, 0);
             float _Split_4bf70fcd1b8345c0a6ba3b13dba13def_R_1_Float = _ScreenPosition_1135ca87c6f34ab389150df723ce7adc_Out_0_Vector4[0];
             float _Split_4bf70fcd1b8345c0a6ba3b13dba13def_G_2_Float = _ScreenPosition_1135ca87c6f34ab389150df723ce7adc_Out_0_Vector4[1];
@@ -461,27 +497,48 @@ Shader "Shader Graphs/UI_Shader"
             float _Divide_6bbf518a2df94480bd532418eb0dcf5b_Out_2_Float;
             Unity_Divide_float(_Multiply_4df156891a8f42bcae783555cd99f6a3_Out_2_Float, _ScreenParams.x, _Divide_6bbf518a2df94480bd532418eb0dcf5b_Out_2_Float);
             float2 _Vector2_ca4b324dd3fa456d823f8294b96ff93c_Out_0_Vector2 = float2(_Split_4bf70fcd1b8345c0a6ba3b13dba13def_R_1_Float, _Divide_6bbf518a2df94480bd532418eb0dcf5b_Out_2_Float);
+            float4 _UV_512590728375418fbef4a7687cba5a6e_Out_0_Vector4 = IN.uv1;
+            float _Split_4d4aaac91668405784833cfc1e9ddd87_R_1_Float = _UV_512590728375418fbef4a7687cba5a6e_Out_0_Vector4[0];
+            float _Split_4d4aaac91668405784833cfc1e9ddd87_G_2_Float = _UV_512590728375418fbef4a7687cba5a6e_Out_0_Vector4[1];
+            float _Split_4d4aaac91668405784833cfc1e9ddd87_B_3_Float = _UV_512590728375418fbef4a7687cba5a6e_Out_0_Vector4[2];
+            float _Split_4d4aaac91668405784833cfc1e9ddd87_A_4_Float = _UV_512590728375418fbef4a7687cba5a6e_Out_0_Vector4[3];
+            float _Multiply_5f3df75c0a2b4ba5ab80baf1a5ca2a72_Out_2_Float;
+            Unity_Multiply_float_float(_Split_4d4aaac91668405784833cfc1e9ddd87_G_2_Float, _Split_4d4aaac91668405784833cfc1e9ddd87_A_4_Float, _Multiply_5f3df75c0a2b4ba5ab80baf1a5ca2a72_Out_2_Float);
+            float _Divide_8b413b2cc8da4146817b5462403d5d12_Out_2_Float;
+            Unity_Divide_float(_Multiply_5f3df75c0a2b4ba5ab80baf1a5ca2a72_Out_2_Float, _Split_4d4aaac91668405784833cfc1e9ddd87_B_3_Float, _Divide_8b413b2cc8da4146817b5462403d5d12_Out_2_Float);
+            float2 _Vector2_424e0115cfee42f19335e13d55e090f2_Out_0_Vector2 = float2(_Split_4d4aaac91668405784833cfc1e9ddd87_R_1_Float, _Divide_8b413b2cc8da4146817b5462403d5d12_Out_2_Float);
+            float2 _Branch_3265e26e85ae42a0a5fc6db5f3b48327_Out_3_Vector2;
+            Unity_Branch_float2(_Property_251abeb861fd476694e8fccbab6c56cc_Out_0_Boolean, _Vector2_ca4b324dd3fa456d823f8294b96ff93c_Out_0_Vector2, _Vector2_424e0115cfee42f19335e13d55e090f2_Out_0_Vector2, _Branch_3265e26e85ae42a0a5fc6db5f3b48327_Out_3_Vector2);
             float2 _Property_7d37925c0a1f4da98af1449e056188e0_Out_0_Vector2 = _ScrollDirection;
             float _Add_1758c83cae0d41c697096fb257cf84d7_Out_2_Float;
             Unity_Add_float(IN.TimeParameters.x, float(5), _Add_1758c83cae0d41c697096fb257cf84d7_Out_2_Float);
             float _Property_77b6ad482de342c0b4b2a48e3e218a6c_Out_0_Float = _Speed;
             float _Multiply_d49765067e0d4435a54b6760ebde9af4_Out_2_Float;
             Unity_Multiply_float_float(_Add_1758c83cae0d41c697096fb257cf84d7_Out_2_Float, _Property_77b6ad482de342c0b4b2a48e3e218a6c_Out_0_Float, _Multiply_d49765067e0d4435a54b6760ebde9af4_Out_2_Float);
+            float2 _Branch_ad9729691c9a4da28d510ef759520b04_Out_3_Vector2;
+            Unity_Branch_float2(_Property_251abeb861fd476694e8fccbab6c56cc_Out_0_Boolean, float2(0, 0), _Vector2_ca4b324dd3fa456d823f8294b96ff93c_Out_0_Vector2, _Branch_ad9729691c9a4da28d510ef759520b04_Out_3_Vector2);
+            float2 _Add_124ab39b697f4dc5a86fc085b12bd2ed_Out_2_Vector2;
+            Unity_Add_float2((_Multiply_d49765067e0d4435a54b6760ebde9af4_Out_2_Float.xx), _Branch_ad9729691c9a4da28d510ef759520b04_Out_3_Vector2, _Add_124ab39b697f4dc5a86fc085b12bd2ed_Out_2_Vector2);
             float2 _TilingAndOffset_bd5c1210fb4c47bbb825e5fe7b510a8d_Out_3_Vector2;
-            Unity_TilingAndOffset_float(_Vector2_ca4b324dd3fa456d823f8294b96ff93c_Out_0_Vector2, _Property_7d37925c0a1f4da98af1449e056188e0_Out_0_Vector2, (_Multiply_d49765067e0d4435a54b6760ebde9af4_Out_2_Float.xx), _TilingAndOffset_bd5c1210fb4c47bbb825e5fe7b510a8d_Out_3_Vector2);
+            Unity_TilingAndOffset_float(_Branch_3265e26e85ae42a0a5fc6db5f3b48327_Out_3_Vector2, _Property_7d37925c0a1f4da98af1449e056188e0_Out_0_Vector2, _Add_124ab39b697f4dc5a86fc085b12bd2ed_Out_2_Vector2, _TilingAndOffset_bd5c1210fb4c47bbb825e5fe7b510a8d_Out_3_Vector2);
             float _Property_25f4aefc805a44ae93a3d9505881618d_Out_0_Float = _CellDensity;
             float _Voronoi_46b67fb55e404a08875985e50aac9bc8_Out_3_Float;
             float _Voronoi_46b67fb55e404a08875985e50aac9bc8_Cells_4_Float;
             Unity_Voronoi_Deterministic_float(_TilingAndOffset_bd5c1210fb4c47bbb825e5fe7b510a8d_Out_3_Vector2, _Add_1758c83cae0d41c697096fb257cf84d7_Out_2_Float, _Property_25f4aefc805a44ae93a3d9505881618d_Out_0_Float, _Voronoi_46b67fb55e404a08875985e50aac9bc8_Out_3_Float, _Voronoi_46b67fb55e404a08875985e50aac9bc8_Cells_4_Float);
+            float _Property_24dc2394636c47d6842ab903d0f30573_Out_0_Float = _VoronoiWeight;
+            float _OneMinus_390b1037df934d2cb5e0e75d7b9b2cdf_Out_1_Float;
+            Unity_OneMinus_float(_Property_24dc2394636c47d6842ab903d0f30573_Out_0_Float, _OneMinus_390b1037df934d2cb5e0e75d7b9b2cdf_Out_1_Float);
+            float _Lerp_f929de34930248588e7596df89e69412_Out_3_Float;
+            Unity_Lerp_float(_Voronoi_46b67fb55e404a08875985e50aac9bc8_Cells_4_Float, float(1), _OneMinus_390b1037df934d2cb5e0e75d7b9b2cdf_Out_1_Float, _Lerp_f929de34930248588e7596df89e69412_Out_3_Float);
             float _Property_5b7af6b873dd4904bdc45c5ed4f147b3_Out_0_Float = _Scale;
             float _SimpleNoise_e6507eacb3ea4059b7f6b6403749c868_Out_2_Float;
             Unity_SimpleNoise_Deterministic_float(_TilingAndOffset_bd5c1210fb4c47bbb825e5fe7b510a8d_Out_3_Vector2, _Property_5b7af6b873dd4904bdc45c5ed4f147b3_Out_0_Float, _SimpleNoise_e6507eacb3ea4059b7f6b6403749c868_Out_2_Float);
             float _Multiply_3a2533948d5c42c28bdc60f46f42a310_Out_2_Float;
-            Unity_Multiply_float_float(_Voronoi_46b67fb55e404a08875985e50aac9bc8_Cells_4_Float, _SimpleNoise_e6507eacb3ea4059b7f6b6403749c868_Out_2_Float, _Multiply_3a2533948d5c42c28bdc60f46f42a310_Out_2_Float);
+            Unity_Multiply_float_float(_Lerp_f929de34930248588e7596df89e69412_Out_3_Float, _SimpleNoise_e6507eacb3ea4059b7f6b6403749c868_Out_2_Float, _Multiply_3a2533948d5c42c28bdc60f46f42a310_Out_2_Float);
             float _Property_e81e5fadb6904da68c682986c42f9807_Out_0_Float = _Transition;
             float _Property_59d7731d48c142ea9c17a649dcbde84f_Out_0_Boolean = _IsVertical;
-            float _Split_db7bf99f8a9343aa964f53bc0dfa5e72_R_1_Float = _Vector2_ca4b324dd3fa456d823f8294b96ff93c_Out_0_Vector2[0];
-            float _Split_db7bf99f8a9343aa964f53bc0dfa5e72_G_2_Float = _Vector2_ca4b324dd3fa456d823f8294b96ff93c_Out_0_Vector2[1];
+            float _Split_db7bf99f8a9343aa964f53bc0dfa5e72_R_1_Float = _Branch_3265e26e85ae42a0a5fc6db5f3b48327_Out_3_Vector2[0];
+            float _Split_db7bf99f8a9343aa964f53bc0dfa5e72_G_2_Float = _Branch_3265e26e85ae42a0a5fc6db5f3b48327_Out_3_Vector2[1];
             float _Split_db7bf99f8a9343aa964f53bc0dfa5e72_B_3_Float = 0;
             float _Split_db7bf99f8a9343aa964f53bc0dfa5e72_A_4_Float = 0;
             float _Branch_b1ee125b1ce5463dadaf6f0fe36ac26f_Out_3_Float;
@@ -493,8 +550,13 @@ Shader "Shader Graphs/UI_Shader"
             Unity_Lerp_float(_Multiply_3a2533948d5c42c28bdc60f46f42a310_Out_2_Float, _Property_e81e5fadb6904da68c682986c42f9807_Out_0_Float, _Subtract_3dd4f7cc16c7404eac6e64fd8f91c37f_Out_2_Float, _Lerp_600f0b288c2142edbde191762355ce71_Out_3_Float);
             float _Branch_2e19450bb08e47dbad9131d31663a1b2_Out_3_Float;
             Unity_Branch_float(_Property_49f28783e83742099b1dc228a2a37b62_Out_0_Boolean, _Lerp_600f0b288c2142edbde191762355ce71_Out_3_Float, _Multiply_3a2533948d5c42c28bdc60f46f42a310_Out_2_Float, _Branch_2e19450bb08e47dbad9131d31663a1b2_Out_3_Float);
+            float _Property_2b6e21334a1e440c9fa25989ab703e7f_Out_0_Float = _AlphaShift;
+            float _Add_b5b6482425574a06a9f746d4c177f461_Out_2_Float;
+            Unity_Add_float(_Branch_2e19450bb08e47dbad9131d31663a1b2_Out_3_Float, _Property_2b6e21334a1e440c9fa25989ab703e7f_Out_0_Float, _Add_b5b6482425574a06a9f746d4c177f461_Out_2_Float);
+            float _Saturate_652f949a2b87426a868023bf595a6663_Out_1_Float;
+            Unity_Saturate_float(_Add_b5b6482425574a06a9f746d4c177f461_Out_2_Float, _Saturate_652f949a2b87426a868023bf595a6663_Out_1_Float);
             float4 _Multiply_45f0bf168079400ebe9c0ab520aff046_Out_2_Vector4;
-            Unity_Multiply_float4_float4(_Multiply_48bcc08000674b7691cdbf00d60537a2_Out_2_Vector4, (_Branch_2e19450bb08e47dbad9131d31663a1b2_Out_3_Float.xxxx), _Multiply_45f0bf168079400ebe9c0ab520aff046_Out_2_Vector4);
+            Unity_Multiply_float4_float4(_Multiply_48bcc08000674b7691cdbf00d60537a2_Out_2_Vector4, (_Saturate_652f949a2b87426a868023bf595a6663_Out_1_Float.xxxx), _Multiply_45f0bf168079400ebe9c0ab520aff046_Out_2_Vector4);
             float _Split_af3a6d77e9044b9e89f9114690e89ff1_R_1_Float = _Multiply_45f0bf168079400ebe9c0ab520aff046_Out_2_Vector4[0];
             float _Split_af3a6d77e9044b9e89f9114690e89ff1_G_2_Float = _Multiply_45f0bf168079400ebe9c0ab520aff046_Out_2_Vector4[1];
             float _Split_af3a6d77e9044b9e89f9114690e89ff1_B_3_Float = _Multiply_45f0bf168079400ebe9c0ab520aff046_Out_2_Vector4[2];
@@ -557,6 +619,7 @@ Shader "Shader Graphs/UI_Shader"
             output.NDCPosition.y = 1.0f - output.NDCPosition.y;
         
             output.uv0 = input.texCoord0;
+            output.uv1 = input.texCoord1;
             output.VertexColor = input.color;
         #if UNITY_ANY_INSTANCING_ENABLED
         #else // TODO: XR support for procedural instancing because in this case UNITY_ANY_INSTANCING_ENABLED is not defined and instanceID is incorrect.

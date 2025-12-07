@@ -41,6 +41,9 @@ public class UIManager : MonoBehaviour
     [Header("Credits Menus")]
     [SerializeField] private RectTransform creditsMenu;
     
+    [Header("Loading Screen")]
+    [SerializeField] private RectTransform loadingScreen;
+    
     [Header("In-game UI")]
     [SerializeField] private RectTransform inGameUI;
     [SerializeField] private Slider staminaBar;

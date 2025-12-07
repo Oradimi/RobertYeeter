@@ -58,17 +58,21 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _CellDensity: 8
+    - _AlphaShift: 0
+    - _CellDensity: 12
     - _HasTransition: 1
     - _IsVertical: 1
     - _QueueControl: 0
     - _QueueOffset: 0
-    - _Scale: 8
-    - _Shift: 0.3
-    - _Speed: 0.2
-    - _Transition: -3.35
+    - _Scale: 12
+    - _ScreenDependant: 0
+    - _Shift: 1
+    - _Speed: 0.1
+    - _Transition: -1
     - _Vertical: 0
+    - _VoronoiWeight: 1
     m_Colors:
+    - White: {r: 1, g: 1, b: 1, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _ScrollDirection: {r: -1, g: -1, b: 0, a: 0}
   m_BuildTextureStacks: []

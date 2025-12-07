@@ -20,6 +20,8 @@ public class GameManager : MonoBehaviour
     
     public static PlayerData PlayerData;
     public static readonly string PlayerDataPath = "/saveData";
+
+    public static bool InitialLoadingFinished;
     
     public static AudioSource AudioSource;
     public static float SoundEffectsVolume;
@@ -45,7 +47,7 @@ public class GameManager : MonoBehaviour
     
     [SceneLabel(SceneLabelID.DistanceTraveled, suffix: "m", fontSize: 12)]
     private float _distanceTraveled;
-
+    
     private Vector3 _targetPosition;
     private float _effectTime;
     private int _combo;
@@ -134,6 +136,11 @@ public class GameManager : MonoBehaviour
     public static PlayerController GetPlayer()
     {
         return _instance.player;
+    }
+
+    public static float GetDistanceTraveled()
+    {
+        return _instance._distanceTraveled;
     }
 
     public static void GameManagerLabelEffect(SceneLabelAttribute attr, SceneLabelOverlay.SceneLabelOverlayData data)

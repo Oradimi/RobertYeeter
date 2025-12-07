@@ -35,6 +35,7 @@ public class FloorManager : MonoBehaviour
     private float _cameraSpeedBoost;
     private bool _started;
     private bool _gameOver;
+    private GameManager.GameOverCase _gameOverCase;
     private bool _paused;
     
     private List<int> _prefabPreselection;
@@ -104,7 +105,11 @@ public class FloorManager : MonoBehaviour
             UpdateCamera();
 
         if (_gameOver || _paused)
+        {
+            if (_gameOverCase == GameManager.GameOverCase.Drowned)
+                UpdateScrollingEnvironment(GetFloorScrollSpeed(), _floor, _floorPreviousPosition);
             return;
+        }
 
         if (_enemyInstantiationReady)
             InstantiateEnemies();
@@ -252,9 +257,63 @@ public class FloorManager : MonoBehaviour
         return _instance._gameOver;
     }
 
+    public static GameManager.GameOverCase GetGameOverCase()
+    {
+        return _instance._gameOverCase;
+    }
+    
+    public static bool IsStarted()
+    {
+        return _instance._started;
+    }
+
+    public static Floor.Data[] GetFloorData()
+    {
+        return _instance.soFloor.data;
+    }
+
+    public static int GetLevelCount()
+    {
+        return _instance._levelCount;
+    }
+
+    public static bool IsPaused()
+    {
+        return _instance._paused;
+    }
+
+    public static void TogglePause()
+    {
+        _instance._paused = !_instance._paused;
+        if (_instance._paused)
+        {
+            GameManager.GetPlayer().DisableActionMap();
+            GameManager.GlobalSpeedStored = GameManager.GlobalSpeed;
+            GameManager.AffectsAnimationsStored = GameManager.AffectsAnimations;
+            GameManager.GlobalSpeed = 0f;
+            GameManager.AffectsAnimations = true;
+        }
+        else
+        {
+            GameManager.GetPlayer().EnableActionMap();
+            GameManager.GlobalSpeed = GameManager.GlobalSpeedStored;
+            GameManager.AffectsAnimations = GameManager.AffectsAnimationsStored;
+        }
+    }
+
+    public static Vector3 WorldToScreenPoint(Vector3 position)
+    {
+        return _instance._camera.WorldToScreenPoint(position);
+    }
+
     public static Floor.Data.Zone GetCurrentZone()
     {
         return _instance._currentZone;
+    }
+
+    public static Transform GetCurrentFloor()
+    {
+        return _instance._floor[0];
     }
 
     public static float GetFloorScrollSpeed()
@@ -266,6 +325,8 @@ public class FloorManager : MonoBehaviour
     {
         _instance._started = true;
         _instance._gameOver = false;
+        GameManager.GlobalSpeed = 1f;
+        GameManager.AffectsAnimations = true;
         UIManager.DisplayMenu(false);
     }
 
@@ -274,6 +335,7 @@ public class FloorManager : MonoBehaviour
         GameManager.GetPlayer().DisableUIMap();
         GameManager.SaveData();
         _instance._gameOver = true;
+        _instance._gameOverCase = gameOverCase;
         Vector3 playerPosition;
         switch (gameOverCase)
         {
@@ -370,50 +432,6 @@ public class FloorManager : MonoBehaviour
             RenderSettings.ambientLight = zoneTexturesSet.data.ambientColor;
             break;
         }
-    }
-
-    public static bool IsStarted()
-    {
-        return _instance._started;
-    }
-
-    public static Floor.Data[] GetFloorData()
-    {
-        return _instance.soFloor.data;
-    }
-
-    public static int GetLevelCount()
-    {
-        return _instance._levelCount;
-    }
-
-    public static bool IsPaused()
-    {
-        return _instance._paused;
-    }
-
-    public static void TogglePause()
-    {
-        _instance._paused = !_instance._paused;
-        if (_instance._paused)
-        {
-            GameManager.GetPlayer().DisableActionMap();
-            GameManager.GlobalSpeedStored = GameManager.GlobalSpeed;
-            GameManager.AffectsAnimationsStored = GameManager.AffectsAnimations;
-            GameManager.GlobalSpeed = 0f;
-            GameManager.AffectsAnimations = true;
-        }
-        else
-        {
-            GameManager.GetPlayer().EnableActionMap();
-            GameManager.GlobalSpeed = GameManager.GlobalSpeedStored;
-            GameManager.AffectsAnimations = GameManager.AffectsAnimationsStored;
-        }
-    }
-
-    public static Vector3 WorldToScreenPoint(Vector3 position)
-    {
-        return _instance._camera.WorldToScreenPoint(position);
     }
 
     private void UpdateCamera()

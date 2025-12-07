@@ -3,18 +3,18 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 [RequireComponent(typeof(Selectable))]
-[RequireComponent(typeof(Image))]
 [RequireComponent(typeof(Animator))]
 public class SelectableAnimation : MonoBehaviour,
-    IPointerEnterHandler, IPointerExitHandler
+    IPointerEnterHandler, IPointerExitHandler,
+    ISelectHandler
 {
     private static readonly int NormalTrigger = Animator.StringToHash("Normal");
     private static readonly int HoverTrigger = Animator.StringToHash("Highlighted");
     
     [SerializeField] private Animator animator;
     [SerializeField] private Selectable selectable;
-    
-    private void Awake()
+
+    protected void Awake()
     {
         if (!animator)
             animator = GetComponent<Animator>();
@@ -29,6 +29,11 @@ public class SelectableAnimation : MonoBehaviour,
     }
 
     public void OnPointerExit(PointerEventData eventData)
+    {
+        EvaluateAndTransitionToSelectionState(false);
+    }
+
+    public void OnSelect(BaseEventData eventData)
     {
         EvaluateAndTransitionToSelectionState(false);
     }
