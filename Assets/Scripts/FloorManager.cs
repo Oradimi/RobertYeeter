@@ -37,6 +37,7 @@ public class FloorManager : MonoBehaviour
     private bool _gameOver;
     private GameManager.GameOverCase _gameOverCase;
     private bool _paused;
+    private bool _loadingTrigger;
     
     private List<int> _prefabPreselection;
     private List<Transform> _floor;
@@ -118,9 +119,8 @@ public class FloorManager : MonoBehaviour
         switch (playerAltitude)
         {
             case > 10f:
-                _cameraTarget = cameraTarget.position + Vector3.up + GameManager.GetPlayer().transform.position;
+                _cameraTarget = cameraTarget.position + Vector3.up * 2f;
                 _cameraSpeedBoost = 4f;
-                GameManager.SetTargetPosition(cameraTarget.position + GameManager.GetPlayer().transform.position);
                 break;
             case > 1f:
                 _cameraTarget = cameraTarget.position + Vector3.up;
@@ -133,13 +133,18 @@ public class FloorManager : MonoBehaviour
                 GameManager.SetTargetPosition(Vector3.zero);
                 break;
             default:
-                _cameraTarget = cameraTarget.position + GameManager.GetPlayer().transform.position;
-                _cameraSpeedBoost = 4f;
-                GameManager.SetTargetPosition(cameraTarget.position + GameManager.GetPlayer().transform.position);
+                _cameraTarget = cameraTarget.position + Vector3.down * cameraTarget.position.y;
+                _cameraSpeedBoost = 0.25f;
+                GameManager.SetTargetPosition(cameraTarget.position + Vector3.up * 3f);
+                if (!_loadingTrigger)
+                {
+                    _loadingTrigger = true;
+                    LoadingManager.LoadZoneEffect();
+                }
                 break;
         }
         
-        if (_camera.transform.position.y < -15f)
+        if (_camera.transform.position.y < 0.1f)
             ChangeZone();
 
         _enemyInstantiationReady = UpdateScrollingEnvironment(GetFloorScrollSpeed(), _floor, _floorPreviousPosition);
@@ -376,9 +381,10 @@ public class FloorManager : MonoBehaviour
         var zoneEnumValues = Enum.GetValues(typeof(Floor.Data.Zone));
         var newZone = (Floor.Data.Zone)zoneEnumValues.GetValue((_levelCount - 1) % zoneEnumValues.Length);
         GameManager.GetPlayer().transform.position = new Vector3(GameManager.GetPlayer().transform.position.x, 30f, GameManager.GetPlayer().transform.position.z);
-        _camera.transform.position = GameManager.GetPlayer().transform.position;
+        _camera.transform.position = cameraTarget.position + Vector3.up * 2f;
         _currentZone = newZone;
         _prefabPreselection = FloorGeneration.Run(soFloor.settings);
+        _loadingTrigger = false;
         InstantiateFloor(Vector3.forward * 30f);
     }
 

@@ -50,9 +50,11 @@ public class PlayerController : MonoBehaviour
     private float _blinkTarget;
     private bool _isBlinking;
     
+    private bool _isIdle;
     private bool _isCharging;
     private bool _isJumping;
     private bool _isFalling;
+    private bool _isGrounded;
     private float _jumpTime;
     private bool _inWater;
     
@@ -73,6 +75,7 @@ public class PlayerController : MonoBehaviour
     private void OnEnable()
     {
         _animator.Play("Idle_0");
+        _isIdle = true;
         _idleCooldown = idleAnimations[0].length;
         _animator.SetBool(WetBool, false);
         
@@ -100,12 +103,9 @@ public class PlayerController : MonoBehaviour
         
         ProcessBlinking();
         ProcessMagica();
-        
-        if (!FloorManager.IsStarted())
-        {
-            ProcessRandomIdle();
+
+        if (ProcessIdle())
             return;
-        }
 
         if (FloorManager.IsPaused())
             return;
@@ -148,10 +148,10 @@ public class PlayerController : MonoBehaviour
         
         var ray = new Ray(transform.position + Vector3.up, Vector3.down);
         Physics.Raycast(ray, out var hit, 1.2f, LayerMask.GetMask("Default"));
+        _isGrounded = true;
         if (_isJumping)
         {
-            if (hit.collider && Mathf.Abs(hit.point.y - transform.position.y) < 0.2f)
-                _targetPosition = new Vector3(_targetPosition.x, hit.point.y, _targetPosition.z);
+            _isGrounded = false;
         }
         else if (hit.collider)
         {
@@ -159,6 +159,7 @@ public class PlayerController : MonoBehaviour
         }
         else if (!Physics.CheckSphere(transform.position + Vector3.up * 0.1f, 0.2f, LayerMask.GetMask("Default")))
         {
+            _isGrounded = false;
             _targetPosition += Vector3.down * (Time.fixedDeltaTime * Speed());
         }
 
@@ -270,6 +271,23 @@ public class PlayerController : MonoBehaviour
         _blinkTimer = Random.Range(0.20f, 0.25f);
     }
 
+    private bool ProcessIdle()
+    {
+        if (IsFunMode() && _idleCooldown < 0f && !FloorManager.IsGameOver())
+            _isIdle = true;
+        
+        if (_isIdle)
+        {
+            ProcessRandomIdle();
+            return true;
+        }
+        
+        if (IsFunMode())
+            _idleCooldown -= Time.fixedDeltaTime;
+
+        return false;
+    }
+
     private void ProcessRandomIdle()
     {
         _idleCooldown -= Time.fixedDeltaTime;
@@ -295,7 +313,8 @@ public class PlayerController : MonoBehaviour
                 newIdleCooldown = idleAnimations[newIdleIndex].length;
             }
 
-            if (_animator.GetCurrentAnimatorClipInfo(0)[0].clip.name == newIdle)
+            var animatorClipInfo = _animator.GetCurrentAnimatorClipInfo(0);
+            if (animatorClipInfo.Length == 0 || animatorClipInfo.Length > 0 && animatorClipInfo[0].clip.name == newIdle)
                 continue;
 
             _animator.CrossFadeInFixedTime(newIdle, 0.3f, 0);
@@ -349,7 +368,10 @@ public class PlayerController : MonoBehaviour
     
     private void OnMove(InputAction.CallbackContext ctx)
     {
-        if (!FloorManager.IsStarted())
+        if (IsFunMode())
+            _idleCooldown = 6f;
+        
+        if (_isIdle)
             return;
         
         var input = ctx.ReadValue<Vector2>();
@@ -385,16 +407,19 @@ public class PlayerController : MonoBehaviour
             return false;
         var ray = new Ray(roundedHeightTarget, Vector3.down);
         if (Physics.Raycast(ray, out var hit, 0.5f, LayerMask.GetMask("Default")))
-            return hit.normal == Vector3.up;
+            return hit.normal == Vector3.up && _isGrounded;
         return false;
     }
 
     private void OnCharge(InputAction.CallbackContext ctx)
     {
-        if (IsMouseOverUi() || !FloorManager.IsStarted())
+        if (IsFunMode())
+            _idleCooldown = 6f;
+        
+        if (IsMouseOverUi() || _isIdle)
             return;
         
-        if (_isCharging || _chargeCooldown > 0f || _chargePosition.z > 0.01f)
+        if (_isCharging || _chargeCooldown > 0f || !Mathf.Approximately(chargeBreak, _initialChargeBreak))
         {
             _audioSource.PlayOneShot(cantMoveSound);
             return;
@@ -408,6 +433,7 @@ public class PlayerController : MonoBehaviour
 
     public void PerformCharging()
     {
+        _isIdle = false;
         _isCharging = true;
         _animator.CrossFadeInFixedTime("Run", 0.1f);
         _chargePosition += new Vector3(0, 0, -2);
@@ -416,14 +442,31 @@ public class PlayerController : MonoBehaviour
 
     private void OnJump(InputAction.CallbackContext ctx)
     {
+        if (IsFunMode())
+            _idleCooldown = 6f;
+        
         if (_isJumping || _isFalling)
         {
             _audioSource.PlayOneShot(cantMoveSound);
             return;
         }
-        
+
+        if (!FloorManager.IsStarted() && _isIdle)
+        {
+            _isIdle = false;
+            _idleCooldown = 6f;
+            _animator.CrossFadeInFixedTime("Jump", 0.1f);
+            _jumpTime = 1f;
+            return;
+        }
+            
         _animator.SetTrigger(JumpTrigger);
         _jumpTime = 1f;
+    }
+
+    private bool IsFunMode()
+    {
+        return !FloorManager.IsStarted() && !_isIdle;
     }
 
     private void OnPause(InputAction.CallbackContext ctx)
