@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.UI;
+using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour
 {
@@ -27,6 +28,8 @@ public class PlayerController : MonoBehaviour
 
     private float _promptTime;
     private float _direction;
+    private bool _moveInputHeld;
+    private float _stickDeadzone = 0.5f;
     
     private Animator _animator;
     private static readonly int ChargeTrigger = Animator.StringToHash("Charge");
@@ -368,6 +371,11 @@ public class PlayerController : MonoBehaviour
     
     private void OnMove(InputAction.CallbackContext ctx)
     {
+        var isMouseAndKeyboard = ctx.action.activeControl.device.displayName.Equals("Mouse") ||
+                                 ctx.action.activeControl.device.displayName.Equals("Keyboard");
+        if (!isMouseAndKeyboard && !EventSystem.current.currentSelectedGameObject)
+            EventSystem.current.SetSelectedGameObject(FindAnyObjectByType<Selectable>().gameObject);
+        
         if (IsFunMode())
             _idleCooldown = 6f;
         
@@ -375,6 +383,8 @@ public class PlayerController : MonoBehaviour
             return;
         
         var input = ctx.ReadValue<Vector2>();
+        if (!AllowRegisterInput(input.x))
+            return;
         var newDirection = Mathf.Round(-input.x);
 
         if (TargetingWater() && Mathf.Approximately(newDirection, _direction))
@@ -393,6 +403,21 @@ public class PlayerController : MonoBehaviour
             return;
         }
         _targetPosition = new Vector3(Mathf.Clamp(_targetPosition.x + _direction, -3.0f, 3.0f), _targetPosition.y, _targetPosition.z);
+    }
+
+    private bool AllowRegisterInput(float x)
+    {
+        if (Mathf.Abs(x) < _stickDeadzone)
+        {
+            _moveInputHeld = false;
+            return false;
+        }
+
+        if (_moveInputHeld)
+            return false;
+
+        _moveInputHeld = true;
+        return true;
     }
 
     private Vector3 CombinedTargetPositions()
@@ -451,7 +476,9 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        if (!FloorManager.IsStarted() && _isIdle)
+        var isMouseAndKeyboard = ctx.action.activeControl.device.displayName.Equals("Mouse") ||
+                                 ctx.action.activeControl.device.displayName.Equals("Keyboard");
+        if (!FloorManager.IsStarted() && _isIdle && isMouseAndKeyboard)
         {
             _isIdle = false;
             _idleCooldown = 6f;

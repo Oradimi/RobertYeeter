@@ -315,8 +315,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 320, y: -67.502426}
-  m_SizeDelta: {x: 640, y: 0}
+  m_AnchoredPosition: {x: 320, y: -198.20999}
+  m_SizeDelta: {x: 640, y: 79.479996}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &15229290
 MonoBehaviour:
@@ -467,8 +467,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 960, y: -999}
-  m_SizeDelta: {x: 1792, y: 510}
+  m_AnchoredPosition: {x: 960, y: -530.98}
+  m_SizeDelta: {x: 1792, y: 619.37994}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &31401501
 MonoBehaviour:
@@ -978,8 +978,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 320, y: -117.25364}
-  m_SizeDelta: {x: 640, y: 35.50243}
+  m_AnchoredPosition: {x: 320, y: -333.185}
+  m_SizeDelta: {x: 640, y: 126.47}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &145613999
 MonoBehaviour:
@@ -1880,6 +1880,7 @@ GameObject:
   - component: {fileID: 385074031}
   - component: {fileID: 385074030}
   - component: {fileID: 385074029}
+  - component: {fileID: 385074032}
   m_Layer: 5
   m_Name: Credits
   m_TagString: Untagged
@@ -1921,10 +1922,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Button
   m_Navigation:
-    m_Mode: 3
+    m_Mode: 4
     m_WrapAround: 0
-    m_SelectOnUp: {fileID: 0}
-    m_SelectOnDown: {fileID: 0}
+    m_SelectOnUp: {fileID: 1860387385}
+    m_SelectOnDown: {fileID: 1422026221}
     m_SelectOnLeft: {fileID: 0}
     m_SelectOnRight: {fileID: 0}
   m_Transition: 1
@@ -1967,6 +1968,19 @@ MonoBehaviour:
       - m_Target: {fileID: 1615312416}
         m_TargetAssemblyTypeName: UIManager, Assembly-CSharp
         m_MethodName: PlayOpenMenu
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 1
+        m_CallState: 2
+      - m_Target: {fileID: 385074032}
+        m_TargetAssemblyTypeName: UINavigation.SetUiElementToSelectOnInteraction,
+          Assembly-CSharp
+        m_MethodName: JumpToElement
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -2082,6 +2096,22 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &385074032
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 385074023}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eaee7f81bc60e304c8498d73f95bbf30, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UINavigation.SetsUiElementToSelectOnInteraction
+  eventSystem: {fileID: 748510335}
+  elementToSelect: {fileID: 1775134646}
+  showVisualization: 0
+  navigationColour: {r: 0, g: 1, b: 1, a: 1}
 --- !u!4 &387399384 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8800358253310621954, guid: 885f4d1c37a2c534ab604e77bbc253be, type: 3}
@@ -2704,8 +2734,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 960, y: -854.95953}
-  m_SizeDelta: {x: 1792, y: 199.00487}
+  m_AnchoredPosition: {x: 960, y: -530.98}
+  m_SizeDelta: {x: 1792, y: 619.38}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &484806866
 MonoBehaviour:
@@ -3005,6 +3035,7 @@ GameObject:
   - component: {fileID: 547145191}
   - component: {fileID: 547145192}
   - component: {fileID: 547145193}
+  - component: {fileID: 547145194}
   m_Layer: 5
   m_Name: Start
   m_TagString: Untagged
@@ -3047,10 +3078,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Button
   m_Navigation:
-    m_Mode: 3
+    m_Mode: 4
     m_WrapAround: 0
-    m_SelectOnUp: {fileID: 0}
-    m_SelectOnDown: {fileID: 0}
+    m_SelectOnUp: {fileID: 1422026221}
+    m_SelectOnDown: {fileID: 1311123782}
     m_SelectOnLeft: {fileID: 0}
     m_SelectOnRight: {fileID: 0}
   m_Transition: 1
@@ -3081,6 +3112,19 @@ MonoBehaviour:
       - m_Target: {fileID: 1615312416}
         m_TargetAssemblyTypeName: UIManager, Assembly-CSharp
         m_MethodName: StartGame
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 547145194}
+        m_TargetAssemblyTypeName: UINavigation.SetUiElementToSelectOnInteraction,
+          Assembly-CSharp
+        m_MethodName: JumpToElement
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -3196,6 +3240,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ec7c531f67844491ae84a4f3d1575d01, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-GraphicMaterialOverride::Plugins.Animate_UI_Materials.GraphicMaterialOverride
+--- !u!114 &547145194
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 547145185}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eaee7f81bc60e304c8498d73f95bbf30, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UINavigation.SetUiElementToSelectOnInteraction
+  eventSystem: {fileID: 748510335}
+  elementToSelect: {fileID: 1498914906}
+  showVisualization: 0
+  navigationColour: {r: 0, g: 1, b: 1, a: 1}
 --- !u!4 &551230042 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 141419482079919334, guid: 885f4d1c37a2c534ab604e77bbc253be, type: 3}
@@ -4024,8 +4084,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 64, y: -919.82495}
-  m_SizeDelta: {x: 0, y: 65.68997}
+  m_AnchoredPosition: {x: 64, y: -586.98}
+  m_SizeDelta: {x: 0, y: 731.38}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &804405261
 MonoBehaviour:
@@ -5340,8 +5400,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 320, y: -199.00485}
-  m_SizeDelta: {x: 640, y: 0}
+  m_AnchoredPosition: {x: 320, y: -579.64}
+  m_SizeDelta: {x: 640, y: 79.479996}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1141945935
 MonoBehaviour:
@@ -6802,6 +6862,7 @@ GameObject:
   - component: {fileID: 1311123788}
   - component: {fileID: 1311123787}
   - component: {fileID: 1311123786}
+  - component: {fileID: 1311123789}
   m_Layer: 5
   m_Name: Skins
   m_TagString: Untagged
@@ -6843,10 +6904,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Button
   m_Navigation:
-    m_Mode: 3
+    m_Mode: 4
     m_WrapAround: 0
-    m_SelectOnUp: {fileID: 0}
-    m_SelectOnDown: {fileID: 0}
+    m_SelectOnUp: {fileID: 547145187}
+    m_SelectOnDown: {fileID: 1860387385}
     m_SelectOnLeft: {fileID: 0}
     m_SelectOnRight: {fileID: 0}
   m_Transition: 1
@@ -6889,6 +6950,19 @@ MonoBehaviour:
       - m_Target: {fileID: 1615312416}
         m_TargetAssemblyTypeName: UIManager, Assembly-CSharp
         m_MethodName: PlayOpenMenu
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 1
+        m_CallState: 2
+      - m_Target: {fileID: 1311123789}
+        m_TargetAssemblyTypeName: UINavigation.SetUiElementToSelectOnInteraction,
+          Assembly-CSharp
+        m_MethodName: JumpToElement
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -7004,6 +7078,22 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &1311123789
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1311123780}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eaee7f81bc60e304c8498d73f95bbf30, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UINavigation.SetsUiElementToSelectOnInteraction
+  eventSystem: {fileID: 748510335}
+  elementToSelect: {fileID: 1812213320}
+  showVisualization: 0
+  navigationColour: {r: 0, g: 1, b: 1, a: 1}
 --- !u!1 &1317718063
 GameObject:
   m_ObjectHideFlags: 0
@@ -7419,8 +7509,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 320, y: -17.751215}
-  m_SizeDelta: {x: 640, y: 35.50243}
+  m_AnchoredPosition: {x: 320, y: -63.235}
+  m_SizeDelta: {x: 640, y: 126.47}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1420560539
 MonoBehaviour:
@@ -7579,10 +7669,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Button
   m_Navigation:
-    m_Mode: 3
+    m_Mode: 4
     m_WrapAround: 0
-    m_SelectOnUp: {fileID: 0}
-    m_SelectOnDown: {fileID: 0}
+    m_SelectOnUp: {fileID: 385074025}
+    m_SelectOnDown: {fileID: 547145187}
     m_SelectOnLeft: {fileID: 0}
     m_SelectOnRight: {fileID: 0}
   m_Transition: 1
@@ -8448,8 +8538,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 320, y: -167.00485}
-  m_SizeDelta: {x: 640, y: 0}
+  m_AnchoredPosition: {x: 320, y: -468.16}
+  m_SizeDelta: {x: 640, y: 79.479996}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1544494786
 MonoBehaviour:
@@ -9379,6 +9469,7 @@ GameObject:
   - component: {fileID: 1615312413}
   - component: {fileID: 1615312414}
   - component: {fileID: 1615312415}
+  - component: {fileID: 1615312417}
   m_Layer: 5
   m_Name: UIManager
   m_TagString: Untagged
@@ -9517,6 +9608,20 @@ MonoBehaviour:
   selectedTextColor: {r: 1, g: 1, b: 1, a: 1}
   staminaBarNormalColor: {r: 1, g: 0.7411765, b: 0, a: 1}
   staminaBarRechargeColor: {r: 0.43529412, g: 0, b: 0.007843138, a: 1}
+--- !u!114 &1615312417
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1615312411}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a316cb47ce68d8742bcea8795e1f6f91, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UINavigation.RememberCurrentlySelectedGameObject
+  eventSystem: {fileID: 748510335}
+  lastSelectedElement: {fileID: 0}
 --- !u!4 &1620309674 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -1172642328352949582, guid: 885f4d1c37a2c534ab604e77bbc253be, type: 3}
@@ -10716,6 +10821,7 @@ GameObject:
   - component: {fileID: 1812213326}
   - component: {fileID: 1812213325}
   - component: {fileID: 1812213324}
+  - component: {fileID: 1812213327}
   m_Layer: 5
   m_Name: Back
   m_TagString: Untagged
@@ -10741,8 +10847,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 224, y: -1306}
-  m_SizeDelta: {x: 320, y: 40}
+  m_AnchoredPosition: {x: 224, y: -912.67004}
+  m_SizeDelta: {x: 320, y: 80}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1812213320
 MonoBehaviour:
@@ -10803,6 +10909,19 @@ MonoBehaviour:
       - m_Target: {fileID: 1615312416}
         m_TargetAssemblyTypeName: UIManager, Assembly-CSharp
         m_MethodName: PlayCloseMenu
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 1
+        m_CallState: 2
+      - m_Target: {fileID: 1812213327}
+        m_TargetAssemblyTypeName: UINavigation.SetUiElementToSelectOnInteraction,
+          Assembly-CSharp
+        m_MethodName: JumpToElement
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -10918,6 +11037,22 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &1812213327
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1812213318}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eaee7f81bc60e304c8498d73f95bbf30, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UINavigation.SetsUiElementToSelectOnInteraction
+  eventSystem: {fileID: 748510335}
+  elementToSelect: {fileID: 547145187}
+  showVisualization: 0
+  navigationColour: {r: 0, g: 1, b: 1, a: 1}
 --- !u!4 &1821108201 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 90303558087108115, guid: 885f4d1c37a2c534ab604e77bbc253be, type: 3}
@@ -10985,6 +11120,7 @@ GameObject:
   - component: {fileID: 1860387391}
   - component: {fileID: 1860387390}
   - component: {fileID: 1860387389}
+  - component: {fileID: 1860387392}
   m_Layer: 5
   m_Name: Settings
   m_TagString: Untagged
@@ -11026,10 +11162,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Button
   m_Navigation:
-    m_Mode: 3
+    m_Mode: 4
     m_WrapAround: 0
-    m_SelectOnUp: {fileID: 0}
-    m_SelectOnDown: {fileID: 0}
+    m_SelectOnUp: {fileID: 1311123782}
+    m_SelectOnDown: {fileID: 385074025}
     m_SelectOnLeft: {fileID: 0}
     m_SelectOnRight: {fileID: 0}
   m_Transition: 1
@@ -11072,6 +11208,19 @@ MonoBehaviour:
       - m_Target: {fileID: 1615312416}
         m_TargetAssemblyTypeName: UIManager, Assembly-CSharp
         m_MethodName: PlayOpenMenu
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 1
+        m_CallState: 2
+      - m_Target: {fileID: 1860387392}
+        m_TargetAssemblyTypeName: UINavigation.SetUiElementToSelectOnInteraction,
+          Assembly-CSharp
+        m_MethodName: JumpToElement
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -11187,6 +11336,22 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &1860387392
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1860387383}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eaee7f81bc60e304c8498d73f95bbf30, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UINavigation.SetsUiElementToSelectOnInteraction
+  eventSystem: {fileID: 748510335}
+  elementToSelect: {fileID: 15229290}
+  showVisualization: 0
+  navigationColour: {r: 0, g: 1, b: 1, a: 1}
 --- !u!1 &1862709850
 GameObject:
   m_ObjectHideFlags: 0

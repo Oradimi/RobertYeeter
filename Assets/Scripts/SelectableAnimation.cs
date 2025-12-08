@@ -6,7 +6,7 @@ using UnityEngine.UI;
 [RequireComponent(typeof(Animator))]
 public class SelectableAnimation : MonoBehaviour,
     IPointerEnterHandler, IPointerExitHandler,
-    ISelectHandler
+    ISelectHandler, IDeselectHandler
 {
     private static readonly int NormalTrigger = Animator.StringToHash("Normal");
     private static readonly int HoverTrigger = Animator.StringToHash("Highlighted");
@@ -34,6 +34,11 @@ public class SelectableAnimation : MonoBehaviour,
     }
 
     public void OnSelect(BaseEventData eventData)
+    {
+        EvaluateAndTransitionToSelectionState(true);
+    }
+    
+    public void OnDeselect(BaseEventData eventData)
     {
         EvaluateAndTransitionToSelectionState(false);
     }
