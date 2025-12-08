@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if UNITY_EDITOR
+using System;
 using UnityEditor;
 using UnityEngine;
 
@@ -91,3 +92,4 @@ namespace Plugins.Animate_UI_Materials.Editor
     }
   }
 }
+#endif

@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using System.IO;
 using System.Text.RegularExpressions;
 using UnityEditor;
@@ -64,3 +65,4 @@ namespace Utilities
         }
     }
 }
+#endif

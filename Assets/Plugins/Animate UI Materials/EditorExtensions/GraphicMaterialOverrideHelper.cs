@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿#if UNITY_EDITOR
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -77,3 +78,4 @@ namespace Plugins.Animate_UI_Materials.EditorExtensions
     }
   }
 }
+#endif

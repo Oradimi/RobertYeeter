@@ -1,4 +1,5 @@
-﻿namespace UnityEditor
+﻿#if UNITY_EDITOR
+namespace UnityEditor
 {
  /// <summary>
  /// Broken implementation of MaterialEditor meant to be injected in a standard Editor
@@ -32,3 +33,4 @@
 
   }
 }
+#endif
