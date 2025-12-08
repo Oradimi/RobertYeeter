@@ -26,12 +26,17 @@ namespace Utilities
             else
             {
 #if UNITY_EDITOR
+                var saveDevelopmentPhase = buildScriptableObject.developmentPhase;
                 buildScriptableObject.developmentPhase = BuildScriptableObject.DevelopmentPhase.Dev;
 #endif
                 if (buildScriptableObject.developmentPhase == BuildScriptableObject.DevelopmentPhase.Release)
                     _text.SetText($"v{Application.version}_{buildScriptableObject.buildNumber:000}");
                 else
                     _text.SetText($"v{Application.version}_{buildScriptableObject.buildNumber:000}_{buildScriptableObject.developmentPhase.ToString().ToLowerInvariant()}");
+                
+#if UNITY_EDITOR
+                buildScriptableObject.developmentPhase = saveDevelopmentPhase;
+#endif
             }
         }
     }

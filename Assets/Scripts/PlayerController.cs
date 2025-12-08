@@ -383,7 +383,7 @@ public class PlayerController : MonoBehaviour
             return;
         
         var input = ctx.ReadValue<Vector2>();
-        if (!AllowRegisterInput(input.x))
+        if (!AllowRegisterInput(input.x) && !isMouseAndKeyboard)
             return;
         var newDirection = Mathf.Round(-input.x);
 
