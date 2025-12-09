@@ -114,7 +114,7 @@ public class PlayerController : MonoBehaviour
             return;
 
         if (transform.parent)
-            _parentPosition += Vector3.forward * (Time.fixedDeltaTime * 0.5f);
+            _parentPosition += FloorManager.GetLevelCount() % 3 == 2 ? Vector3.right * (Time.fixedDeltaTime * 0.5f) : Vector3.forward * (Time.fixedDeltaTime * 0.5f);
 
         transform.position = Vector3.MoveTowards(transform.position, _targetPosition + _chargePosition + _parentPosition, 
             Speed() * Time.fixedDeltaTime);

@@ -20,7 +20,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: CorridorWater
+  m_Name: CorridorWaterHorizontal
   m_Shader: {fileID: -6465566751694194690, guid: 6da4150d19c5b8643b6ba53801a4f002, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
@@ -51,7 +51,7 @@ Material:
     m_Ints: []
     m_Floats:
     - _Direction: 0
-    - _Horizontal: 0
+    - _Horizontal: 1
     - _QueueControl: 0
     - _QueueOffset: 0
     m_Colors:
