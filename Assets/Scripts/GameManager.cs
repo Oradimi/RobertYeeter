@@ -26,6 +26,7 @@ public class GameManager : MonoBehaviour
     public static AudioSource AudioSource;
     public static float SoundEffectsVolume;
     public static bool EnemyNameDisplay;
+    public static bool AntiAliasing;
     
     public static float GlobalSpeed;
     public static bool AffectsAnimations;
@@ -213,7 +214,11 @@ public class GameManager : MonoBehaviour
             {
                 MusicVolume = 40,
                 SoundVolume = 40,
-                SelectedSkins = new Dictionary<string, string>()
+                SelectedSkins = new Dictionary<string, string>(),
+                AntiAliasing = true,
+                EnemyNameDisplay = false,
+                MaxScore = 0,
+                MaxDistanceTraveled = 0f,
             };
 
             var obj = Resources.Load("Build", typeof(BuildScriptableObject));
@@ -243,6 +248,7 @@ public class GameManager : MonoBehaviour
     private static void InitSettings()
     {
         EnemyNameDisplay = PlayerData.EnemyNameDisplay;
+        AntiAliasing = PlayerData.AntiAliasing;
     }
 
     private static void InitSkin()

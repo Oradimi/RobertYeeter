@@ -37,12 +37,10 @@ public class UIManager : MonoBehaviour
     [SerializeField] private Slider soundVolume;
     [SerializeField] private TextMeshProUGUI soundVolumeLabel;
     [SerializeField] private Toggle enemyNameDisplay;
+    [SerializeField] private Toggle antiAliasing;
     
     [Header("Credits Menus")]
     [SerializeField] private RectTransform creditsMenu;
-    
-    [Header("Loading Screen")]
-    [SerializeField] private RectTransform loadingScreen;
     
     [Header("In-game UI")]
     [SerializeField] private RectTransform inGameUI;
@@ -55,6 +53,7 @@ public class UIManager : MonoBehaviour
     [SerializeField] private AudioClip enableSetting;
     [SerializeField] private AudioClip disableSetting;
     [SerializeField] private AudioClip cantSelect;
+    [SerializeField] private AudioClip selectElement;
     
     [Header("Colors")]
     [SerializeField] private Color normalColor;
@@ -228,6 +227,7 @@ public class UIManager : MonoBehaviour
         _instance.soundVolume.SetValueWithoutNotify(GameManager.SoundEffectsVolume * 100f);
         _instance.soundVolumeLabel.text = GameManager.PlayerData.SoundVolume.ToString();
         _instance.enemyNameDisplay.SetIsOnWithoutNotify(GameManager.EnemyNameDisplay);
+        _instance.antiAliasing.SetIsOnWithoutNotify(GameManager.AntiAliasing);
         DisplayMainMenu(!value);
     }
     
@@ -310,6 +310,14 @@ public class UIManager : MonoBehaviour
         GameManager.SaveData();
     }
 
+    public static void ChangeAntiAliasing(bool value)
+    {
+        GameManager.AntiAliasing = value;
+        GameManager.PlayerData.AntiAliasing = value;
+        FloorManager.SetAntiAliasing(value);
+        GameManager.SaveData();
+    }
+
     public static void SetGameOverText(string text)
     {
         _instance.gameOverText.text = text;
@@ -333,5 +341,10 @@ public class UIManager : MonoBehaviour
     public static void PlayCantSelect()
     {
         GameManager.GetPlayer().PlaySound(_instance.cantSelect);
+    }
+
+    public static void PlaySelectElement()
+    {
+        GameManager.GetPlayer().PlaySound(_instance.selectElement);
     }
 }

@@ -69,6 +69,7 @@ public class FloorManager : MonoBehaviour
         _camera.transform.position = cameraStartPosition.position;
         _camera.transform.rotation = cameraStartPosition.rotation;
         _cameraTarget = cameraTarget.position;
+        SetAntiAliasing(GameManager.AntiAliasing);
         
         _floor = new List<Transform>();
         _floorPreviousPosition = new List<Vector3>();
@@ -324,6 +325,11 @@ public class FloorManager : MonoBehaviour
     public static float GetFloorScrollSpeed()
     {
         return GameManager.GlobalSpeed * _instance.speed;
+    }
+
+    public static void SetAntiAliasing(bool value)
+    {
+        _instance._camera.GetComponent<UniversalAdditionalCameraData>().antialiasing = value ? AntialiasingMode.FastApproximateAntialiasing : AntialiasingMode.None;
     }
 
     public static void StartGame()

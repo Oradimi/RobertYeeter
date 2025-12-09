@@ -35,6 +35,8 @@ public class SelectableAnimation : MonoBehaviour,
 
     public void OnSelect(BaseEventData eventData)
     {
+        if (eventData is not PointerEventData)
+            UIManager.PlaySelectElement();
         EvaluateAndTransitionToSelectionState(true);
     }
     
