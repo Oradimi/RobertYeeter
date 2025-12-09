@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7956f4727750cba48aba63a710eff030, type: 3}
   m_Name: Build
   m_EditorClassIdentifier: Assembly-CSharp-Editor::BuildScriptableObject
-  buildNumber: 8
+  buildNumber: 9
   developmentPhase: 3
