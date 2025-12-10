@@ -14,9 +14,13 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private AudioClip punchSound;
     [SerializeField] private AudioClip splashSound;
     [SerializeField] private AudioClip cantMoveSound;
+    [SerializeField] private AudioClip castSound;
     
     [SerializeField] private AnimationClip[] idleAnimations;
     [SerializeField] private AnimationClip[] happyIdleAnimations;
+    
+    [SerializeField] private Light castLight;
+    [SerializeField] private AnimationCurve castLightCurve;
 
     [SerializeField] private MagicaCloth bunCloth;
     [SerializeField] private float looseningMultiplier = 2f;
@@ -36,6 +40,7 @@ public class PlayerController : MonoBehaviour
     private static readonly int JumpTrigger = Animator.StringToHash("Jump");
     private static readonly int DrownTrigger = Animator.StringToHash("Drown");
     private static readonly int CaughtTrigger = Animator.StringToHash("Caught");
+    private static readonly int CastTrigger = Animator.StringToHash("Cast");
     private static readonly int WetBool = Animator.StringToHash("Wet");
     private static readonly int BlinkFloat = Animator.StringToHash("Blink");
 
@@ -47,6 +52,7 @@ public class PlayerController : MonoBehaviour
     private Vector3 _chargePosition;
     private float _chargeCooldown;
     private float _initialChargeBreak;
+    private float _castCooldown;
 
     private float _idleCooldown;
     private float _blinkTimer;
@@ -57,6 +63,7 @@ public class PlayerController : MonoBehaviour
     private bool _isCharging;
     private bool _isJumping;
     private bool _isFalling;
+    private bool _isCasting;
     private bool _isGrounded;
     private float _jumpTime;
     private bool _inWater;
@@ -120,9 +127,13 @@ public class PlayerController : MonoBehaviour
             Speed() * Time.fixedDeltaTime);
         
         UIManager.UpdateStaminaBar(Mathf.Abs(_chargeCooldown - 1f));
+        castLight.intensity = castLightCurve.Evaluate((2f - _castCooldown) * 0.5f);
 
         _chargePosition *= chargeBreak + (1f - chargeBreak) * (1f - GameManager.GlobalSpeed);
         _isCharging = _chargeCooldown >= 1f;
+        _castCooldown -= Time.fixedDeltaTime * GameManager.GlobalSpeed;
+        _castCooldown = Mathf.Max(0f, _castCooldown);
+        _isCasting = _castCooldown >= 0.5f;
         
         CheckForJumpPrompt();
         
@@ -143,7 +154,7 @@ public class PlayerController : MonoBehaviour
 
     private bool _collision1;
     private bool _collision2;
-    
+
     private void CheckCollision()
     {
         if (_inWater || FloorManager.IsGameOver())
@@ -200,6 +211,7 @@ public class PlayerController : MonoBehaviour
         _controls.Player.Move.performed += OnMove;
         _controls.Player.Attack.performed += OnCharge;
         _controls.Player.Jump.performed += OnJump;
+        _controls.Player.Cast.performed += OnCast;
     }
 
     public void EnableUIMap()
@@ -212,6 +224,7 @@ public class PlayerController : MonoBehaviour
         _controls.Player.Move.performed -= OnMove;
         _controls.Player.Attack.performed -= OnCharge;
         _controls.Player.Jump.performed -= OnJump;
+        _controls.Player.Cast.performed -= OnCast;
     }
 
     public void DisableUIMap()
@@ -489,6 +502,27 @@ public class PlayerController : MonoBehaviour
             
         _animator.SetTrigger(JumpTrigger);
         _jumpTime = 1f;
+    }
+
+    private void OnCast(InputAction.CallbackContext ctx)
+    {
+        if (IsFunMode())
+            _idleCooldown = 6f;
+        
+        if (_isIdle)
+            return;
+        
+        if (_isCasting || _castCooldown > 0f || _isJumping || _isFalling)
+        {
+            _audioSource.PlayOneShot(cantMoveSound);
+            return;
+        }
+        
+        _isCasting = true;
+        _audioSource.clip = castSound;
+        _audioSource.PlayDelayed(0.9f);
+        _animator.SetTrigger(CastTrigger);
+        _castCooldown = 2f;
     }
 
     private bool IsFunMode()
