@@ -557,6 +557,15 @@
                     "initialStateCheck": true
                 },
                 {
+                    "name": "RightClick",
+                    "type": "PassThrough",
+                    "id": "8a0193f9-f8c9-4bc4-a113-0c6db1ee50f5",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
                     "name": "MiddleClick",
                     "type": "PassThrough",
                     "id": "dad70c86-b58c-4b17-88ad-f5e53adf419e",
@@ -1060,6 +1069,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "Fullscreen",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "7c69fc9b-79c0-4a62-99fd-fed6de1d49a3",
+                    "path": "",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "RightClick",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

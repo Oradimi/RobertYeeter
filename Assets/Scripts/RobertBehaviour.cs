@@ -80,9 +80,9 @@ public class RobertBehaviour : MonoBehaviour
         }
 
         var results = new Collider[10];
-        Physics.OverlapSphereNonAlloc(transform.position, 0.3f, results, LayerMask.GetMask("Rock"));
+        var size = Physics.OverlapSphereNonAlloc(transform.position, 0.3f, results, LayerMask.GetMask("Rock"));
 
-        foreach (var result in results)
-            Destroy(result.gameObject);
+        for (var i = 0; i < size; i++)
+            Destroy(results[i].gameObject);
     }
 }
