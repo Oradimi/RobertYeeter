@@ -38,6 +38,9 @@ public class RobertBehaviour : MonoBehaviour
         
         if (Physics.CheckSphere(transform.position, 0.3f, LayerMask.GetMask("Player")))
             PlayerTouched();
+        
+        if (Physics.CheckSphere(transform.position, 0.3f, LayerMask.GetMask("Rock")))
+            RockTouched();
     }
 
     private void PlayerTouched()
@@ -59,5 +62,27 @@ public class RobertBehaviour : MonoBehaviour
         GameManager.GetPlayer().PlayPunchSound();
         GameManager.GetPlayer().SetCaught();
         GameManager.GameOver(GameManager.GameOverCase.Caught);
+    }
+    
+    private void RockTouched()
+    {
+        if (_yeeted)
+            return;
+        
+        if (!invincible)
+        {
+            _yeeted = true;
+            GameManager.GetPlayer().PlayPunchSound();
+            GameManager.AddScore(1);
+            _targetPosition = Vector3.up * 100f;
+            Destroy(gameObject, 3f);
+            return;
+        }
+
+        var results = new Collider[10];
+        Physics.OverlapSphereNonAlloc(transform.position, 0.3f, results, LayerMask.GetMask("Rock"));
+
+        foreach (var result in results)
+            Destroy(result.gameObject);
     }
 }
