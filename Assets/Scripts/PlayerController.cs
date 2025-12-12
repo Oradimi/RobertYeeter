@@ -1,5 +1,7 @@
+using System.Collections.Generic;
 using MagicaCloth2;
 using SceneLabel;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -12,12 +14,16 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float chargeBreak = 0.95f;
     
     [SerializeField] private AudioClip punchSound;
+    [SerializeField] private AudioClip lightPunchSound;
     [SerializeField] private AudioClip splashSound;
     [SerializeField] private AudioClip cantMoveSound;
     [SerializeField] private AudioClip castSound;
     
     [SerializeField] private AnimationClip[] idleAnimations;
     [SerializeField] private AnimationClip[] happyIdleAnimations;
+
+    [SerializeField] private Transform rocksContainer;
+    [SerializeField] private RockBehaviour rockPrefab;
     
     [SerializeField] private Light castLight;
     [SerializeField] private AnimationCurve castLightCurve;
@@ -34,6 +40,8 @@ public class PlayerController : MonoBehaviour
     private float _direction;
     private bool _moveInputHeld;
     private float _stickDeadzone = 0.5f;
+    
+    private List<RockBehaviour> _rocks;
     
     private Animator _animator;
     private static readonly int ChargeTrigger = Animator.StringToHash("Charge");
@@ -68,6 +76,8 @@ public class PlayerController : MonoBehaviour
     private float _jumpTime;
     private bool _inWater;
     
+    private bool _rockIsJumping;
+    
     private void Awake()
     {
         _animator = GetComponent<Animator>();
@@ -79,6 +89,13 @@ public class PlayerController : MonoBehaviour
         _targetPosition = Vector3.right;
         _chargePosition = Vector3.zero;
         _initialChargeBreak = chargeBreak;
+        _rocks = new List<RockBehaviour>();
+        
+        var children = rocksContainer.GetComponentsInChildren<Transform>();
+        foreach (var child in children)
+            if (child != rocksContainer)
+                Destroy(child.gameObject);
+        
         GameManager.SetPlayer(this);
     }
 
@@ -97,6 +114,7 @@ public class PlayerController : MonoBehaviour
         _controls.Enable();
         EnableActionMap();
         _controls.UI.Fullscreen.performed += OnFullscreen;
+        GameManager.OnScoreThresholdCrossed += OnScoreThresholdCrossed;
     }
 
     private void OnDisable()
@@ -105,6 +123,7 @@ public class PlayerController : MonoBehaviour
         DisableUIMap();
         _controls.UI.Fullscreen.performed -= OnFullscreen;
         _controls.Disable();
+        GameManager.OnScoreThresholdCrossed -= OnScoreThresholdCrossed;
     }
 
     private void FixedUpdate()
@@ -125,6 +144,8 @@ public class PlayerController : MonoBehaviour
 
         transform.position = Vector3.MoveTowards(transform.position, _targetPosition + _chargePosition + _parentPosition, 
             Speed() * Time.fixedDeltaTime);
+
+        ProcessRocks();
         
         UIManager.UpdateStaminaBar(Mathf.Abs(_chargeCooldown - 1f));
         castLight.intensity = castLightCurve.Evaluate((2f - _castCooldown) * 0.5f);
@@ -247,6 +268,11 @@ public class PlayerController : MonoBehaviour
         _audioSource.PlayOneShot(punchSound);
     }
 
+    public void PlayLightPunchSound()
+    {
+        _audioSource.PlayOneShot(lightPunchSound);
+    }
+
     public void PlaySound(AudioClip clip)
     {
         _audioSource.PlayOneShot(clip);
@@ -345,6 +371,29 @@ public class PlayerController : MonoBehaviour
         bunClothData.angleRestorationConstraint.stiffness =
             new CurveSerializeData(Mathf.Exp(-0.001f * looseningMultiplier * GameManager.GetDistanceTraveled()));
         bunCloth.SetParameterChange();
+    }
+
+    private void OnScoreThresholdCrossed()
+    {
+        SpawnRock();
+    }
+
+    private void SpawnRock()
+    {
+        _rocks.Add(Instantiate(rockPrefab, transform.position, Quaternion.Euler(0, 180, 0), rocksContainer));
+    }
+
+    private void ProcessRocks()
+    {
+        for (var i = 0f; i < _rocks.Count; i++)
+        {
+            var xPos = transform.position.x - i % 3f * 0.25f + 0.25f;
+            var zPos = transform.position.z + Mathf.Floor(i / 3f) * 0.25f + 0.5f;
+            _rocks[Mathf.RoundToInt(i)].SetTargetPosition(new Vector3(xPos, 0f, zPos), true);
+            if (_rockIsJumping)
+                _rocks[Mathf.RoundToInt(i)].Jump();
+        }
+        _rockIsJumping = false;
     }
 
     private void CheckForJumpPrompt()
@@ -501,6 +550,7 @@ public class PlayerController : MonoBehaviour
         }
             
         _animator.SetTrigger(JumpTrigger);
+        _rockIsJumping = true;
         _jumpTime = 1f;
     }
 

@@ -1,0 +1,73 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!319 &31900000
+AvatarMask:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: RockAdjustmentMask
+  m_Mask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+  m_Elements:
+  - m_Path: 
+    m_Weight: 1
+  - m_Path: Arm.left
+    m_Weight: 0
+  - m_Path: Arm.right
+    m_Weight: 0
+  - m_Path: Armature
+    m_Weight: 0
+  - m_Path: Armature/Hips
+    m_Weight: 1
+  - m_Path: Armature/Hips/LeftUpLeg
+    m_Weight: 0
+  - m_Path: Armature/Hips/LeftUpLeg/LeftLeg
+    m_Weight: 0
+  - m_Path: Armature/Hips/LeftUpLeg/LeftLeg/LeftFoot
+    m_Weight: 0
+  - m_Path: Armature/Hips/LeftUpLeg/LeftLeg/LeftFoot/LeftFoot_end
+    m_Weight: 0
+  - m_Path: Armature/Hips/RightUpLeg
+    m_Weight: 0
+  - m_Path: Armature/Hips/RightUpLeg/RightLeg
+    m_Weight: 0
+  - m_Path: Armature/Hips/RightUpLeg/RightLeg/RightFoot
+    m_Weight: 0
+  - m_Path: Armature/Hips/RightUpLeg/RightLeg/RightFoot/RightFoot_end
+    m_Weight: 0
+  - m_Path: Armature/Hips/Spine
+    m_Weight: 0
+  - m_Path: Armature/Hips/Spine/Spine1
+    m_Weight: 0
+  - m_Path: Armature/Hips/Spine/Spine1/Spine2
+    m_Weight: 0
+  - m_Path: Armature/Hips/Spine/Spine1/Spine2/LeftShoulder
+    m_Weight: 0
+  - m_Path: Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm
+    m_Weight: 0
+  - m_Path: Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm
+    m_Weight: 0
+  - m_Path: Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftForeArm_end
+    m_Weight: 0
+  - m_Path: Armature/Hips/Spine/Spine1/Spine2/Neck
+    m_Weight: 0
+  - m_Path: Armature/Hips/Spine/Spine1/Spine2/Neck/Head
+    m_Weight: 0
+  - m_Path: Armature/Hips/Spine/Spine1/Spine2/Neck/Head/Head_end
+    m_Weight: 0
+  - m_Path: Armature/Hips/Spine/Spine1/Spine2/RightShoulder
+    m_Weight: 0
+  - m_Path: Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm
+    m_Weight: 0
+  - m_Path: Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm
+    m_Weight: 0
+  - m_Path: Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightForeArm_end
+    m_Weight: 0
+  - m_Path: Head
+    m_Weight: 0
+  - m_Path: Head/Plane
+    m_Weight: 0
+  - m_Path: Leg.left
+    m_Weight: 0
+  - m_Path: Leg.right
+    m_Weight: 0

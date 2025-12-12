@@ -7,16 +7,19 @@ public class RobertBehaviour : MonoBehaviour
 #pragma warning disable 0414
     [SerializeField] private string robertName = "Robert";
 #pragma warning restore 0414
+    [SerializeField] private int healthPoints = 3;
     [SerializeField] private bool invincible;
     
     private Animator _animator;
     private Vector3 _targetPosition;
     private bool _yeeted;
     private bool _playerCaught;
+    private Collider[] _hitResults; 
 
     private void Awake()
     {
         _animator = GetComponent<Animator>();
+        _hitResults =  new Collider[8];
     }
 
     private void OnEnable()
@@ -38,9 +41,10 @@ public class RobertBehaviour : MonoBehaviour
         
         if (Physics.CheckSphere(transform.position, 0.3f, LayerMask.GetMask("Player")))
             PlayerTouched();
-        
-        if (Physics.CheckSphere(transform.position, 0.3f, LayerMask.GetMask("Rock")))
-            RockTouched();
+
+        var size = Physics.OverlapSphereNonAlloc(transform.position, 0.3f, _hitResults, LayerMask.GetMask("Rock"));
+        if (size > 0)
+            RockTouched(_hitResults[0].GetComponent<RockBehaviour>());
     }
 
     private void PlayerTouched()
@@ -64,25 +68,31 @@ public class RobertBehaviour : MonoBehaviour
         GameManager.GameOver(GameManager.GameOverCase.Caught);
     }
     
-    private void RockTouched()
+    private void RockTouched(RockBehaviour rock)
     {
-        if (_yeeted)
+        if (_yeeted || rock.IsCharging())
             return;
         
-        if (!invincible)
+        rock.StopCharge();
+        
+        if (healthPoints > 0)
+        {
+            healthPoints -= 1;
+            GameManager.GetPlayer().PlayLightPunchSound();
+        }
+        else
         {
             _yeeted = true;
             GameManager.GetPlayer().PlayPunchSound();
             GameManager.AddScore(1);
             _targetPosition = Vector3.up * 100f;
             Destroy(gameObject, 3f);
-            return;
         }
 
-        var results = new Collider[10];
-        var size = Physics.OverlapSphereNonAlloc(transform.position, 0.3f, results, LayerMask.GetMask("Rock"));
-
-        for (var i = 0; i < size; i++)
-            Destroy(results[i].gameObject);
+        // var results = new Collider[10];
+        // var size = Physics.OverlapSphereNonAlloc(transform.position, 0.15f, results, LayerMask.GetMask("Rock"));
+        //
+        // for (var i = 0; i < size; i++)
+        //     Destroy(results[i].gameObject);
     }
 }

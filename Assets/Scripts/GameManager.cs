@@ -5,6 +5,7 @@ using System.Linq;
 using SceneLabel;
 using So;
 using UnityEngine;
+using UnityEngine.Events;
 using Utilities;
 
 public class GameManager : MonoBehaviour
@@ -33,6 +34,8 @@ public class GameManager : MonoBehaviour
     
     public static float GlobalSpeedStored;
     public static bool AffectsAnimationsStored;
+
+    public static UnityAction OnScoreThresholdCrossed;
     
     [Header("Data")]
     [SerializeField] private Skin soSkin;
@@ -100,8 +103,10 @@ public class GameManager : MonoBehaviour
             _instance._combo = 1;
         
         _instance._gain = _instance._combo * score;
-        _instance._score += _instance._combo * score;
+        _instance._score += _instance._gain;
         _instance._effectTime = 2f;
+        if ((_instance._score - _instance._gain) % 10 > _instance._score % 10)
+            OnScoreThresholdCrossed?.Invoke();
     }
     
     public static void ResetScore()
@@ -280,7 +285,10 @@ public class GameManager : MonoBehaviour
 
     public static void ApplySkin()
     {
-        var objects = _instance.player.GetComponentsInChildren<Transform>(true).ToDictionary(o => o.name, o => o);
+        var objects = _instance.player.GetComponentsInChildren<Transform>(true)
+            .GroupBy(t => t.name)
+            .Where(g => g.Count() == 1)
+            .ToDictionary(g => g.Key, g => g.First());
         foreach (var category in _instance.soSkin.data)
             foreach (var skin in category.skins)
                 objects[skin.nameInScene].gameObject.SetActive(PlayerData.SelectedSkins[category.name] == skin.nameInScene);
